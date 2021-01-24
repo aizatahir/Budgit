@@ -1,6 +1,7 @@
 import os
+import requests
 import hashlib
-from flask import Flask, session, render_template, request, redirect
+from flask import Flask, session, render_template, request, redirect, jsonify
 from flask_session import Session
 from sqlalchemy import and_
 
@@ -24,9 +25,6 @@ Session(app)
 def index():
     return render_template("index.html")
 
-@app.route("/home")
-def home():
-    return render_template("home.html")
 
 @app.route("/authenticate", methods=["POST"])
 def authenticate():
@@ -53,6 +51,73 @@ def authenticate():
         session["userName"] = user.name
         return redirect("/home")
 
+@app.route("/home")
+def home():
+    return render_template("home.html")
+
+
+
+@app.route("/addExpense", methods=["POST"])
+def addExpend():
+    expenseName = request.form.get("expenseName")
+    expensePrice = request.form.get("expensePrice")
+    date = now
+    time = getCurrentTime()
+
+    try:
+        expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"])
+    except KeyError:
+        return redirect("/")
+    expense.addExpense()
+    return render_template("home.html", alert=True, alertInfo={"type":"primary", "message": f"{expenseName} Has Been Added"})
+
+
+
+
+
+
+@app.route("/getExpenses", methods=["POST","GET"])
+def getExpenses():
+    expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+    userExpenses = []
+
+    for i, expense in enumerate(expenseQuery):
+        userExpenses.append({
+            "item_name": expense.item_name,
+            "item_price": expense.item_price,
+            "date": expense.date,
+            "time": expense.time
+        })
+
+    return jsonify(userExpenses)
+
+
+
+@app.route("/setExpenseLimit", methods=["POST", "GET"])
+def setExpenseLimit():
+    if request.method == "GET":
+        return render_template("set_expense.html")
+
+
+
+
+
+
+
+
+
+def getCurrentTime():
+    from datetime import datetime
+    time = datetime.today().strftime("%H:%M %p")
+    time = time.split(':')
+    hour = int(time[0])
+    minute = time[1]
+    if hour <= 12:
+        pass
+    else:
+        hour -= 12
+    time = f"{hour}:{minute}"
+    return time
 
 
 

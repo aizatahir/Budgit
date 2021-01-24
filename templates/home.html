@@ -3,20 +3,356 @@
 {% block style %}
 <style>
     #mainHeading {
+        font-size: 60px;
+    }
+    #addExpenseHeading, #expenseInfo, #expenseListHeading {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-size: 35px;
+        font-weight: 400;
+    }
+    #expenseInfo {
+        margin-bottom: 5px;
+    }
+    #addExpenseBtn {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        background-color: orange;
+        border: none;
+        border-radius: 10px;
+    }
+    #setSpendingLimitBtn {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border: none;
+        border-radius: 10px;
+        background-color: blueviolet;
+    }
+    #logoutBtn {
+        position: relative;
+        background-color: white;
+        color: black;
+        border: none;
+        margin-top: 5px;
+        left: 94%;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border-radius: 5px;
+   }
+    a, a:hover {
+        color: white;
+        text-decoration: none;
+    }
+    #expenseListSelect {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        width: 110px;
+    }
+    .table_data {
+        /* font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; */
+        font-weight: 600;
+    }
+    .container-1 {
+        display: flex;
+        flex-wrap: wrap;
+        /* height: 850px; */
+        min-height: 850px;
+    }
+    .add-expense-container {
+        margin: auto;
+        margin-top: 70px;
+        width: 60%;
+        background-color: white;
+        border-radius: 10px;
+        height: 320px;
+        padding: 15px;
+    }
+    .expense-tracker-conainer {
+        margin: auto;
+        margin-top: 70px;
+        width: 30%;
+        background-color: white;
+        border-radius: 10px;
+        height: 320px;
+        padding: 15px;
+    }
+    .expense-list-container {
+        margin: auto;
+        margin-top: 70px;
+        margin-bottom: 10px;
+        width: 90%;
+        background-color: white;
+        border-radius: 10px;
+        /* height: 280px; */
+        min-height: 280px;
+        padding: 15px;
+
     }
 </style>
 {% endblock %}
 
 
 {% block body %}
-<h2 id="mainHeading">Home Page</h2>
+
+<!-- LOGOUT BUTTON -->
+<form action="/logout">
+    <button  id="logoutBtn" class="btn btn-primary">Logout</button>
+</form>
+
+<center>
+    <h2 id="mainHeading">Portfolio</h2>
+</center>
+
+{% if alert == True %}
+    {% set alertType = alertInfo["type"] %}
+    {% set alertMessage = alertInfo["message"] %}
+
+    <div id="alertMessage" class="alert alert-{{ alertType }}" role="alert">{{ alertMessage }}</div>
+{% endif %}
+
+
+<div class="container-1">
+    <!-- EXPENSE TRACKER CONTAINER -->
+    <div class="expense-tracker-conainer">
+        <center>
+            <div id="expenseInfo">Expense Info</div>
+        </center>
+        <div class="form-group">
+            <form>
+                <!-- EXPENSE PER TIME-->
+                <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime">Spending Limit: $130</label>
+                <select class="form-control" name="expensePerTime">
+                    <option value="per-day">Per Day</option>
+                    <option value="per-week">Per Week</option>
+                    <option value="per-month">Per Month</option>
+                </select>
+                <br>
+                <!-- TOTAL EXPENSE PER TIME -->
+                <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $450</label>
+                <select class="form-control" name="totalExpense">
+                    <option value="per-day">Per Day</option>
+                    <option value="per-week">Per Week</option>
+                    <option value="per-month">Per Month</option>
+                </select>
+                <br>
+                <!-- <button a href="/setExpenseLimit" onclick="centeredPopup(this.href,'myWindow','700','300','yes');return false" id="setSpendingLimitBtn" class="btn btn-primary" type="button">Set Spending Limit</button> -->
+                <button class="btn btn-primary" id="setSpendingLimitBtn"><a href="/setExpenseLimit" onclick="centeredPopup(this.href,'myWindow','700','300','yes');return false">Set Expense Limit</a></button>
+            </form>
+        </div>
+    </div>
+    <!-- ADD EXPENSE CONTAINER -->
+    <div class="add-expense-container">
+        <center>
+            <div id="addExpenseHeading">Add Expense</div>
+        </center>
+        <form id="addExpenseForm" action="/addExpense" method="POST">
+            <div class="form-group">
+                <!-- ITEM NAME -->
+                <label class="inputLabel" for="expenseName">Item Name</label>
+                <input class="form-control" name="expenseName" placeholder="Enter The Name of The Expense">
+                <br>
+                <!-- ITEM PRICE -->
+                <label class="inputLabel" for="expensePrice">Item Price</label>
+                <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense">
+                <br>
+                <button id="addExpenseBtn" class="btn btn-primary" type="submit" disabled>Add Expense</button>
+            </div>
+        </form>
+    </div>
+    <!-- EXPENSE LIST CONTAINER -->
+    <div class="expense-list-container">
+        <select id="expenseListSelect" class="form-control">
+            <option value="per-day">Per Day</option>
+            <option value="per-week">Per Week</option>
+            <option value="per-month">Per Month</option>
+        </select>
+        <center>
+            <div id="Test"></div>
+            <div id="expenseListHeading">Expenses For The Day</div>
+            <br>
+            <table class="table table" style="width:90%;">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </center>
+
+    </div>
+
+</div>
 {% endblock %}
 
 
 {% block script %}
 <script>
+    // REMOVE ALERT MESSAGE
+    var alertBox = document.getElementById('alertMessage')
+    setTimeout(() => {alertBox.style.display="none"}, 3000)
+
+    // DISPLAY EXPENSE LIMIT FOR THE DAY
+    if (!localStorage.getItem('expenseLimit')) {
+        localStorage.setItem('expenseLimit', 'Not Set')
+    }
+    else {
+        document.querySelector('#expenseLimitLabel').textContent = "Spending Limit: $" + localStorage.getItem('expenseLimit')
+    }
+
+
+     // SET EXPENSE LIMIT POPUP
+    var popupWindow = null;
+    function centeredPopup(url,winName,w,h,scroll){
+        LeftPosition = (screen.width) ? (screen.width-w)/2 : 0;
+        TopPosition = (screen.height) ? (screen.height-h)/2 : 0;
+        settings =
+        'height='+h+',width='+w+',top='+TopPosition+',left='+LeftPosition+',scrollbars='+scroll+',resizable'
+        popupWindow = window.open(url,winName,settings)
+    }
+
+
+   
+    document.addEventListener('DOMContentLoaded', () => {
+        populateTable()
+
+    })
+
+    // EXPENSE LIMIT POPUP
+    // function setUpSetExpenseLimitPopUp() {
+       
+    // }
+
+    // POPULATE TABLE
+    function populateTable() {
+
+        // Initialize new request
+        const request = new XMLHttpRequest();
+        const currency = "JPY"
+        request.open('POST', '/getExpenses');
+
+        // Callback function for when request completes
+        request.onload = () => {
+            // Extract JSON data from request
+            const data = JSON.parse(request.responseText);
+            displayTotalExpense(data)
+
+            // CREATE TABLE DATA
+            var tableBody = document.getElementById('tableBody')
+
+            for (let i = 0; i < data.length; i ++) {
+                let tr = document.createElement('tr')
+                
+                // NAME DATA
+                let tdName = document.createElement('td')
+                tdName.className = "table_data"
+                tdName.height = "65px"
+                let itemNameText = data[i]['item_name']
+                tdName.textContent = itemNameText
+
+                // PRICE DATA
+                let tdPrice = document.createElement('td')
+                tdPrice.className = "table_data"
+                let itemPriceText = '$' + data[i]['item_price']
+                tdPrice.textContent = itemPriceText
+
+                // DATE DATA
+                let tdDate = document.createElement('td')
+                tdDate.className = "table_data"
+                let itemDateText = data[i]['date']
+                tdDate.textContent = itemDateText
+
+                // TIME DATA
+                let tdTime = document.createElement('td')
+                tdTime.className = "table_data"
+                let itemTimeText = data[i]['time']
+                tdTime.textContent = itemTimeText
+
+                tr.appendChild(tdName)
+                tr.appendChild(tdPrice)
+                tr.appendChild(tdDate)
+                tr.appendChild(tdTime)
+
+                tableBody.appendChild(tr)
+
+            }
+
+            // LAST ROW
+            let extraTr = document.createElement('tr')
+            extraTr.className = "table-active"
+
+            let averageExpenseTdHeading = document.createElement('td')
+            averageExpenseTdHeading.style.fontWeight = "bold"
+            averageExpenseTdHeading.textContent = "Average Expense"
+
+            // EMPLY TD SLOTS
+            let emptyTd1 = document.createElement('td')
+            let emptyTd2 = document.createElement('td')
+
+            // AVERAGE EXPENSE
+            let averageExpenseTd = document.createElement('td')
+            averageExpenseTd.className = "table_data"
+            if (data.length != 0)
+                averageExpenseTd.textContent = "$" + computeAverageExpense(data).toFixed(2)
+            else
+                averageExpenseTd.textContent = ""
+
+            extraTr.appendChild(averageExpenseTdHeading)
+            extraTr.appendChild(emptyTd1)
+            extraTr.appendChild(emptyTd2)
+            extraTr.appendChild(averageExpenseTd)
+
+            tableBody.appendChild(extraTr)
+
+        }
+        request.send(200);
+
+    }
+
+    // DISPLAY TOTAL EXPENSE
+    function displayTotalExpense(data, peroid) {
+        let totalExpenseLabel = document.getElementById('totalExpenseLabel')
+        let totalExpense = 0
+
+        for (let i = 0; i < data.length; i++) {
+            totalExpense += data[i]['item_price']
+        }
+
+        totalExpenseLabel.textContent = "Total Expense: $" + totalExpense
+
+
+    }
+
+    function computeAverageExpense(data) {
+        let totalExpense = 0
+        for (let i = 0; i < data.length; i ++) {
+            totalExpense += data[i]['item_price']
+        }
+        let average = totalExpense / data.length
+        return average
+    }
+
+    // ADD EXPENSE FORM 
+    document.querySelector('#addExpenseForm').onkeyup = () => {
+        var expenseNameField = document.forms["addExpenseForm"]["expenseName"].value
+        var expensePriceField = document.forms["addExpenseForm"]["expensePrice"].value
+        var addExpenseBtn = document.querySelector('#addExpenseBtn')
+
+        if (expenseNameField != '' && expensePriceField != '') {
+            addExpenseBtn.disabled = false
+        }
+        else {
+            addExpenseBtn.disabled = true
+        }
+
+        if (expensePriceField != '') {
+            if (isNaN(expensePriceField)) {
+            document.querySelector('#itemPrice').style.borderColor = "red"
+            addExpenseBtn.disabled = true
+            }
+            else {
+                document.querySelector('#itemPrice').style.borderColor = ""
+            }
+        }
+    }
 
 </script>
 {% endblock%}

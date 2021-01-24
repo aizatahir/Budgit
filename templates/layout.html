@@ -8,6 +8,27 @@
 </head>
 
 <style>
+    #mainHeading {
+        font-family: 'Times New Roman', Times, serif;
+        color: white;
+        font-size: 50px;
+        font-weight: bold;
+    }
+    #alertMessage {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        margin: auto;
+        width: 50%;
+        border-radius: 10px;
+        border: none;
+    }
+     .inputLabel {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+    }
+    ::placeholder {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
     body {
         background-image: url("{{ url_for('static', filename = 'landingPage1.jpg') }}");
         /* background-image: url('static/landingPageBG.jpg'); */
