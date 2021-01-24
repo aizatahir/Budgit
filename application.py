@@ -22,11 +22,36 @@ Session(app)
 
 @app.route("/")
 def index():
-    return render_template("register.html")
+    return render_template("index.html")
 
-@app.route("/login")
-def login():
-    return render_template("login.html")
+@app.route("/home")
+def home():
+    return render_template("home.html")
+
+@app.route("/authenticate", methods=["POST"])
+def authenticate():
+    userName = request.form.get('userName')
+    userEmail = request.form.get('userEmail')
+    userPassword = hash_password(request.form.get('userPassword'))
+    confirmPassword = request.form.get('confirmPassword')
+
+    user = User(name=userName, email=userEmail, password=userPassword)
+
+    if confirmPassword != '':
+        # REGISTER
+        if user.addUser() == -1:
+            return render_template("index.html", alert=True, alertType="warning", alertMessage="You Are Already Registered")
+        session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
+        session["userName"] = user.name
+        session["userPassword"] = user.email
+        return redirect("/home")
+    else:
+        # LOGIN
+        if not user.validateCredentials():
+            return render_template("index.html", alert=True, alertType="danger", alertMessage="You Are Not Registered")
+        session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
+        session["userName"] = user.name
+        return redirect("/home")
 
 
 

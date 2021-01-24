@@ -1,0 +1,250 @@
+{% extends "layout.html" %}
+
+{% block style %}
+
+<style>
+    #mainHeading {
+        font-family: 'Times New Roman', Times, serif;
+        color: white;
+        font-size: 50px;
+        font-weight: bold;
+    }
+    .form-container {
+        margin: auto;
+        margin-top: 100px;
+        width: 50%;
+        background-color: white;
+        border-radius: 10px;
+        height: 290px;
+        padding: 15px;
+    }
+    #loginButton, #registerButton {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border-radius: 10px;
+    }
+    #confirmPass {
+        display: none;
+    }
+    #Email {
+        display: none;
+    }
+    #alertMessage {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        margin: auto;
+        width: 50%;
+        border-radius: 10px;
+        border: none;
+    }
+    .inputLabel {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+    }
+    .container-1 {
+        height: 650px;
+    }
+    .container-2 {
+        background-color: darkgray;
+        height: 40px;
+    }
+    ::placeholder {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-1">
+        <center>
+            <div id="mainHeading">Sky Alpha Books</div>
+        </center>
+    <!-- </div> -->
+    <!-- ALERT MESSAGE -->
+    {% if alert == True %}
+        {% set alertType = alertType %}
+        {% set alertMessage = alertMessage %}
+
+        <div id="alertMessage" class="alert alert-{{ alertType }}" role="alert">{{ alertMessage }}</div>
+
+    {% endif %}
+
+   
+    
+    <div class="form-container">
+        <form action="/authenticate" name="Form" onkeyup="validateForm();" method="POST">
+            <div class="form-group">
+                <!-- USERNAME -->
+                <label class="inputLabel" for="userName">Username</label>
+                <input class="form-control" name="userName" placeholder="Type your username here">
+                <br>
+                <!-- EMAIL -->
+                <div id="Email">
+                    <label class="inputLabel" for="userEmail">Email</label>
+                    <input class="form-control" name="userEmail" placeholder="Enter Your Email">
+                    <br>
+                </div>
+                <!-- PASSWORD -->
+                <label class="inputLabel" for="userPassword">Password</label>
+                <input class="form-control" name="userPassword" placeholder="Type your password here" type="password">
+                <br>
+                <!-- CONFRIM PASSWORD -->
+                <div id="confirmPass">
+                    <label class="inputLabel" for="confirmPassword">Confirm Password</label>
+                    <input id="cPass" class="form-control" name="confirmPassword" placeholder="Confirm your password" type="password">
+                </div>
+                <br>
+                <!-- LOGIN BTN -->
+                <button id="loginButton" class="btn btn-primary" type="button" disabled="true" onclick="removeConfirmPassword();" action="/login" >Login</button>
+                <button id="registerButton" class="btn btn-success" type="button" onclick="showConfirmPassword();">Register</button>
+                <!-- <button id="testBtn" class="btn btn-dark" type="button">Click Me</button> -->
+            </div>
+        </form>
+
+    </div>
+    
+    <div class="container-3">
+
+    </div>
+    
+</div>
+
+{% endblock %}
+
+{% block script %}
+
+<script>
+
+    window.onload = function() {
+        removeAlert()
+    };
+
+    function removeAlert() {
+        var alertBox = document.getElementById('alertMessage')
+        setTimeout(function(){ alertBox.style.display = "none"; }, 3000);
+    }
+
+
+    function validateForm() {
+        // console.log("validateForm")
+
+        confirmPass =  document.getElementById("confirmPass");
+       
+        loginBtn = document.getElementById("loginButton");
+        registerBtn = document.getElementById("registerButton");
+
+        nameField = document.forms["Form"]["userName"].value;
+        passwordField = document.forms["Form"]["userPassword"].value;
+        emalField = document.forms["Form"]["userEmail"].value;
+        confirmPassField = document.forms["Form"]["confirmPassword"].value;
+
+
+         //  LOGIN BUTTON
+        if (confirmPass.style.display === "") {
+            if (nameField != "" && passwordField != "") {
+                // console.log("Login Changed To Submit")
+                loginBtn.disabled = false;
+                loginBtn.type = "submit";
+            }
+            else {
+                // console.log("Login Changed To Button")
+                loginBtn.disabled = true;
+                loginBtn.type ="button";
+            }
+        }
+        
+
+
+        // REGISTER BUTTON
+        var byPassDisable = false
+        if (confirmPass.style.display === "block") {
+             // VALIDATE PASSWORDS
+            var confirmPassInput = document.getElementById('cPass')
+
+            if ((passwordField != "" && confirmPassField != "") && passwordField != confirmPassField) {
+                confirmPassInput.style.borderColor = "red"
+                byPassDisable = true
+                registerBtn.disabled = true
+            }
+            else {
+                confirmPassInput.style.borderColor = ""
+                registerBtn.disabled = false
+            }
+
+            
+            if ((nameField != "" && passwordField != "" && confirmPassField != "" && emalField != "") && !byPassDisable) {
+                registerBtn.disabled = false;
+                registerBtn.type = "submit"
+            }
+            else {
+                registerBtn.disabled = true;
+                registerBtn.type = "button";
+            }
+        }
+
+    }
+    
+    function showConfirmPassword() {
+        // console.log("show Confirm")
+        // EXTEND THE HEIGHT
+        document.querySelector('.form-container').style.height = "440px"
+
+        confirmPass =  document.getElementById("confirmPass");
+        emalField = document.getElementById('Email');
+
+        if (confirmPass.style.display === "") {
+            loginBtn = document.getElementById("loginButton");
+            registerBtn = document.getElementById("registerButton");
+
+            // confirmPass =  document.getElementById("confirmPass");
+            confirmPass.style.display = "block";
+            emalField.style.display = "block"
+
+            registerBtn.disabled = true;
+            loginBtn.disabled = false;
+            
+        }
+       
+    }
+
+    function removeConfirmPassword() {
+        // console.log("remove Confirm")
+        document.querySelector('.form-container').style.height = "290px"
+
+        nameField = document.forms["Form"]["userName"].value;
+        passwordField = document.forms["Form"]["userPassword"].value;
+        confirmPassField = document.forms["Form"]["confirmPassword"].value;
+
+  
+        loginBtn = document.getElementById("loginButton");
+        registerBtn = document.getElementById("registerButton");
+
+        confirmPass =  document.getElementById("confirmPass");
+        emalField = document.getElementById("Email");
+
+        confirmPass.style.display = "";
+        emalField.style.display = ""
+
+        registerBtn.disabled = false;
+        
+        if (nameField != '' && passwordField != '')
+            loginBtn.disabled = false
+        else
+            loginBtn.disabled = true
+        // loginBtn.disabled = true;
+    }
+
+    function clearAllFields() {
+
+        console.log()
+
+        // document.forms["Form"]["userName"].value = ""
+        // document.forms["Form"]["userPassword"].value = ""
+        // document.forms["Form"]["confirmPassword"].value = ""
+
+
+    }
+    
+</script>
+
+{% endblock %}
