@@ -1,0 +1,103 @@
+{% extends "layout.html" %}
+
+{% block style %}
+
+<style>
+    #mainHeading {
+        font-family: 'Times New Roman', Times, serif;
+        color: white;
+        font-size: 50px;
+        font-weight: bold;
+    }
+    .form-container {
+        margin: auto;
+        margin-top: 100px;
+        width: 50%;
+        background-color: white;
+        border-radius: 10px;
+        border: 1px solid black;
+        height: 370px;
+        padding: 15px;
+    }
+    #loginButton, #registerButton {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border-radius: 10px;
+    }
+    #confirmPass {
+        display: none;
+    }
+    #alertMessage {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        margin: auto;
+        width: 50%;
+        border-radius: 10px;
+    }
+    .inputLabel {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+    }
+    .container-1 {
+        height: 650px;
+    }
+    .container-2 {
+        background-color: darkgray;
+        height: 40px;
+    }
+    ::placeholder {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+<div class="container-1">
+        <center>
+            <div id="mainHeading">Finance Project</div>
+        </center>
+    <!-- ALERT MESSAGE -->
+    {% if alert == True %}
+        {% set alertType = alertType %}
+        {% set alertMessage = alertMessage %}
+
+        <div id="alertMessage" class="alert alert-{{ alertType }}" role="alert">{{ alertMessage }}</div>
+
+    {% endif %}
+
+   
+    
+    <div class="form-container">
+        <form action="/authenticate" name="Form" onkeyup="validateForm();" method="POST">
+            <div class="form-group">
+                <!-- USERNAME -->
+                <label class="inputLabel" for="userName">Username</label>
+                <input class="form-control" name="userName" placeholder="Type your username here">
+                <br>
+                <!-- PASSWORD -->
+                <label class="inputLabel" for="userPassword">Password</label>
+                <input class="form-control" name="userPassword" placeholder="Type your password here" type="password">
+                <br> 
+                <button id="registerButton" class="btn btn-success" type="submit">Register</button>
+                <button id="loginButton" class="btn btn-primary" type="submit">Login</button>
+               
+            </div>
+        </form>
+
+    </div>
+    
+    <div class="container-3">
+
+    </div>
+    
+</div>
+
+{% endblock %}
+
+
+
+{% block script %}
+<script>
+
+</script>
+{% endblock%}
