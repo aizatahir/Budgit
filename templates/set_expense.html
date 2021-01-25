@@ -31,6 +31,7 @@
 {% endblock %}
 
 {% block body %}
+<div id="userID" data-user_id="{{ user_id }}"></div>
 
 <div class="container-1">
     <center>
@@ -46,7 +47,7 @@
                 <lable class="inputLabel" for="expenseLimit">Expense Limit</lable>
                 <input id="expenseLimitInput" class="form-control" name="expenseLimit" placeholder="Amount">
                 <br>
-                <button id="setLimitBtn" class="btn btn-primary" disabled>Set Limit</button>
+                <button id="setLimitBtn" class="btn btn-primary" type="button" disabled>Set Limit</button>
             </form>
         </div>
     </div>
@@ -68,11 +69,45 @@
             setLimitBtn.disabled = false
     }
 
+    function addExpenseLimit(expenseLimit) {
+        let currentExpenseLimits = getCurrentExpenseLimits()
+
+        if (isNewExpense(currentExpenseLimits, expenseLimit) === true) {
+            currentExpenseLimits.push(expenseLimit)
+            localStorage.setItem('expenseLimit', JSON.stringify(currentExpenseLimits))
+        }
+        else {
+            let index = isNewExpense(currentExpenseLimits, expenseLimit)[1]
+            currentExpenseLimits[index] = expenseLimit
+            localStorage.setItem('expenseLimit', JSON.stringify(currentExpenseLimits))
+        }
+       
+    }
+    function getCurrentExpenseLimits() {
+        if (localStorage.getItem('expenseLimit') === 'Not Set') {
+            return []
+        }
+        return JSON.parse(localStorage.getItem('expenseLimit'))
+    }
+    function isNewExpense(allExpenses, userExpense) {
+        for (let i = 0; i < allExpenses.length; i++) {
+            if (allExpenses[i]['id'] === userExpense['id'])
+                return [false, i]
+        }
+        return true
+    }
+
     document.querySelector('#setLimitBtn').onclick = () => {
         let expenseLimit = document.forms["limitForm"]["expenseLimit"].value
         let setLimitBtn = document.getElementById("setLimitBtn")
+        let idContainer = document.querySelector('#userID')
 
-        localStorage.setItem("expenseLimit", parseInt(expenseLimit))
+        let userExpenseLimit = {
+            'id': idContainer.dataset.user_id,
+            'expenseLimit': expenseLimit,
+        }
+
+        addExpenseLimit(userExpenseLimit)
 
         document.querySelector('#periodHeading').style.fontSize = "25px"
         document.querySelector('#periodHeading').style.marginBottom = "5px"

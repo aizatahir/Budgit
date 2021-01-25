@@ -121,7 +121,10 @@
 
     function removeAlert() {
         var alertBox = document.getElementById('alertMessage')
-        setTimeout(function(){ alertBox.style.display = "none"; }, 3000);
+        if (alertBox != null) {
+            setTimeout(function(){ alertBox.style.display = "none"; }, 3000);
+        }
+        
     }
 
 

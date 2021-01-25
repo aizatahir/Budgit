@@ -43,6 +43,14 @@
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         width: 110px;
     }
+    #exceedLimitText {
+        display: none;
+        margin-left: 10px;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 20px;
+        color: red;
+
+    }
     .table_data {
         /* font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; */
         font-weight: 600;
@@ -78,16 +86,18 @@
         width: 90%;
         background-color: white;
         border-radius: 10px;
-        /* height: 280px; */
         min-height: 280px;
         padding: 15px;
-
+    }
+    .exceed-limit-container {
+        display: flex;
     }
 </style>
 {% endblock %}
 
 
 {% block body %}
+<div id="userID" data-user_id="{{ user_id }}"></div>
 
 <!-- LOGOUT BUTTON -->
 <form action="/logout">
@@ -98,12 +108,8 @@
     <h2 id="mainHeading">Portfolio</h2>
 </center>
 
-{% if alert == True %}
-    {% set alertType = alertInfo["type"] %}
-    {% set alertMessage = alertInfo["message"] %}
 
-    <div id="alertMessage" class="alert alert-{{ alertType }}" role="alert">{{ alertMessage }}</div>
-{% endif %}
+<div id="alertMessage" class="alert alert-primary" role="alert" style="display: none;"></div>
 
 
 <div class="container-1">
@@ -115,7 +121,7 @@
         <div class="form-group">
             <form>
                 <!-- EXPENSE PER TIME-->
-                <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime">Spending Limit: $130</label>
+                <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime"></label>
                 <select class="form-control" name="expensePerTime">
                     <option value="per-day">Per Day</option>
                     <option value="per-week">Per Week</option>
@@ -123,7 +129,7 @@
                 </select>
                 <br>
                 <!-- TOTAL EXPENSE PER TIME -->
-                <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $450</label>
+                <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $0</label>
                 <select class="form-control" name="totalExpense">
                     <option value="per-day">Per Day</option>
                     <option value="per-week">Per Week</option>
@@ -150,7 +156,11 @@
                 <label class="inputLabel" for="expensePrice">Item Price</label>
                 <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense">
                 <br>
-                <button id="addExpenseBtn" class="btn btn-primary" type="submit" disabled>Add Expense</button>
+                <div class="exceed-limit-container">
+                    <button id="addExpenseBtn" class="btn btn-primary" type="submit" disabled>Add Expense</button>
+                    <div id="exceedLimitText">This expense will go over your limit for the day</div>
+                </div>
+                
             </div>
         </form>
     </div>
@@ -186,16 +196,51 @@
 
 {% block script %}
 <script>
+    var userID = document.querySelector('#userID').dataset.user_id
+
     // REMOVE ALERT MESSAGE
     var alertBox = document.getElementById('alertMessage')
-    setTimeout(() => {alertBox.style.display="none"}, 3000)
+   
+   
+
+    // UPDATE SPENDING LIMIT LABEL
+    setInterval(updateSpendingLimit, 5000)
+
+
+    function updateSpendingLimit() {
+        if ("Spending Limit: " + getUserExpenseLimit(userID) === document.querySelector('#expenseLimitLabel').textContent === false) {
+            location.reload()
+        }
+    }
+    
 
     // DISPLAY EXPENSE LIMIT FOR THE DAY
     if (!localStorage.getItem('expenseLimit')) {
         localStorage.setItem('expenseLimit', 'Not Set')
+        let userExpenseLimit = getUserExpenseLimit(userID)
+        document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: ` + userExpenseLimit
     }
     else {
-        document.querySelector('#expenseLimitLabel').textContent = "Spending Limit: $" + localStorage.getItem('expenseLimit')
+        let userExpenseLimit = getUserExpenseLimit(userID)
+        document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: ` + userExpenseLimit
+    }
+    function getUserExpenseLimit(userID) {
+        if (localStorage.getItem('expenseLimit') === 'Not Set')
+            return 'Not Set'
+        let allExpenseLimits = JSON.parse(localStorage.getItem('expenseLimit'))
+        let currentUserExpenseLimit;
+
+        for (let i = 0; i < allExpenseLimits.length; i++) {
+            if (allExpenseLimits[i]['id'] === userID) {
+                currentUserExpenseLimit = allExpenseLimits[i]['expenseLimit']
+                break
+            }
+        }
+        if (typeof(currentUserExpenseLimit) === "undefined")
+            return "Not Set"
+
+        return "$" + currentUserExpenseLimit
+
     }
 
 
@@ -213,13 +258,7 @@
    
     document.addEventListener('DOMContentLoaded', () => {
         populateTable()
-
     })
-
-    // EXPENSE LIMIT POPUP
-    // function setUpSetExpenseLimitPopUp() {
-       
-    // }
 
     // POPULATE TABLE
     function populateTable() {
@@ -308,7 +347,7 @@
     }
 
     // DISPLAY TOTAL EXPENSE
-    function displayTotalExpense(data, peroid) {
+    function displayTotalExpense(data) {
         let totalExpenseLabel = document.getElementById('totalExpenseLabel')
         let totalExpense = 0
 
@@ -316,9 +355,16 @@
             totalExpense += data[i]['item_price']
         }
 
-        totalExpenseLabel.textContent = "Total Expense: $" + totalExpense
+        totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
 
 
+    }
+
+    // GET TOTAL EXPENSE
+    function getTotalExpense() {
+        let totalExpense = document.getElementById('totalExpenseLabel').textContent
+        totalExpense = parseFloat(totalExpense.split(':')[1].replace(' ', '').replace('$', ''))
+        return totalExpense
     }
 
     function computeAverageExpense(data) {
@@ -330,11 +376,25 @@
         return average
     }
 
-    // ADD EXPENSE FORM 
+    // ADD EXPENSE FORM -onkeyup
     document.querySelector('#addExpenseForm').onkeyup = () => {
         var expenseNameField = document.forms["addExpenseForm"]["expenseName"].value
         var expensePriceField = document.forms["addExpenseForm"]["expensePrice"].value
         var addExpenseBtn = document.querySelector('#addExpenseBtn')
+
+        var totalExpense = getTotalExpense()
+        var userExpenseLimit = parseUserExpense(getUserExpenseLimit(userID))
+        var exceedLimitText = document.getElementById('exceedLimitText')
+
+        // CHECK IF THE EXPENSE THAT IS ABOUT TO BE ADDED WILL EXCEED THE EXPENSE LIMIT SET
+        if ((totalExpense + parseFloat(expensePriceField)) > userExpenseLimit) {
+            if (userExpenseLimit != null) {
+                exceedLimitText.style.display = "block"
+            }
+        }
+        else {
+            exceedLimitText.style.display = "none"
+        }
 
         if (expenseNameField != '' && expensePriceField != '') {
             addExpenseBtn.disabled = false
@@ -352,6 +412,24 @@
                 document.querySelector('#itemPrice').style.borderColor = ""
             }
         }
+    }
+    
+    // ADD EXPENSE FORM - onsubmit
+    document.querySelector('#addExpenseForm').onsubmit = () => {
+        var expenseName = document.forms["addExpenseForm"]["expenseName"].value
+        alertBox.style.display = "block"
+        alertBox.textContent = `${expenseName} Has Been Added`
+    }
+
+
+    function parseUserExpense(userExpense) {
+        if (userExpense === 'Not Set') {
+            return null
+        }
+        userExpense = parseFloat(userExpense.split('$')[1])
+        return userExpense
+        
+
     }
 
 </script>

@@ -42,18 +42,18 @@ def authenticate():
         session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
         session["userName"] = user.name
         session["userPassword"] = user.email
-        return redirect("/home")
+        return redirect(f"/home/{session['user_id']}")
     else:
         # LOGIN
         if not user.validateCredentials():
             return render_template("index.html", alert=True, alertType="danger", alertMessage="You Are Not Registered")
         session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
         session["userName"] = user.name
-        return redirect("/home")
+        return redirect(f"/home/{session['user_id']}")
 
-@app.route("/home")
-def home():
-    return render_template("home.html")
+@app.route("/home/<string:user_id>")
+def home(user_id):
+    return render_template("home.html", user_id=user_id)
 
 
 
@@ -69,8 +69,8 @@ def addExpend():
     except KeyError:
         return redirect("/")
     expense.addExpense()
-    return render_template("home.html", alert=True, alertInfo={"type":"primary", "message": f"{expenseName} Has Been Added"})
-
+    # return render_template("home.html", alert=True, alertInfo={"type":"primary", "message": f"{expenseName} Has Been Added"})
+    return redirect(f"/home/{session['user_id']}")
 
 
 
@@ -95,8 +95,10 @@ def getExpenses():
 
 @app.route("/setExpenseLimit", methods=["POST", "GET"])
 def setExpenseLimit():
-    if request.method == "GET":
-        return render_template("set_expense.html")
+    try:
+        return render_template("set_expense.html", user_id=session['user_id'])
+    except KeyError:
+        return redirect("/")
 
 
 
