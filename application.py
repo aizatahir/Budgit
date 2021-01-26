@@ -9,11 +9,11 @@ from models import *
 
 
 # Check for environment variable
-if not os.getenv("DATABASE_URL"):
-    raise RuntimeError("DATABASE_URL is not set")
+# if not os.getenv("DATABASE_URL"):
+#     raise RuntimeError("DATABASE_URL is not set")
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgres://xvyuizkfcurmjh:7109d217fa02423e0f0f798dfff541fbb4c702d14990167c291af184cb3382c6@ec2-54-236-122-55.compute-1.amazonaws.com:5432/d3t1p9vdao3ngt"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 db.init_app(app)
