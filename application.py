@@ -83,18 +83,21 @@ def addExpend():
 
 @app.route("/getExpenses", methods=["POST","GET"])
 def getExpenses():
-    expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
-    userExpenses = []
+    url = os.environ.get('DATABASE_URL')
+    return render_template("test.html", item=url)
 
-    for i, expense in enumerate(expenseQuery):
-        userExpenses.append({
-            "item_name": expense.item_name,
-            "item_price": expense.item_price,
-            "date": expense.date,
-            "time": expense.time
-        })
-
-    return jsonify(userExpenses)
+    # expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+    # userExpenses = []
+    #
+    # for i, expense in enumerate(expenseQuery):
+    #     userExpenses.append({
+    #         "item_name": expense.item_name,
+    #         "item_price": expense.item_price,
+    #         "date": expense.date,
+    #         "time": expense.time
+    #     })
+    #
+    # return jsonify(userExpenses)
 
 
 
