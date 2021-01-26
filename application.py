@@ -13,7 +13,7 @@ from models import *
 #     raise RuntimeError("DATABASE_URL is not set")
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URL')
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 db.init_app(app)
@@ -24,11 +24,6 @@ Session(app)
 @app.route("/")
 def index():
     return render_template("index.html")
-
-@app.route("/test")
-def test():
-    url = os.environ.get('DATABASE_URL')
-    return render_template("test.html", item=url)
 
 
 @app.route("/authenticate", methods=["POST"])
@@ -83,21 +78,18 @@ def addExpend():
 
 @app.route("/getExpenses", methods=["POST","GET"])
 def getExpenses():
-    url = os.environ.get('DATABASE_URL')
-    return render_template("layout.html", item=url)
+    expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+    userExpenses = []
 
-    # expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
-    # userExpenses = []
-    #
-    # for i, expense in enumerate(expenseQuery):
-    #     userExpenses.append({
-    #         "item_name": expense.item_name,
-    #         "item_price": expense.item_price,
-    #         "date": expense.date,
-    #         "time": expense.time
-    #     })
-    #
-    # return jsonify(userExpenses)
+    for i, expense in enumerate(expenseQuery):
+        userExpenses.append({
+            "item_name": expense.item_name,
+            "item_price": expense.item_price,
+            "date": expense.date,
+            "time": expense.time
+        })
+
+    return jsonify(userExpenses)
 
 
 

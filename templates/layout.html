@@ -30,7 +30,7 @@
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
     body {
-        /* background-image: url("{{ url_for('static', filename = 'landingPage1.jpg') }}"); */
+        background-image: url("{{ url_for('static', filename = 'landingPage1.jpg') }}");
         /* background-image: url('static/landingPageBG.jpg'); */
         background-size: 100% 100%;
         background-repeat: no-repeat;
@@ -40,7 +40,6 @@
 {% block style %}
 {% endblock %}
 <body>
-    {{ item }}
     {% block body %}
     {% endblock %}
 
