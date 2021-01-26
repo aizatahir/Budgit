@@ -13,7 +13,7 @@ from models import *
 #     raise RuntimeError("DATABASE_URL is not set")
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get('DATABASE_URL')
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv('DATABASE_URL')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 db.init_app(app)
@@ -24,6 +24,11 @@ Session(app)
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/test")
+def test():
+    url = os.environ.get('DATABASE_URL')
+    return render_template("test.html", item=url)
 
 
 @app.route("/authenticate", methods=["POST"])
