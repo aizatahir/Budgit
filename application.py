@@ -84,7 +84,7 @@ def addExpend():
 @app.route("/getExpenses", methods=["POST","GET"])
 def getExpenses():
     url = os.environ.get('DATABASE_URL')
-    return render_template("test.html", item=url)
+    return render_template("layout.html", item=url)
 
     # expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
     # userExpenses = []
