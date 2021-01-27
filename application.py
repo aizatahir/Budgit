@@ -4,8 +4,10 @@ import hashlib
 from flask import Flask, session, render_template, request, redirect, jsonify
 from flask_session import Session
 from sqlalchemy import and_
-
 from models import *
+import datetime
+from datetime import date, timedelta
+
 
 
 # Check for environment variable
@@ -59,9 +61,15 @@ def home(user_id):
 
 @app.route("/addExpense", methods=["POST"])
 def addExpend():
+    from datetime import date, datetime
+    current_date = date.today()
+    now = current_date.strftime("%B %d, %Y")
+
+
     expenseName = request.form.get("expenseName")
     expensePrice = request.form.get("expensePrice")
     date = now
+    print(date)
     time = getCurrentTime()
 
     try:
@@ -76,10 +84,22 @@ def addExpend():
 
 
 
-@app.route("/getExpenses", methods=["POST","GET"])
-def getExpenses():
-    expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+@app.route("/getExpenses/<string:period>", methods=["GET"])
+def getExpenses(period):
     userExpenses = []
+    if period == 'all-time':
+        expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+    elif period == 'this-day':
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+    elif period == 'this-week':
+        thisWeek = getThisWeekForQuery()
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+    elif period == 'this-month':
+        thisMonth, thisYear = now.split()[0], now.split()[2]
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+    elif period == 'this-year':
+        thisYear = now.split()[2]
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
 
     for i, expense in enumerate(expenseQuery):
         userExpenses.append({
@@ -91,6 +111,28 @@ def getExpenses():
 
     return jsonify(userExpenses)
 
+@app.route("/getTotalExpense/<string:period>", methods=["GET"])
+def getTotalExpense(period):
+    totalExpense = 0
+    if period == 'all-time':
+        expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+    elif period == 'this-day':
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+    elif period == 'this-week':
+        thisWeek = getThisWeekForQuery()
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+    elif period == 'this-month':
+        thisMonth, thisYear = now.split()[0], now.split()[2]
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+    elif period == 'this-year':
+        thisYear = now.split()[2]
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+
+    for expense in expenseQuery:
+        totalExpense += expense.item_price
+
+    return str(totalExpense)
+
 
 
 @app.route("/setExpenseLimit", methods=["POST", "GET"])
@@ -99,11 +141,6 @@ def setExpenseLimit():
         return render_template("set_expense.html", user_id=session['user_id'])
     except KeyError:
         return redirect("/")
-
-
-
-
-
 
 
 
@@ -129,7 +166,80 @@ def logout():
     return redirect("/")
 
 
+def getThisWeekForQuery():
+    todayDay    = getCurrentDay(now)
+    monthIndex  = getMonthIndex(now)
+    currentYear = getCurrentYear(now)
+    startOfWeek = getStartOfWeek(currentYear, monthIndex, todayDay)
 
+    return getWeeks(currentYear, monthIndex, startOfWeek)
+
+
+
+def getStartOfWeek(currentYear, monthIndex, todayDay):
+    dayTolerance = {}
+    allTolerances = []
+    for sunday in getSundays(currentYear, monthIndex):
+        dayTolerance.update({sunday: (todayDay - sunday)})
+
+    for t in dayTolerance:
+        if t >= 0:
+            allTolerances.append(t)
+
+    return dayTolerance[min(allTolerances)]
+
+
+
+def getSundays(year, currentMonthIndex: int):
+    Sundays = []
+    def allsundays(year, currentMonthIndex: int):
+       d = date(year, currentMonthIndex, 1)
+       d += timedelta(days = 6 - d.weekday())
+       while d.month == currentMonthIndex:
+          yield d
+          d += timedelta(days = 7)
+
+    for d in allsundays(year, currentMonthIndex):
+        Sundays.append(d.day)
+    return Sundays
+
+
+def getWeeks(year, monthIndex, day):
+    numweeks = 1
+    start_date = datetime.datetime(year=year,month=monthIndex,day=day)
+
+    weeks = {}
+
+    offset = datetime.timedelta(days=0)
+    for week in range(numweeks):
+       this_week = []
+       for day in range(7):
+            date = start_date + offset
+            date = date.strftime("%B %d, %Y")
+            this_week.append( date )
+            offset += datetime.timedelta(days=1)
+       weeks[week] = this_week
+
+    return weeks[0]
+
+
+def getCurrentDay(now):
+    day = now.split()[1]
+    return int(day.replace(',', ''))
+
+def getCurrentYear(now):
+    year = now.split()[2]
+    return int(year)
+
+def getMonthIndex(now):
+    currentMonth = now.split()[0]
+    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+              "November", "December"]
+
+    for i, month in enumerate(months, 1):
+        if month == currentMonth:
+            return i
+    return None
 
 
 def hash_password(password):

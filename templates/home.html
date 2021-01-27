@@ -5,7 +5,7 @@
     #mainHeading {
         font-size: 60px;
     }
-    #addExpenseHeading, #expenseInfo, #expenseListHeading {
+    #addExpenseHeading, #expenseInfo, #expenseTableHeading {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-size: 35px;
         font-weight: 400;
@@ -39,9 +39,9 @@
         color: white;
         text-decoration: none;
     }
-    #expenseListSelect {
+    #expenseTableSelect {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        width: 110px;
+        width: 120px;
     }
     #exceedLimitText {
         display: none;
@@ -79,7 +79,7 @@
         height: 320px;
         padding: 15px;
     }
-    .expense-list-container {
+    .expense-table-container {
         margin: auto;
         margin-top: 70px;
         margin-bottom: 10px;
@@ -120,20 +120,23 @@
         </center>
         <div class="form-group">
             <form>
-                <!-- EXPENSE PER TIME-->
+                <!-- EXPENSE FOR TIME-->
                 <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime"></label>
                 <select class="form-control" name="expensePerTime">
-                    <option value="per-day">Per Day</option>
-                    <option value="per-week">Per Week</option>
-                    <option value="per-month">Per Month</option>
+                    <option value="this-day">Today</option>
+                    <option value="this-week">This Week</option>
+                    <option value="this-month">This Month</option>
+                    <option value="this-year">This Year</option>
                 </select>
                 <br>
-                <!-- TOTAL EXPENSE PER TIME -->
+                <!-- TOTAL EXPENSE FOR TIME -->
                 <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $0</label>
-                <select class="form-control" name="totalExpense">
-                    <option value="per-day">Per Day</option>
-                    <option value="per-week">Per Week</option>
-                    <option value="per-month">Per Month</option>
+                <select id="totalExpenseSelect" class="form-control" name="totalExpense">
+                    <option value="all-time">All Time</option>
+                    <option value="this-day">Today</option>
+                    <option value="this-week">This Week</option>
+                    <option value="this-month">This Month</option>
+                    <option value="this-year">This Year</option>
                 </select>
                 <br>
                 <!-- <button a href="/setExpenseLimit" onclick="centeredPopup(this.href,'myWindow','700','300','yes');return false" id="setSpendingLimitBtn" class="btn btn-primary" type="button">Set Spending Limit</button> -->
@@ -164,16 +167,18 @@
             </div>
         </form>
     </div>
-    <!-- EXPENSE LIST CONTAINER -->
-    <div class="expense-list-container">
-        <select id="expenseListSelect" class="form-control">
-            <option value="per-day">Per Day</option>
-            <option value="per-week">Per Week</option>
-            <option value="per-month">Per Month</option>
+    <!-- EXPENSE TABLE CONTAINER -->
+    <div class="expense-table-container">
+        <select id="expenseTableSelect" class="form-control">
+            <option value="all-time">All Time</option>
+            <option value="this-day">Today</option>
+            <option value="this-week">This Week</option>
+            <option value="this-month">This Month</option>
+            <option value="this-year">This Year</option>
         </select>
         <center>
             <div id="Test"></div>
-            <div id="expenseListHeading">Expenses For The Day</div>
+            <div id="expenseTableHeading">All Time Expenses</div>
             <br>
             <table class="table table" style="width:90%;">
                 <thead class="thead-dark">
@@ -201,12 +206,8 @@
     // REMOVE ALERT MESSAGE
     var alertBox = document.getElementById('alertMessage')
    
-   
-
     // UPDATE SPENDING LIMIT LABEL
     setInterval(updateSpendingLimit, 5000)
-
-
     function updateSpendingLimit() {
         if ("Spending Limit: " + getUserExpenseLimit(userID) === document.querySelector('#expenseLimitLabel').textContent === false) {
             location.reload()
@@ -254,25 +255,53 @@
         popupWindow = window.open(url,winName,settings)
     }
 
-
-   
+    // DOM CONTENT LOADED
     document.addEventListener('DOMContentLoaded', () => {
-        populateTable()
+        let expensePeriodForTable = document.getElementById('expenseTableSelect').value
+        populateTable(expensePeriodForTable)
+        displayTotalExpense('all-time')
     })
 
+    // EXPENSE TABLE SELECT
+    document.querySelector('#expenseTableSelect').onchange = function() {
+        let timePeriod
+        if (this.value === 'all-time') {
+            timePeriod = 'All Time Expenses'
+        }
+        else if (this.value === 'this-day') {
+            timePeriod = 'Expenses For Today'
+        }
+        else if (this.value === 'this-week') {
+            timePeriod = 'Expenses For This Week'
+        }
+        else if (this.value === 'this-month') {
+            timePeriod = 'Expenses For This Month'
+        }
+        else if (this.value === 'this-year') {
+            timePeriod = 'Expenses For This Year'
+        }
+
+        let tableBody = document.getElementById('tableBody')
+        let expenseTableHeading = document.getElementById('expenseTableHeading')
+        expenseTableHeading.textContent = timePeriod
+        // REMOVE PREVEIOUS DATA FROM TABLE TO POPULATE IT WITH NEW ONE DATA
+        removeAllChildNodes(tableBody)
+
+        populateTable(this.value)
+    }
+
     // POPULATE TABLE
-    function populateTable() {
+    function populateTable(period) {
 
         // Initialize new request
         const request = new XMLHttpRequest();
-        const currency = "JPY"
-        request.open('POST', '/getExpenses');
+        request.open('GET', `/getExpenses/${period}`);
 
         // Callback function for when request completes
         request.onload = () => {
             // Extract JSON data from request
             const data = JSON.parse(request.responseText);
-            displayTotalExpense(data)
+            // displayTotalExpense(data)
 
             // CREATE TABLE DATA
             var tableBody = document.getElementById('tableBody')
@@ -323,8 +352,8 @@
             averageExpenseTdHeading.textContent = "Average Expense"
 
             // EMPLY TD SLOTS
-            let emptyTd1 = document.createElement('td')
-            let emptyTd2 = document.createElement('td')
+            // let emptyTd1 = document.createElement('td')
+            // let emptyTd2 = document.createElement('td')
 
             // AVERAGE EXPENSE
             let averageExpenseTd = document.createElement('td')
@@ -335,8 +364,8 @@
                 averageExpenseTd.textContent = ""
 
             extraTr.appendChild(averageExpenseTdHeading)
-            extraTr.appendChild(emptyTd1)
-            extraTr.appendChild(emptyTd2)
+            // extraTr.appendChild(emptyTd1)
+            // extraTr.appendChild(emptyTd2)
             extraTr.appendChild(averageExpenseTd)
 
             tableBody.appendChild(extraTr)
@@ -347,19 +376,29 @@
     }
 
     // DISPLAY TOTAL EXPENSE
-    function displayTotalExpense(data) {
+    function displayTotalExpense(perioid) {
         let totalExpenseLabel = document.getElementById('totalExpenseLabel')
-        let totalExpense = 0
+        
+        // Initialize new request
+        const request = new XMLHttpRequest()
+        request.open('GET', `/getTotalExpense/${perioid}`)
 
-        for (let i = 0; i < data.length; i++) {
-            totalExpense += data[i]['item_price']
+        // Callback function for when request comples
+        request.onload = () => {
+            var totalExpense = parseFloat(request.responseText)
+            totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
+            
         }
+        request.send(200)
 
-        totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
+        
 
 
     }
-
+    document.querySelector('#totalExpenseSelect').onchange = function() {
+        var timePeriod = this.value
+        displayTotalExpense(timePeriod)
+    }
     // GET TOTAL EXPENSE
     function getTotalExpense() {
         let totalExpense = document.getElementById('totalExpenseLabel').textContent
@@ -430,6 +469,12 @@
         return userExpense
         
 
+    }
+
+    function removeAllChildNodes(parent) {
+        while (parent.firstChild) {
+            parent.removeChild(parent.firstChild)
+        }
     }
 
 </script>
