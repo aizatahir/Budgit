@@ -56,12 +56,16 @@ def authenticate():
 @app.route("/home/<string:user_id>")
 def home(user_id):
     limitQuery = ExpenseLimit.query.filter_by(user_id=int(user_id)).first()
-    expenseLimits = {
-        "this-day": limitQuery.day,
-        "this-week": limitQuery.week,
-        "this-month": limitQuery.month,
-        "this-year": limitQuery.year
-    }
+    try:
+        expenseLimits = {
+            "this-day": limitQuery.day,
+            "this-week": limitQuery.week,
+            "this-month": limitQuery.month,
+            "this-year": limitQuery.year
+        }
+    except AttributeError:
+        expenseLimits = {"this-day":None, "this-week":None, "this-month":None, "this-year":None}
+
     totalExpenses = {
         "this-day": getTotalExpense("this-day"),
         "this-week": getTotalExpense("this-week"),
@@ -130,7 +134,7 @@ def getExpenses(period):
 
 @app.route("/getTotalExpense/<string:period>", methods=["GET"])
 def getTotalExpense(period):
-    from datetime import date, datetime
+    from datetime import date
     current_date = date.today()
     now = current_date.strftime("%B %d, %Y")
     totalExpense = 0
@@ -178,14 +182,17 @@ def setExpenseLimit(limit, period):
 @app.route("/getExpenseLimit/<string:userID>/<string:period>/", methods=["GET"])
 def getExpenseLimit(userID, period):
     userID = int(userID)
-    if period == 'this-day':
-        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().day
-    elif period == 'this-week':
-        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().week
-    elif period == 'this-month':
-        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().month
-    elif period == 'this-year':
-        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().year
+    try:
+        if period == 'this-day':
+            limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().day
+        elif period == 'this-week':
+            limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().week
+        elif period == 'this-month':
+            limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().month
+        elif period == 'this-year':
+            limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().year
+    except AttributeError:
+        return ""
 
     return str(limitQuery)
 
