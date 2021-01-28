@@ -61,7 +61,6 @@
         width: 120px;
     }
     #exceedLimitText {
-        display: none;
         margin-left: 10px;
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-size: 20px;
@@ -143,6 +142,8 @@
 
 {% block body %}
 <div id="userID" data-user_id="{{ user_id }}"></div>
+<div id="userExpenseLimits" data-user_expense_limits="{{ user_expense_limits }}"></div>
+<div id="totalUserExpenses" data-total_user_expenses="{{ total_expenses }}"></div>
 
 <!-- LOGOUT BUTTON -->
 <form action="/logout">
@@ -207,7 +208,7 @@
                 <br>
                 <div class="exceed-limit-container">
                     <button id="addExpenseBtn" class="btn btn-primary" type="submit" disabled>Add Expense</button>
-                    <div id="exceedLimitText">This expense will go over your limit for the day</div>
+                    <div id="exceedLimitText"></div>
                 </div>
                 
             </div>
@@ -269,7 +270,6 @@
     var userID = document.querySelector('#userID').dataset.user_id
 
     var alertBox = document.getElementById('alertMessage')
-
 
 
     // SHOW SET EXPENSE LIMIT POP UP
@@ -348,6 +348,7 @@
         populateTable(expensePeriodForTable)
         displayTotalExpense('all-time')
         displayExpenseLimit(userID, 'this-day')
+        
     })
 
     // EXPENSE TABLE SELECT
@@ -475,13 +476,8 @@
         request.onload = () => {
             var totalExpense = parseFloat(request.responseText)
             totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
-            
         }
         request.send(200)
-
-        
-
-
     }
     document.querySelector('#totalExpenseSelect').onchange = function() {
         var timePeriod = this.value
@@ -507,14 +503,6 @@
     document.querySelector('#expenseLimitSelect').onchange = function() {
         displayExpenseLimit(userID, this.value)
     }
-   
-    // GET TOTAL EXPENSE
-    function getTotalExpense() {
-        let totalExpense = document.getElementById('totalExpenseLabel').textContent
-        totalExpense = parseFloat(totalExpense.split(':')[1].replace(' ', '').replace('$', ''))
-        return totalExpense
-    }
-
 
     function computeAverageExpense(data) {
         let totalExpense = 0
@@ -531,20 +519,41 @@
         var expensePriceField = document.forms["addExpenseForm"]["expensePrice"].value
         var addExpenseBtn = document.querySelector('#addExpenseBtn')
 
-        var totalExpense = getTotalExpense()
-        var userExpenseLimit = parseUserExpense(getUserExpenseLimit(userID))
+        var dayLimit = getUserExpenseLimit('this-day')
+        var weekLimit = getUserExpenseLimit('this-week')
+        var monthLimit = getUserExpenseLimit('this-month')
+        var yearLimit = getUserExpenseLimit('this-year')
+
+        var totalDay = parseFloat(getTotalUserExpenses('this-day'))
+        var totalWeek = parseFloat(getTotalUserExpenses('this-week'))
+        var totalMonth = parseFloat(getTotalUserExpenses('this-month'))
+        var totalYear = parseFloat(getTotalUserExpenses('this-year'))
+       
         var exceedLimitText = document.getElementById('exceedLimitText')
 
         // CHECK IF THE EXPENSE THAT IS ABOUT TO BE ADDED WILL EXCEED THE EXPENSE LIMIT SET
-        if ((totalExpense + parseFloat(expensePriceField)) > userExpenseLimit) {
-            if (userExpenseLimit != null) {
-                exceedLimitText.style.display = "block"
-            }
+        let over = false
+        if ((totalDay + parseFloat(expensePriceField)) > dayLimit && dayLimit != null) {
+            over = true
+            exceedLimitText.textContent = "This expense will go over your limit for the day"
         }
-        else {
-            exceedLimitText.style.display = "none"
+        if ((totalWeek + parseFloat(expensePriceField)) > weekLimit && weekLimit != null) {
+            over = true
+            exceedLimitText.textContent = "This expense will go over your limit for the week"
         }
-
+         if ((totalMonth + parseFloat(expensePriceField)) > monthLimit && monthLimit != null) {
+             over = true
+            exceedLimitText.textContent = "This expense will go over your limit for the month"
+        }
+        if ((totalYear + parseFloat(expensePriceField)) > yearLimit && yearLimit != null) {
+            over = true
+            exceedLimitText.textContent = "This expense will go over your limit for the year"
+        }
+        if (over === false) {
+            exceedLimitText.textContent = ""
+        }
+       
+        // VALIDATE FIELD
         if (expenseNameField != '' && expensePriceField != '') {
             addExpenseBtn.disabled = false
         }
@@ -562,6 +571,25 @@
             }
         }
     }
+
+    function getUserExpenseLimit(period) {
+        return loadUserExpenseLimits()[period]
+    }
+    function getTotalUserExpenses(period) {
+        return loadTotalUserExpenses()[period]
+    }
+
+    function loadUserExpenseLimits() {
+        let expenseLimit = document.querySelector('#userExpenseLimits').dataset.user_expense_limits.replace(/'/g, '"').replace(/'/g, '"').replace(/None/g, "null")
+        expenseLimit = JSON.parse(expenseLimit)
+        return expenseLimit
+    }
+    function loadTotalUserExpenses() {
+        let totalExpenses = document.querySelector('#totalUserExpenses').dataset.total_user_expenses.replace(/'/g, '"').replace(/'/g, '"').replace(/None/g, "null")
+        totalExpenses = JSON.parse(totalExpenses)
+        return totalExpenses
+
+    }
     
     // ADD EXPENSE FORM - onsubmit
     document.querySelector('#addExpenseForm').onsubmit = () => {
@@ -577,8 +605,6 @@
         }
         userExpense = parseFloat(userExpense.split('$')[1])
         return userExpense
-        
-
     }
 
     function removeAllChildNodes(parent) {

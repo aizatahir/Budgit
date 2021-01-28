@@ -11,8 +11,8 @@ from datetime import date, timedelta
 
 
 # Check for environment variable
-# if not os.getenv("DATABASE_URL"):
-#     raise RuntimeError("DATABASE_URL is not set")
+if not os.getenv("DATABASE_URL"):
+    raise RuntimeError("DATABASE_URL is not set")
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
@@ -55,13 +55,26 @@ def authenticate():
 
 @app.route("/home/<string:user_id>")
 def home(user_id):
-    return render_template("home.html", user_id=user_id)
+    limitQuery = ExpenseLimit.query.filter_by(user_id=int(user_id)).first()
+    expenseLimits = {
+        "this-day": limitQuery.day,
+        "this-week": limitQuery.week,
+        "this-month": limitQuery.month,
+        "this-year": limitQuery.year
+    }
+    totalExpenses = {
+        "this-day": getTotalExpense("this-day"),
+        "this-week": getTotalExpense("this-week"),
+        "this-month": getTotalExpense("this-month"),
+        "this-year": getTotalExpense("this-year")
+    }
+    return render_template("home.html", user_id=user_id, user_expense_limits=str(expenseLimits), total_expenses=str(totalExpenses))
 
 
 
 @app.route("/addExpense", methods=["POST"])
 def addExpend():
-    from datetime import date, datetime
+    from datetime import date
     current_date = date.today()
     now = current_date.strftime("%B %d, %Y")
 
@@ -77,7 +90,7 @@ def addExpend():
     except KeyError:
         return redirect("/")
     expense.addExpense()
-    # return render_template("home.html", alert=True, alertInfo={"type":"primary", "message": f"{expenseName} Has Been Added"})
+
     return redirect(f"/home/{session['user_id']}")
 
 
@@ -86,6 +99,10 @@ def addExpend():
 
 @app.route("/getExpenses/<string:period>", methods=["GET"])
 def getExpenses(period):
+    from datetime import date
+    current_date = date.today()
+    now = current_date.strftime("%B %d, %Y")
+
     userExpenses = []
     if period == 'all-time':
         expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
@@ -113,6 +130,9 @@ def getExpenses(period):
 
 @app.route("/getTotalExpense/<string:period>", methods=["GET"])
 def getTotalExpense(period):
+    from datetime import date, datetime
+    current_date = date.today()
+    now = current_date.strftime("%B %d, %Y")
     totalExpense = 0
     if period == 'all-time':
         expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
@@ -131,7 +151,7 @@ def getTotalExpense(period):
     for expense in expenseQuery:
         totalExpense += expense.item_price
 
-    return str(totalExpense)
+    return str(format(totalExpense, ",.2f"))
 
 
 
@@ -200,6 +220,10 @@ def logout():
 
 
 def getThisWeekForQuery():
+    from datetime import date, datetime
+    current_date = date.today()
+    now = current_date.strftime("%B %d, %Y")
+
     todayDay    = getCurrentDay(now)
     monthIndex  = getMonthIndex(now)
     currentYear = getCurrentYear(now)
