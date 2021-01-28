@@ -44,3 +44,38 @@ class Expense(db.Model):
         db.session.add(e)
         db.session.commit()
 
+class ExpenseLimit(db.Model):
+    __tablename__ = "expense_limit"
+    id = db.Column(db.Integer, primary_key=True)
+    day = db.Column(db.Float)
+    week = db.Column(db.Float)
+    month = db.Column(db.Float)
+    year   = db.Column(db.Float)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+
+    def addExpenseLimit(self, limit, period):
+        l = ExpenseLimit(day=self.day, week=self.week, month=self.month, year=self.year, user_id=self.user_id)
+
+        # CHECK IF USER HAS ALREADY SET A LIMIT
+        checkLimit = ExpenseLimit.query.filter_by(user_id = self.user_id).all()
+        if len(checkLimit) == 0:
+            db.session.add(l)
+            db.session.commit()
+            return
+        userLimits = ExpenseLimit.query.filter_by(user_id=self.user_id).first()
+        if period == "this-day":
+            userLimits.day = limit
+            db.session.commit()
+            return
+        elif period == "this-week":
+            userLimits.week = limit
+            db.session.commit()
+            return
+        elif period == 'this-month':
+            userLimits.month = limit
+            db.session.commit()
+            return
+        elif period == 'this-year':
+            userLimits.year = limit
+            db.session.commit()
+            return

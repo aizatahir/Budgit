@@ -25,6 +25,23 @@
         border-radius: 10px;
         background-color: blueviolet;
     }
+    #expenseLimitText {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 25px;
+        font-weight: 400;
+    }
+    #expenseLimitSet {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 20px;
+        font-weight: 400;
+    }
+    #setLimitBtn {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        margin-top: 10px;
+        border: none;
+        border-radius: 10px;
+        background-color: blueviolet;
+    }
     #logoutBtn {
         position: relative;
         background-color: white;
@@ -92,6 +109,34 @@
     .exceed-limit-container {
         display: flex;
     }
+    .bg-modal {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        min-height: 720px;
+        background-color: rgba(0, 0, 0, 0.7);
+        position: absolute;
+        top: 0;
+    }
+    .modal-content {
+        position: relative;
+        width: 500px;
+        height: 300px;
+        padding: 20px;
+        background-color: white;
+        border: none;
+        border-radius: 10px;
+        /* text-align: center; */
+    }
+    .closeBtn {
+        position: absolute;
+        top: 0;
+        right: 14px;
+        font-size: 42px;
+        transform: rotate(45deg);
+        cursor: pointer;
+    }
 </style>
 {% endblock %}
 
@@ -111,7 +156,6 @@
 
 <div id="alertMessage" class="alert alert-primary" role="alert" style="display: none;"></div>
 
-
 <div class="container-1">
     <!-- EXPENSE TRACKER CONTAINER -->
     <div class="expense-tracker-conainer">
@@ -120,9 +164,9 @@
         </center>
         <div class="form-group">
             <form>
-                <!-- EXPENSE FOR TIME-->
+                <!-- SPENDING LIMIT FOR TIME-->
                 <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime"></label>
-                <select class="form-control" name="expensePerTime">
+                <select id="expenseLimitSelect" class="form-control" name="expensePerTime">
                     <option value="this-day">Today</option>
                     <option value="this-week">This Week</option>
                     <option value="this-month">This Month</option>
@@ -139,11 +183,13 @@
                     <option value="this-year">This Year</option>
                 </select>
                 <br>
-                <!-- <button a href="/setExpenseLimit" onclick="centeredPopup(this.href,'myWindow','700','300','yes');return false" id="setSpendingLimitBtn" class="btn btn-primary" type="button">Set Spending Limit</button> -->
-                <button class="btn btn-primary" id="setSpendingLimitBtn"><a href="/setExpenseLimit" onclick="centeredPopup(this.href,'myWindow','700','300','yes');return false">Set Expense Limit</a></button>
+                <button class="btn btn-primary" id="setSpendingLimitBtn" type="button">Set Expense Limit</button>
             </form>
+            
         </div>
+        
     </div>
+    
     <!-- ADD EXPENSE CONTAINER -->
     <div class="add-expense-container">
         <center>
@@ -196,6 +242,25 @@
     </div>
 
 </div>
+
+<!-- SET EXPENSE LIMIT POP UP -->
+<div class="bg-modal">
+    <div class="modal-content">
+        <div class="closeBtn">+</div>
+        <center>
+        <div id="expenseLimitText"></div>
+        <br>
+        </center>
+        <form id="limitForm">
+            <div class="form-group">
+                <label class="inputLabel" for="expense_limit">Expense Limit</label>
+                <input class="form-control" name="expenseLimit" placeholder="Amount">
+                <button id="setLimitBtn" class="btn btn-primary" type="button" disabled>Set Limit</button>
+            </div>
+        </form>
+        <div id="expenseLimitSet"></div>
+    </div>
+</div>
 {% endblock %}
 
 
@@ -203,56 +268,78 @@
 <script>
     var userID = document.querySelector('#userID').dataset.user_id
 
-    // REMOVE ALERT MESSAGE
     var alertBox = document.getElementById('alertMessage')
-   
-    // UPDATE SPENDING LIMIT LABEL
-    setInterval(updateSpendingLimit, 5000)
-    function updateSpendingLimit() {
-        if ("Spending Limit: " + getUserExpenseLimit(userID) === document.querySelector('#expenseLimitLabel').textContent === false) {
-            location.reload()
+
+
+
+    // SHOW SET EXPENSE LIMIT POP UP
+    let bgModal = document.querySelector('.bg-modal')
+    document.querySelector('#setSpendingLimitBtn').onclick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        let expenseLimitBeingSet = document.querySelector('#expenseLimitSelect').value
+        let expenseLimitText = document.querySelector('#expenseLimitText')
+        
+        if (expenseLimitBeingSet === 'this-day') {
+            expenseLimitText.textContent = "Set Expense Limit For Today"
         }
-    }
-    
-
-    // DISPLAY EXPENSE LIMIT FOR THE DAY
-    if (!localStorage.getItem('expenseLimit')) {
-        localStorage.setItem('expenseLimit', 'Not Set')
-        let userExpenseLimit = getUserExpenseLimit(userID)
-        document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: ` + userExpenseLimit
-    }
-    else {
-        let userExpenseLimit = getUserExpenseLimit(userID)
-        document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: ` + userExpenseLimit
-    }
-    function getUserExpenseLimit(userID) {
-        if (localStorage.getItem('expenseLimit') === 'Not Set')
-            return 'Not Set'
-        let allExpenseLimits = JSON.parse(localStorage.getItem('expenseLimit'))
-        let currentUserExpenseLimit;
-
-        for (let i = 0; i < allExpenseLimits.length; i++) {
-            if (allExpenseLimits[i]['id'] === userID) {
-                currentUserExpenseLimit = allExpenseLimits[i]['expenseLimit']
-                break
-            }
+        else if (expenseLimitBeingSet === 'this-week') {
+            expenseLimitText.textContent = "Set Expense Limit For This Week"
         }
-        if (typeof(currentUserExpenseLimit) === "undefined")
-            return "Not Set"
+        else if (expenseLimitBeingSet === 'this-month') {
+            expenseLimitText.textContent = "Set Expense Limit For This Month"
+        }
+        else if (expenseLimitBeingSet === 'this-year') {
+            expenseLimitText.textContent = "Set Expense Limit For This Year"
+        }
 
-        return "$" + currentUserExpenseLimit
-
+        document.querySelector('#addExpenseBtn').style.display = "none"
+        bgModal.style.display = "flex"
+        setTimeout(disableScroll, 1000)
+        
     }
+    // HIDE EXPENSE LIMIT POP UP
+    document.querySelector('.closeBtn').addEventListener('click', () => {
+        bgModal.style.display = "none"
+        document.querySelector('#addExpenseBtn').style.display = "inline-block"
+        enableScroll()
+    })
+    // VALIDATE EXPENSE LIMIT INPUT
+    document.querySelector('#limitForm').onkeyup = () => {
+        let expenseLimit = document.forms["limitForm"]["expenseLimit"].value
+        let setLimitBtn = document.getElementById("setLimitBtn")
 
+        if (expenseLimit == '' || isNaN(expenseLimit))
+            setLimitBtn.disabled = true
+        else
+            setLimitBtn.disabled = false
+    }
+    // ADD THE EXPENSE LIMIT
+    document.querySelector('#setLimitBtn').onclick = () => {
+        let timePeriod = document.querySelector('#expenseLimitSelect').value
+        let expenseLimtSetText = document.querySelector('#expenseLimitSet')
+        let expenseLimit = document.forms["limitForm"]["expenseLimit"]
 
-     // SET EXPENSE LIMIT POPUP
-    var popupWindow = null;
-    function centeredPopup(url,winName,w,h,scroll){
-        LeftPosition = (screen.width) ? (screen.width-w)/2 : 0;
-        TopPosition = (screen.height) ? (screen.height-h)/2 : 0;
-        settings =
-        'height='+h+',width='+w+',top='+TopPosition+',left='+LeftPosition+',scrollbars='+scroll+',resizable'
-        popupWindow = window.open(url,winName,settings)
+        request = new XMLHttpRequest()
+        request.open('POST', `/setExpenseLimit/${expenseLimit.value}/${timePeriod}`)
+        request.send(200)
+
+        let periodToDisplay
+        if (timePeriod === 'this-day') {
+            periodToDisplay = "Today"
+        }
+        else if (timePeriod === 'this-week') {
+            periodToDisplay = "This Week"
+        }
+        else if (timePeriod === 'this-month') {
+            periodToDisplay = "This Month"
+        }
+        else if (timePeriod === 'this-year') {
+            periodToDisplay = "This Year"
+        }
+        expenseLimtSetText.textContent = `Expense Limit Set To $${expenseLimit.value} For ${periodToDisplay}`
+        document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: $${expenseLimit.value}`
+        expenseLimit.value = ""
+        setTimeout(() => {expenseLimtSetText.textContent = ""}, 3000)
     }
 
     // DOM CONTENT LOADED
@@ -260,6 +347,7 @@
         let expensePeriodForTable = document.getElementById('expenseTableSelect').value
         populateTable(expensePeriodForTable)
         displayTotalExpense('all-time')
+        displayExpenseLimit(userID, 'this-day')
     })
 
     // EXPENSE TABLE SELECT
@@ -399,12 +487,34 @@
         var timePeriod = this.value
         displayTotalExpense(timePeriod)
     }
+    // DISPLAY EXPENSE LIMIT
+    function displayExpenseLimit(userID, period) {
+        request = new XMLHttpRequest()
+        request.open('GET', `/getExpenseLimit/${userID}/${period}`)
+
+        request.onload = () => {
+            const data = parseFloat(request.responseText)
+            if (isNaN(data)) {
+                document.querySelector('#expenseLimitLabel').textContent = `Spedning Limit: Not Set`
+            }
+            else {
+                document.querySelector('#expenseLimitLabel').textContent = `Spedning Limit: $${data.toFixed(2)}`
+            }
+            
+        }
+        request.send(200)
+    }
+    document.querySelector('#expenseLimitSelect').onchange = function() {
+        displayExpenseLimit(userID, this.value)
+    }
+   
     // GET TOTAL EXPENSE
     function getTotalExpense() {
         let totalExpense = document.getElementById('totalExpenseLabel').textContent
         totalExpense = parseFloat(totalExpense.split(':')[1].replace(' ', '').replace('$', ''))
         return totalExpense
     }
+
 
     function computeAverageExpense(data) {
         let totalExpense = 0
@@ -476,6 +586,22 @@
             parent.removeChild(parent.firstChild)
         }
     }
+    
+    function disableScroll() { 
+        // Get the current page scroll position 
+        scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
+        scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
+
+		// if any scroll is attempted, set this to the previous value 
+		window.onscroll = function() { 
+			window.scrollTo(scrollLeft, scrollTop); 
+		}; 
+    } 
+
+    function enableScroll() { 
+        window.onscroll = function() {}; 
+    } 
+
 
 </script>
 {% endblock%}

@@ -135,14 +135,47 @@ def getTotalExpense(period):
 
 
 
-@app.route("/setExpenseLimit", methods=["POST", "GET"])
-def setExpenseLimit():
+@app.route("/setExpenseLimit/<string:limit>/<string:period>", methods=["POST", "GET"])
+def setExpenseLimit(limit, period):
+    day = week = month = year = None
+    if period == 'this-day':
+        day = limit
+    elif period == 'this-week':
+        week = limit
+    elif period == 'this-month':
+        month = limit
+    elif period == 'this-year':
+        year = limit
+
     try:
-        return render_template("set_expense.html", user_id=session['user_id'])
+        expenseLimit = ExpenseLimit(day=day,week=week,month=month,year=year, user_id=session['user_id'])
     except KeyError:
         return redirect("/")
 
+    expenseLimit.addExpenseLimit(limit, period)
+    return ""
 
+@app.route("/getExpenseLimit/<string:userID>/<string:period>/", methods=["GET"])
+def getExpenseLimit(userID, period):
+    userID = int(userID)
+    if period == 'this-day':
+        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().day
+    elif period == 'this-week':
+        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().week
+    elif period == 'this-month':
+        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().month
+    elif period == 'this-year':
+        limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().year
+
+    return str(limitQuery)
+
+
+
+
+
+@app.route("/test")
+def test():
+    return render_template("test.html")
 
 
 def getCurrentTime():
