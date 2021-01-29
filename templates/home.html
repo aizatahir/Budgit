@@ -120,7 +120,8 @@
     }
     .modal-content {
         position: relative;
-        width: 500px;
+        /* width: 500px; */
+        width: 40%;
         height: 300px;
         padding: 20px;
         background-color: white;
@@ -128,14 +129,71 @@
         border-radius: 10px;
         /* text-align: center; */
     }
-    .closeBtn {
+    #closeBtn {
         position: absolute;
-        top: 0;
-        right: 14px;
+        top: -2%;
+        right: 4%;
         font-size: 42px;
         transform: rotate(45deg);
         cursor: pointer;
     }
+    @media only screen and (max-width: 950px) {
+        #logoutBtn {
+            left: 3%;
+        }
+    }
+    @media only screen and (max-width: 600px) {
+        .modal-content {
+            width: 60%;
+        }
+    }
+    @media only screen and (max-width: 768px) {
+        .container-1 {
+            display: block;
+        }
+        #addExpenseHeading, #expenseInfo, #expenseTableHeading {
+            font-size: 30px;
+        }
+        .add-expense-container {
+            width: 90%;
+        }
+        .expense-tracker-conainer {
+            width: 90%;
+        }
+        .table {
+            width: 100%;
+        }
+    }
+    @media only screen and (max-width: 375px) {
+        body {
+            background-size: 100% 90%;
+        }
+        .modal-content {
+            width: 70%;
+        }
+    }
+    @media only screen and (max-width: 360px) {
+        body {
+            background-size: 100%  90%;
+        }
+        #addExpenseHeading, #expenseInfo, #expenseTableHeading {
+            font-size: 28px;
+        }
+        .table_data {
+            font-size: 11px;
+        }
+    }
+    @media only screen and (max-width: 360px) {
+        body {
+            background-size: 100% 100%;
+        }
+    }
+    @media only screen and (max-width: 700px) {
+        #expenseLimitText {
+            font-size: 20px;
+        }
+    }
+
 </style>
 {% endblock %}
 
@@ -155,7 +213,7 @@
 </center>
 
 
-<div id="alertMessage" class="alert alert-primary" role="alert" style="display: none;"></div>
+<div id="alertMessage" class="alert alert-primary" style="display: none;" role="alert"></div>
 
 <div class="container-1">
     <!-- EXPENSE TRACKER CONTAINER -->
@@ -177,11 +235,11 @@
                 <!-- TOTAL EXPENSE FOR TIME -->
                 <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $0</label>
                 <select id="totalExpenseSelect" class="form-control" name="totalExpense">
-                    <option value="all-time">All Time</option>
                     <option value="this-day">Today</option>
                     <option value="this-week">This Week</option>
                     <option value="this-month">This Month</option>
                     <option value="this-year">This Year</option>
+                    <option value="all-time">All Time</option>
                 </select>
                 <br>
                 <button class="btn btn-primary" id="setSpendingLimitBtn" type="button">Set Expense Limit</button>
@@ -217,15 +275,15 @@
     <!-- EXPENSE TABLE CONTAINER -->
     <div class="expense-table-container">
         <select id="expenseTableSelect" class="form-control">
-            <option value="all-time">All Time</option>
             <option value="this-day">Today</option>
             <option value="this-week">This Week</option>
             <option value="this-month">This Month</option>
             <option value="this-year">This Year</option>
+            <option value="all-time">All Time</option>
         </select>
         <center>
             <div id="Test"></div>
-            <div id="expenseTableHeading">All Time Expenses</div>
+            <div id="expenseTableHeading">Expenses For Today</div>
             <br>
             <table class="table table" style="width:90%;">
                 <thead class="thead-dark">
@@ -247,7 +305,7 @@
 <!-- SET EXPENSE LIMIT POP UP -->
 <div class="bg-modal">
     <div class="modal-content">
-        <div class="closeBtn">+</div>
+        <div id="closeBtn">+</div>
         <center>
         <div id="expenseLimitText"></div>
         <br>
@@ -298,7 +356,7 @@
         
     }
     // HIDE EXPENSE LIMIT POP UP
-    document.querySelector('.closeBtn').addEventListener('click', () => {
+    document.querySelector('#closeBtn').addEventListener('click', () => {
         bgModal.style.display = "none"
         document.querySelector('#addExpenseBtn').style.display = "inline-block"
         enableScroll()
@@ -346,7 +404,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         let expensePeriodForTable = document.getElementById('expenseTableSelect').value
         populateTable(expensePeriodForTable)
-        displayTotalExpense('all-time')
+        displayTotalExpense('this-day')
         displayExpenseLimit(userID, 'this-day')
         
     })
@@ -594,8 +652,17 @@
     // ADD EXPENSE FORM - onsubmit
     document.querySelector('#addExpenseForm').onsubmit = () => {
         var expenseName = document.forms["addExpenseForm"]["expenseName"].value
+        showAlert(`${expenseName} Has Been Added`)
+    }
+
+    // SHOW ALERT
+    function showAlert(message) {
+        alertBox.textContent = message
         alertBox.style.display = "block"
-        alertBox.textContent = `${expenseName} Has Been Added`
+        setTimeout(removeAlert, 4000)
+    }
+    function removeAlert() {
+        alertBox.style.display = "none"
     }
 
 

@@ -138,19 +138,22 @@ def getTotalExpense(period):
     current_date = date.today()
     now = current_date.strftime("%B %d, %Y")
     totalExpense = 0
-    if period == 'all-time':
-        expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
-    elif period == 'this-day':
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
-    elif period == 'this-week':
-        thisWeek = getThisWeekForQuery()
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
-    elif period == 'this-month':
-        thisMonth, thisYear = now.split()[0], now.split()[2]
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
-    elif period == 'this-year':
-        thisYear = now.split()[2]
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+    try:
+        if period == 'all-time':
+            expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+        elif period == 'this-day':
+            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+        elif period == 'this-week':
+            thisWeek = getThisWeekForQuery()
+            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+        elif period == 'this-month':
+            thisMonth, thisYear = now.split()[0], now.split()[2]
+            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+        elif period == 'this-year':
+            thisYear = now.split()[2]
+            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+    except KeyError:
+        return redirect("/")
 
     for expense in expenseQuery:
         totalExpense += expense.item_price

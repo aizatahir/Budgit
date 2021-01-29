@@ -3,15 +3,9 @@
 {% block style %}
 
 <style>
-    /* #mainHeading {
-        font-family: 'Times New Roman', Times, serif;
-        color: white;
-        font-size: 50px;
-        font-weight: bold;
-    } */
     .form-container {
         margin: auto;
-        margin-top: 100px;
+        margin-top: 80px;
         width: 50%;
         background-color: white;
         border-radius: 10px;
@@ -28,18 +22,7 @@
     #Email {
         display: none;
     }
-    /* #alertMessage {
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        margin: auto;
-        width: 50%;
-        border-radius: 10px;
-        border: none;
-    } */
-    /* .inputLabel {
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        font-size: 18px;
-        font-weight: 500;
-    } */
+   
     .container-1 {
         height: 650px;
     }
@@ -47,9 +30,13 @@
         background-color: darkgray;
         height: 40px;
     }
-    /* ::placeholder {
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    } */
+    @media only screen and (max-width: 768px) {
+        .form-container {
+            width: 90%;
+            margin-top: 40px;
+        }
+    }
+  
 </style>
 {% endblock %}
 
@@ -57,7 +44,7 @@
 
 <div class="container-1">
         <center>
-            <div id="mainHeading">Finance Project</div>
+            <div id="mainHeading">BudgIt</div>
         </center>
     <!-- </div> -->
     <!-- ALERT MESSAGE -->
