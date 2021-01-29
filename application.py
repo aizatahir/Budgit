@@ -5,8 +5,9 @@ from flask import Flask, session, render_template, request, redirect, jsonify
 from flask_session import Session
 from sqlalchemy import and_
 from models import *
+
 import datetime
-from datetime import date, timedelta
+from datetime import date, timedelta, tzinfo, datetime
 
 
 
@@ -22,6 +23,17 @@ db.init_app(app)
 
 # ENABLE SESSION
 Session(app)
+
+
+class EST(tzinfo):
+    def utcoffset(self, dt):
+        return timedelta(hours = -5)
+
+    def tzname(self, dt):
+        return "EST"
+
+    def dst(self, dt):
+        return timedelta(0)
 
 @app.route("/")
 def index():
@@ -78,9 +90,8 @@ def home(user_id):
 
 @app.route("/addExpense", methods=["POST"])
 def addExpend():
-    from datetime import date
-    current_date = date.today()
-    now = current_date.strftime("%B %d, %Y")
+    now = datetime.now(EST()).date()
+    now = now.strftime("%B %d, %Y")
 
 
     expenseName = request.form.get("expenseName")
@@ -103,9 +114,8 @@ def addExpend():
 
 @app.route("/getExpenses/<string:period>", methods=["GET"])
 def getExpenses(period):
-    from datetime import date
-    current_date = date.today()
-    now = current_date.strftime("%B %d, %Y")
+    now = datetime.now(EST()).date()
+    now = now.strftime("%B %d, %Y")
 
     userExpenses = []
     if period == 'all-time':
@@ -134,9 +144,9 @@ def getExpenses(period):
 
 @app.route("/getTotalExpense/<string:period>", methods=["GET"])
 def getTotalExpense(period):
-    from datetime import date
-    current_date = date.today()
-    now = current_date.strftime("%B %d, %Y")
+    now = datetime.now(EST()).date()
+    now = now.strftime("%B %d, %Y")
+
     totalExpense = 0
     try:
         if period == 'all-time':
@@ -209,7 +219,6 @@ def test():
 
 
 def getCurrentTime():
-    from datetime import datetime
     time = datetime.today().strftime("%H:%M %p")
     time = time.split(':')
     hour = int(time[0])
@@ -230,9 +239,8 @@ def logout():
 
 
 def getThisWeekForQuery():
-    from datetime import date, datetime
-    current_date = date.today()
-    now = current_date.strftime("%B %d, %Y")
+    now = datetime.now(EST()).date()
+    now = now.strftime("%B %d, %Y")
 
     todayDay    = getCurrentDay(now)
     monthIndex  = getMonthIndex(now)
@@ -272,6 +280,7 @@ def getSundays(year, currentMonthIndex: int):
 
 
 def getWeeks(year, monthIndex, day):
+    import datetime
     numweeks = 1
     start_date = datetime.datetime(year=year,month=monthIndex,day=day)
 

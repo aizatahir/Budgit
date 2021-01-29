@@ -1,7 +1,7 @@
 import hashlib
-from datetime import date, datetime
-current_date = date.today()
-now = current_date.strftime("%B %d, %Y")
+# from datetime import date, datetime
+# current_date = date.today()
+# now = current_date.strftime("%B %d, %Y")
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
