@@ -1,5 +1,10 @@
 {% extends "layout.html" %}
 
+{% block head %}
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/home_table.css') }}">
+<script src="{{url_for('static', filename='/scripts/home_table.js')}}"></script>
+{% endblock %}
+
 {% block style %}
 <style>
     #mainHeading {
@@ -16,6 +21,11 @@
     #addExpenseBtn {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         background-color: orange;
+        border: none;
+        border-radius: 10px;
+    }
+    #deleteExpenseBtn {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         border: none;
         border-radius: 10px;
     }
@@ -42,6 +52,11 @@
         border-radius: 10px;
         background-color: blueviolet;
     }
+    #saveEditBtn {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border: none;
+        border-radius: 10px;
+    }
     #logoutBtn {
         position: relative;
         background-color: white;
@@ -67,6 +82,15 @@
         color: red;
 
     }
+    #closeBtn {
+        position: absolute;
+        top: -2%;
+        right: 4%;
+        font-size: 42px;
+        transform: rotate(45deg);
+        cursor: pointer;
+    }
+    
     .table_data {
         /* font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; */
         font-weight: 600;
@@ -118,32 +142,36 @@
         position: absolute;
         top: 0;
     }
-    .modal-content {
+    .modal-content-expense-limit {
         position: relative;
-        /* width: 500px; */
         width: 40%;
         height: 300px;
         padding: 20px;
         background-color: white;
         border: none;
         border-radius: 10px;
-        /* text-align: center; */
     }
-    #closeBtn {
-        position: absolute;
-        top: -2%;
-        right: 4%;
-        font-size: 42px;
-        transform: rotate(45deg);
-        cursor: pointer;
+    th {
+        width: 1%;
     }
+    
     @media only screen and (max-width: 950px) {
         #logoutBtn {
             left: 3%;
         }
     }
+    @media only screen and (max-width: 700px) {
+        #mainTable {
+            display: block;
+            max-width: -moz-fit-content;
+            max-width: fit-content;
+            margin: 0 auto;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+    }
     @media only screen and (max-width: 600px) {
-        .modal-content {
+        .modal-content-expense-limit {
             width: 60%;
         }
     }
@@ -168,7 +196,7 @@
         body {
             background-size: 100% 90%;
         }
-        .modal-content {
+        .modal-content-expense-limit {
             width: 70%;
         }
     }
@@ -281,22 +309,24 @@
             <option value="this-year">This Year</option>
             <option value="all-time">All Time</option>
         </select>
+        <!-- EXPENSE TABLE -->
         <center>
-            <div id="Test"></div>
             <div id="expenseTableHeading">Expenses For Today</div>
-            <br>
-            <table class="table table" style="width:90%;">
-                <thead class="thead-dark">
-                    <tr>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Date</th>
-                        <th>Time</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
         </center>
+        <br>
+        <table id="mainTable" class="table table-striped" style="width: 90%; margin: auto;" >
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+        
 
     </div>
 
@@ -304,7 +334,7 @@
 
 <!-- SET EXPENSE LIMIT POP UP -->
 <div class="bg-modal">
-    <div class="modal-content">
+    <div class="modal-content-expense-limit">
         <div id="closeBtn">+</div>
         <center>
         <div id="expenseLimitText"></div>
@@ -319,6 +349,59 @@
         </form>
         <div id="expenseLimitSet"></div>
     </div>
+</div>
+
+<!-- Edit Modal HTML -->
+<div id="editExpenseModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form>
+                <!-- EDIT EXPENSE -->
+				<div class="modal-header">						
+					<h4 class="modal-title">Edit Expense</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- NEW ITEM NAME -->
+				<div class="modal-body">					
+					<div class="form-group">
+						<label class="inputLabel" for="newName">New Name</label>
+						<input class="form-control" name="newName" autocomplete="off">
+                    </div>
+                    <!-- NEW ITEM PRICE -->
+					<div class="form-group">
+						<label class="inputLabel" for="newPrice">New Price</label>
+						<input class="form-control" name="newPrice" autocomplete="off">
+					</div>
+                </div>
+                <!-- SAVE BUTTON -->
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<button id="saveEditBtn" class="btn btn-primary" type="button">Save</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+<!-- Delete Modal HTML -->
+<div id="deleteExpenseModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form>
+				<div class="modal-header">						
+					<h4 class="modal-title">Delete Expense</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">					
+					<p>Are you sure you want to delete these Records?</p>
+					<p class="text-warning"><small>This action cannot be undone.</small></p>
+				</div>
+				<div class="modal-footer">
+                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                    <button id="deleteExpenseBtn" class="btn btn-danger" type="button">Delete</button>
+				</div>
+			</form>
+		</div>
+	</div>
 </div>
 {% endblock %}
 
@@ -406,7 +489,6 @@
         populateTable(expensePeriodForTable)
         displayTotalExpense('this-day')
         displayExpenseLimit(userID, 'this-day')
-        
     })
 
     // EXPENSE TABLE SELECT
@@ -448,7 +530,9 @@
         request.onload = () => {
             // Extract JSON data from request
             const data = JSON.parse(request.responseText);
-            // displayTotalExpense(data)
+            if (data.length === 0) {
+                document.querySelector('#mainTable').style.display = "none"
+            }
 
             // CREATE TABLE DATA
             var tableBody = document.getElementById('tableBody')
@@ -460,6 +544,7 @@
                 let tdName = document.createElement('td')
                 tdName.className = "table_data"
                 tdName.height = "65px"
+                // tdName.width = "10px"
                 let itemNameText = data[i]['item_name']
                 tdName.textContent = itemNameText
 
@@ -481,10 +566,46 @@
                 let itemTimeText = data[i]['time']
                 tdTime.textContent = itemTimeText
 
+                // ACTIONS BUTTON
+                let tdButton  = document.createElement('td')
+        
+                // EDIT BUTTON
+                let editBtn = document.createElement('a')
+                editBtn.href = "#editExpenseModal"
+                editBtn.className = "edit"
+                editBtn.dataset.item_id = data[i]['id']
+                editBtn.dataset.toggle="modal"
+                // ICON
+                let editIcon = document.createElement('i')
+                editIcon.className = "material-icons"
+                editIcon.dataset.toggle = "tooltip"
+                editIcon.title = "Edit"
+                editIcon.innerHTML = "&#xE254;"
+
+                editBtn.appendChild(editIcon)
+                tdButton.appendChild(editBtn)
+
+                // DELETE BTN
+                let deleteBtn = document.createElement('a')
+                deleteBtn.href = "#deleteExpenseModal"
+                deleteBtn.className = "delete"
+                deleteBtn.dataset.toggle = "modal"
+                // ICON
+                let deleteIcon = document.createElement('i')
+                deleteIcon.className = "material-icons"
+                deleteIcon.dataset.toggle = "tooltip"
+                deleteIcon.title = "Delete"
+                deleteIcon.innerHTML = "&#xE872;"
+
+                deleteBtn.appendChild(deleteIcon)
+                tdButton.appendChild(deleteBtn)
+
+
                 tr.appendChild(tdName)
                 tr.appendChild(tdPrice)
                 tr.appendChild(tdDate)
                 tr.appendChild(tdTime)
+                tr.appendChild(tdButton)
 
                 tableBody.appendChild(tr)
 
@@ -521,6 +642,8 @@
         request.send(200);
 
     }
+
+    // TABLE BUTTONS
 
     // DISPLAY TOTAL EXPENSE
     function displayTotalExpense(perioid) {

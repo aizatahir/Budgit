@@ -134,6 +134,7 @@ def getExpenses(period):
 
     for i, expense in enumerate(expenseQuery):
         userExpenses.append({
+            "id": expense.id,
             "item_name": expense.item_name,
             "item_price": expense.item_price,
             "date": expense.date,
