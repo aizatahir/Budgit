@@ -2,7 +2,7 @@
 
 {% block head %}
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/home_table.css') }}">
-<script src="{{url_for('static', filename='/scripts/home_table.js')}}"></script>
+
 {% endblock %}
 
 {% block style %}
@@ -73,7 +73,7 @@
     }
     #expenseTableSelect {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        width: 120px;
+        width: 125px;
     }
     #exceedLimitText {
         margin-left: 10px;
@@ -227,6 +227,8 @@
 
 
 {% block body %}
+<script src="{{url_for('static', filename='/scripts/home_table.js')}}"></script>
+
 <div id="userID" data-user_id="{{ user_id }}"></div>
 <div id="userExpenseLimits" data-user_expense_limits="{{ user_expense_limits }}"></div>
 <div id="totalUserExpenses" data-total_user_expenses="{{ total_expenses }}"></div>
@@ -355,7 +357,7 @@
 <div id="editExpenseModal" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
-			<form>
+			<form id="editExpenseForm">
                 <!-- EDIT EXPENSE -->
 				<div class="modal-header">						
 					<h4 class="modal-title">Edit Expense</h4>
@@ -371,12 +373,13 @@
 					<div class="form-group">
 						<label class="inputLabel" for="newPrice">New Price</label>
 						<input class="form-control" name="newPrice" autocomplete="off">
-					</div>
+                    </div>
+                        <p id="errorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE BUTTON -->
 				<div class="modal-footer">
-					<input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-					<button id="saveEditBtn" class="btn btn-primary" type="button">Save</button>
+					<input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
+					<button id="saveEditBtn" class="btn btn-primary" type="button" disabled>Save</button>
 				</div>
 			</form>
 		</div>
@@ -392,11 +395,11 @@
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 				</div>
 				<div class="modal-body">					
-					<p>Are you sure you want to delete these Records?</p>
+					<p>Are you sure you want to delete this expense?</p>
 					<p class="text-warning"><small>This action cannot be undone.</small></p>
 				</div>
 				<div class="modal-footer">
-                    <input type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                    <input type="button" class="btn btn-default" id="deleteExpenseCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="deleteExpenseBtn" class="btn btn-danger" type="button">Delete</button>
 				</div>
 			</form>
@@ -533,6 +536,9 @@
             if (data.length === 0) {
                 document.querySelector('#mainTable').style.display = "none"
             }
+            else {
+                document.querySelector('#mainTable').style.display = ""
+            }
 
             // CREATE TABLE DATA
             var tableBody = document.getElementById('tableBody')
@@ -573,12 +579,12 @@
                 let editBtn = document.createElement('a')
                 editBtn.href = "#editExpenseModal"
                 editBtn.className = "edit"
-                editBtn.dataset.item_id = data[i]['id']
                 editBtn.dataset.toggle="modal"
                 // ICON
                 let editIcon = document.createElement('i')
                 editIcon.className = "material-icons"
                 editIcon.dataset.toggle = "tooltip"
+                editIcon.dataset.item_id = data[i]['id']
                 editIcon.title = "Edit"
                 editIcon.innerHTML = "&#xE254;"
 
@@ -594,6 +600,7 @@
                 let deleteIcon = document.createElement('i')
                 deleteIcon.className = "material-icons"
                 deleteIcon.dataset.toggle = "tooltip"
+                deleteIcon.dataset.item_id = data[i]['id']
                 deleteIcon.title = "Delete"
                 deleteIcon.innerHTML = "&#xE872;"
 
@@ -644,6 +651,95 @@
     }
 
     // TABLE BUTTONS
+    document.querySelector('#mainTable').addEventListener('click', (e) =>{
+        var itemID = e.target.dataset.item_id
+        // EDIT BUTTON
+        if (e.target.className === "material-icons" && e.target.title === "Edit") {
+            // VALIDATE EDIT MODAL FORM
+            var saveEditBtn = document.querySelector('#saveEditBtn')
+            document.querySelector('#editExpenseForm').onkeyup = () => {
+                let newNameField = document.forms["editExpenseForm"]["newName"].value
+                let newPriceField = document.forms["editExpenseForm"]["newPrice"]
+                
+                let errorMessage = document.querySelector('#errorMessage')
+                // INPUT FIELDS EMPTY
+                if (newNameField === "" && newPriceField.value === "") {
+                    saveEditBtn.disabled = true
+                }
+                else {
+                    saveEditBtn.disabled = false
+                }
+                // PRICE FIELD NOT A NUMBER
+                if (isNaN(newPriceField.value)) {
+                   if (newPriceField.value.includes('$')) {
+                       errorMessage.textContent = "Enter the price without the use of '$'"
+                   }
+                   else {
+                       errorMessage.textContent = ""
+                   }
+                    newPriceField.style.borderColor = "red"
+                    saveEditBtn.disabled = true
+                }
+                else {
+                    saveEditBtn.disabled = false
+                }
+                if (newPriceField.value === "") {
+                    newPriceField.style.borderColor = ""
+                    errorMessage.textContent = ""
+                }
+
+            
+            }
+            // SUBMIT FORM
+            saveEditBtn.onclick = () => {
+                let newNameField = document.forms["editExpenseForm"]["newName"].value
+                let newPriceField = document.forms["editExpenseForm"]["newPrice"].value
+                if (newPriceField === "") {
+                    newPriceField = "Empty"
+                }
+                if (newNameField === "") {
+                    newNameField = "Empty"
+                }
+
+                const request = new XMLHttpRequest()
+                request.open('POST', `/editExpense/${itemID}/${newNameField}/${newPriceField}`)
+                request.onload = () => {
+                    let tableBody = document.getElementById('tableBody')
+                    let timePeriod = document.querySelector('#expenseTableSelect').value
+                    document.forms["editExpenseForm"]["newName"].value = ""
+                    document.forms["editExpenseForm"]["newPrice"].value = ""
+                    removeEditExpenseModal()
+                    showAlert("Expense Changed")
+                    removeAllChildNodes(tableBody)
+                    populateTable(timePeriod)
+                }
+                request.send()
+            }    
+        }
+        else if (e.target.className === "material-icons" && e.target.title === "Delete") {
+            document.querySelector('#deleteExpenseBtn').onclick = () => {
+                const request = new XMLHttpRequest()
+                request.open('POST', `/deleteExpense/${itemID}`)
+                request.onload = () => {
+                    let tableBody = document.getElementById('tableBody')
+                    let timePeriod = document.querySelector('#expenseTableSelect').value
+                    removeDeleteExpenseModal()
+                    showAlert("Expense Deleted")
+                    removeAllChildNodes(tableBody)
+                    populateTable(timePeriod)
+                }
+                request.send()
+            }
+        }
+       
+    })
+    //  REMOVE MODALS
+    function removeEditExpenseModal() {
+        document.querySelector('#editModalCancelBtn').click()
+    }
+    function removeDeleteExpenseModal() {
+        document.querySelector('#deleteExpenseCancelBtn').click()
+    }
 
     // DISPLAY TOTAL EXPENSE
     function displayTotalExpense(perioid) {

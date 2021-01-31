@@ -108,8 +108,33 @@ def addExpend():
 
     return redirect(f"/home/{session['user_id']}")
 
+@app.route("/editExpense/<string:item_id>/<string:newItemName>/<string:newItemPrice>", methods=["POST"])
+def editExpense(item_id, newItemName, newItemPrice):
+    try:
+        userID = session['user_id']
+    except KeyError:
+        return redirect("/")
+    userExpense = Expense.query.filter(and_(Expense.user_id == userID, Expense.id == item_id)).first()
+    # ITEM NAME BEING EDITED
+    if newItemPrice == "Empty" and newItemName != "":
+        userExpense.item_name = newItemName
+        db.session.commit()
+    # ITEM PRICE BEING EDITED
+    if newItemName == "Empty" and newItemPrice != "":
+        userExpense.item_price = float(newItemPrice)
+        db.session.commit()
+    # BOTH NAME AND PRICE BEING EDITED
+    if newItemName != "Empty" and newItemPrice != "Empty":
+        userExpense.item_name = newItemName
+        userExpense.item_price = float(newItemPrice)
+        db.session.commit()
+    return ""
 
-
+@app.route("/deleteExpense/<string:item_id>", methods=["POST"])
+def deleteExpense(item_id):
+    userExpense = Expense.query.get(item_id)
+    db.session.delete(userExpense)
+    db.session.commit()
 
 
 @app.route("/getExpenses/<string:period>", methods=["GET"])
