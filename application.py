@@ -195,7 +195,7 @@ def getTotalExpense(period):
     for expense in expenseQuery:
         totalExpense += expense.item_price
 
-    return str(format(totalExpense, ",.2f"))
+    return str(format(totalExpense, ".2f"))
 
 
 
