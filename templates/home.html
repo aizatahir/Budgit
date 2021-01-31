@@ -687,8 +687,6 @@
                     newPriceField.style.borderColor = ""
                     errorMessage.textContent = ""
                 }
-
-            
             }
             // SUBMIT FORM
             saveEditBtn.onclick = () => {
@@ -711,6 +709,7 @@
                     removeEditExpenseModal()
                     showAlert("Expense Changed")
                     removeAllChildNodes(tableBody)
+                    displayTotalExpense(timePeriod)
                     populateTable(timePeriod)
                 }
                 request.send()
@@ -726,6 +725,7 @@
                     removeDeleteExpenseModal()
                     showAlert("Expense Deleted")
                     removeAllChildNodes(tableBody)
+                    displayTotalExpense(timePeriod)
                     populateTable(timePeriod)
                 }
                 request.send()
@@ -754,7 +754,7 @@
             var totalExpense = parseFloat(request.responseText)
             totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
         }
-        request.send(200)
+        request.send()
     }
     document.querySelector('#totalExpenseSelect').onchange = function() {
         var timePeriod = this.value

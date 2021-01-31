@@ -135,6 +135,7 @@ def deleteExpense(item_id):
     userExpense = Expense.query.get(item_id)
     db.session.delete(userExpense)
     db.session.commit()
+    return ""
 
 
 @app.route("/getExpenses/<string:period>", methods=["GET"])
