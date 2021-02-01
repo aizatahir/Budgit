@@ -236,7 +236,9 @@ def getExpenseLimit(userID, period):
 
     return str(limitQuery)
 
-
+@app.route("/account", methods=["GET"])
+def account():
+    return render_template("account.html")
 
 
 
@@ -269,26 +271,37 @@ def getThisWeekForQuery():
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
-    todayDay    = getCurrentDay(now)
-    monthIndex  = getMonthIndex(now)
+    todayDay = getCurrentDay(now)
+    monthIndex = getMonthIndex(now)
     currentYear = getCurrentYear(now)
     startOfWeek = getStartOfWeek(currentYear, monthIndex, todayDay)
+
+    if type(startOfWeek) == tuple:
+        lastMonthIndex = startOfWeek[1]
+        return getWeeks(currentYear, lastMonthIndex, startOfWeek[0])
 
     return getWeeks(currentYear, monthIndex, startOfWeek)
 
 
 
-def getStartOfWeek(currentYear, monthIndex, todayDay):
+def getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=False):
     dayTolerance = {}
     allTolerances = []
-    for sunday in getSundays(currentYear, monthIndex):
-        dayTolerance.update({sunday: (todayDay - sunday)})
+    if not takeLastSunday:
+        for sunday in getSundays(currentYear, monthIndex):
+            dayTolerance.update({sunday: (todayDay - sunday)})
+    else:
+        return (getSundays(currentYear, monthIndex-1)[-1], monthIndex-1)
 
     for t in dayTolerance:
-        if t >= 0:
+        if dayTolerance[t] >= 0:
             allTolerances.append(t)
 
-    return dayTolerance[min(allTolerances)]
+    if len(allTolerances) != 0:
+        return dayTolerance[min(allTolerances)]
+    else:
+        # WE ARE IN A NEW MONTH AND THE START OF THE WEEK IS STILL IN THE PREVIOUS MONTH
+        return getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=True)
 
 
 
@@ -309,19 +322,19 @@ def getSundays(year, currentMonthIndex: int):
 def getWeeks(year, monthIndex, day):
     import datetime
     numweeks = 1
-    start_date = datetime.datetime(year=year,month=monthIndex,day=day)
+    start_date = datetime.datetime(year=year, month=monthIndex, day=day)
 
     weeks = {}
 
     offset = datetime.timedelta(days=0)
     for week in range(numweeks):
-       this_week = []
-       for day in range(7):
+        this_week = []
+        for day in range(7):
             date = start_date + offset
             date = date.strftime("%B %d, %Y")
-            this_week.append( date )
+            this_week.append(date)
             offset += datetime.timedelta(days=1)
-       weeks[week] = this_week
+        weeks[week] = this_week
 
     return weeks[0]
 
