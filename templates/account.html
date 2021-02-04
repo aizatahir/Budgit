@@ -43,6 +43,9 @@
         position: absolute;
         left: 73%;
     }
+    #passwordErrorMessage {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
     .field-item {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-size: 18px;
@@ -81,15 +84,23 @@
         }
     }
     @media only screen and (max-width: 375px) {
+        img {
+            max-width: 85%;
+        }
+        #welcomeHeading {
+            font-size: 28px;
+        }
         .acc-container {
-            width: 95%;
+            width: 98%;
+        }
+        .field-item {
+            font-size: 17px;
         }
     }
     @media only screen and (max-width: 360px) {
         #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn {
             left: 83%;
         }
-
     }
    
 </style>
@@ -107,7 +118,6 @@
     </center>
     <div class="acc-container">
         <div id="pp-image-container">
-            <!-- <img src="/static/profile_pic2.png" -->
             <img src="{{ url_for('static', filename = 'profile_pic2.png') }}">
         </div>
         
@@ -116,30 +126,158 @@
         <div class="field-container">
             <!-- USERNAME -->
             <div class="field-item">Username: <span id="userNameField" class="userInfo" style=""></span>
-                <a href="#" id="editUserNameBtn" class="edit" data-toggle="modal">
+                <a href="#editUserNameModal" id="editUserNameBtn" class="edit" data-toggle="modal">
                     <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
                 </a>
             </div>
             <hr>
             <!-- EMAIL -->
             <div class="field-item">Email: <span id="emailField" class="userInfo" style=""></span>
-                <a href="#" id="editEmailBtn" class="edit" data-toggle="modal">
+                <a href="#editEmailModal" id="editEmailBtn" class="edit" data-toggle="modal">
                     <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
                 </a>
             </div>
             <hr>
             <!-- PHONE NUMBER -->
-            <div class="field-item">Phone Number: <span id="phoneNumberField" class="userInfo" style=""></span>
-                <a href="#" id="editPhoneNumberBtn" class="edit" data-toggle="modal">
+            <div class="field-item">Phone Number: <span id="phoneNumberField" class="userInfo"></span>
+                <a href="#editPhoneNumberModal" id="editPhoneNumberBtn" class="edit" data-toggle="modal">
                     <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
                 </a>
             </div>
             <hr>
             <!-- UPDATE PASSWORD -->
-            <button id="changePassBtn" class="btn btn-light">Update Password</button>
+            <a href="#updatePasswordModal" class="edit" data-toggle="modal">
+                <button id="changePassBtn" class="btn btn-light">Update Password</button>
+            </a>
         </div>
     </div>
 </div>
+
+<!-- EDIT USERNAME MODAL -->
+<div id="editUserNameModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<form id="editUsernameForm">
+                <!-- EDIT USERNAME -->
+				<div class="modal-header">						
+					<h4 class="modal-title">Edit Username</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- NEW USERNAME -->
+				<div class="modal-body">					
+					<div class="form-group">
+						<label class="inputLabel" for="newUsername">New Username</label>
+						<input class="form-control" name="newUsername" autocomplete="off">
+                    </div>
+                        <p id="errorMessage" class="text-warning"><small></small></p>
+                </div>
+                <!-- SAVE AND CANCEL BUTTON -->
+				<div class="modal-footer">
+					<input id="cancelUsernameBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<button id="saveUsernameBtn" class="btn btn-primary" type="button" disabled>Save</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- EDIT EMAIL MODAL -->
+<div id="editEmailModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editEmailForm">
+              <!-- EDIT USERNAME -->
+				<div class="modal-header">						
+					<h4 class="modal-title">Edit Email</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- NEW EMAIL -->
+				<div class="modal-body">					
+					<div class="form-group">
+						<label class="inputLabel" for="newEmail">New Email</label>
+						<input class="form-control" name="newEmail" autocomplete="off">
+                    </div>
+                        <p id="errorMessage" class="text-warning"><small></small></p>
+                </div>
+                <!-- SAVE AND CANCEL BUTTON -->
+				<div class="modal-footer">
+					<input id="cancelEmailBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<button id="saveEmailBtn" class="btn btn-primary" type="button" disabled>Save</button>
+				</div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- EDIT PHONE NUMBER MODAL -->
+<div id="editPhoneNumberModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editPhoneNumberForm">
+              <!-- HEADER -->
+				<div class="modal-header">						
+					<h4 class="modal-title">Edit Phone Number</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- BODY -->
+				<div class="modal-body">					
+					<div class="form-group">
+						<label class="inputLabel" for="newPhoneNumber">New Phone Number</label>
+						<input class="form-control" name="newPhoneNumber" autocomplete="off">
+                    </div>
+                        <p id="errorMessage" class="text-warning"><small></small></p>
+                </div>
+                <!-- SAVE AND CANCEL BUTTON -->
+				<div class="modal-footer">
+					<input id="cancelPhoneNumberBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<button id="savePhoneNumberBtn" class="btn btn-primary" type="button" disabled>Save</button>
+				</div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- UPDATE PASSWORD MODAL -->
+<div id="updatePasswordModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="updatePasswordForm">
+              <!-- HEADER -->
+				<div class="modal-header">						
+					<h4 class="modal-title">Update Password</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- BODY -->
+				<div class="modal-body">	
+                    <!-- CURRENT PASSWORD -->
+					<div class="form-group">
+						<label class="inputLabel" for="currentPassword">Current Password</label>
+						<input class="form-control" name="currentPassword" type="password" autocomplete="new-password">
+                    </div>
+                    <!-- NEW PASSWORD -->
+                    <div class="form-group">
+                        <label class="inputLabel" for="newPassword">New Password</label>
+                        <input class="form-control" name="newPassword" type="password" autocomplete="new-password">
+                    </div>
+                     <!-- CONFIRM PASSWORD -->
+                     <div class="form-group">
+                        <label class="inputLabel" for="confirmPassword">Confirm Password</label>
+                        <input class="form-control" name="confirmPassword" type="password" autocomplete="new-password">
+                    </div>
+                        <p id="passwordErrorMessage" class="text-warning"></p>
+                </div>
+                <!-- SAVE AND CANCEL BUTTON -->
+				<div class="modal-footer">
+					<input id="cancelPasswordBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<button id="savePasswordBtn" class="btn btn-primary" type="button" disabled>Save</button>
+				</div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
 {% endblock %}
 
 {% block script %}
@@ -156,8 +294,6 @@
             let userName = data['userName']
             let userEmail = data['Email']
             let userPhoneNumber = data['phoneNumber']
-
-            console.log(userPhoneNumber)
 
             let welcomeHeading = document.querySelector('#welcomeHeading')
             let userNameField = document.querySelector('#userNameField')
@@ -178,15 +314,76 @@
             else {
                 phoneNumberField.textContent = userPhoneNumber
             }
-            
-
-
-
-
-
-            // console.log(data)
         }
         request.send()
     }
+
+    // VALIDATE MODAL FORMS
+
+    // USERNAME FORM
+    document.querySelector('#editUsernameForm').onkeyup = () => {
+        let newUserNameField = document.forms['editUsernameForm']['newUsername'].value
+        let saveUsernameBtn = document.querySelector('#saveUsernameBtn')
+        if (newUserNameField === '') {
+            saveUsernameBtn.disabled = true
+        }
+        else {
+            saveUsernameBtn.disabled = false
+        }
+    }
+    // EMAIL FORM
+    document.querySelector('#editEmailForm').onkeyup = () => {
+        let newEmailField = document.forms['editEmailForm']['newEmail'].value
+        let saveEmailBtn = document.querySelector('#saveEmailBtn')
+        if (newEmailField === '') {
+            saveEmailBtn.disabled = true
+        }
+        else {
+            saveEmailBtn.disabled = false
+        }
+    }
+    // PHONE NUMBER FORM
+    document.querySelector('#editPhoneNumberForm').onkeyup = () => {
+        let newPhoneNumberField = document.forms['editPhoneNumberForm']['newPhoneNumber'].value
+        let savePhoneNumberBtn = document.querySelector('#savePhoneNumberBtn')
+        if (newPhoneNumberField === '') {
+            savePhoneNumberBtn.disabled = true
+        }
+        else {
+            savePhoneNumberBtn.disabled = false
+        }
+    }
+    // UPDATE PASSWORD
+    document.querySelector('#updatePasswordForm').onkeyup = () => {
+        let currentPasswordField = document.forms['updatePasswordForm']['currentPassword'].value
+        let newPasswordField =  document.forms['updatePasswordForm']['newPassword'].value
+        let confirmPasswordField = document.forms['updatePasswordForm']['confirmPassword']
+        let errorMessage = document.querySelector('#passwordErrorMessage')
+        console.log(errorMessage)
+        let savePasswordBtn = document.querySelector('#savePasswordBtn')
+
+        if (currentPasswordField === '' || newPasswordField === '' || confirmPasswordField.value === '') {
+            savePasswordBtn.disabled = true
+        }
+        else {
+            savePasswordBtn.disabled = false
+             // CHECKING IF PASSWORDS MATCH
+            if ((confirmPasswordField.value != '') && confirmPasswordField.value != newPasswordField) {
+                confirmPasswordField.style.borderColor = 'red'
+                errorMessage.textContent = "Passwords don't match"
+                console.log(errorMessage)
+                savePasswordBtn.disabled = true
+            }
+            else {
+                confirmPasswordField.style.borderColor = ''
+                errorMessage.textContent = ""
+                savePasswordBtn.disabled = false
+            }
+        }
+
+       
+
+    }
+    
 </script>
 {% endblock %}

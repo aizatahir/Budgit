@@ -1,7 +1,7 @@
 import os
 import requests
 import hashlib
-from flask import Flask, session, render_template, request, redirect, jsonify
+from flask import Flask, render_template, request, redirect, jsonify
 from flask_session import Session
 from sqlalchemy import and_
 from models import *
@@ -18,12 +18,12 @@ if not os.getenv("DATABASE_URL"):
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SESSION_TYPE"] = "filesystem"
+# app.config["SESSION_TYPE"] = "filesystem"
 db.init_app(app)
 
 # ENABLE SESSION
-Session(app)
-
+# Session(app)
+session = {}
 
 class EST(tzinfo):
     def utcoffset(self, dt):
