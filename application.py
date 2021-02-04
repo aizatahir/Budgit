@@ -87,6 +87,22 @@ def home(user_id):
     return render_template("home.html", user_id=user_id, user_expense_limits=str(expenseLimits), total_expenses=str(totalExpenses))
 
 
+@app.route("/getUserInfo", methods=["GET"])
+def getUserInfo():
+    try:
+        user = User.query.get(session['user_id'])
+    except KeyError:
+        return redirect("/")
+
+    userInfo = {
+        'id': user.id,
+        'userName': user.name,
+        'Email': user.email,
+        'phoneNumber': user.phone_number
+    }
+    return jsonify(userInfo)
+
+
 
 @app.route("/addExpense", methods=["POST"])
 def addExpend():

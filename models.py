@@ -15,6 +15,7 @@ class User(db.Model):
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String)
     password = db.Column(db.String, nullable=False)
+    phone_number = db.Column(db.String)
 
     def addUser(self):
         newUser = User(name=self.name, email=self.email, password=self.password)

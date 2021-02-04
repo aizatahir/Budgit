@@ -2,6 +2,22 @@
 
 {% block style %}
 <style>
+    #welcomeHeading {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 45px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    #logoutBtn {
+        position: relative;
+        background-color: white;
+        color: black;
+        border: none;
+        margin-top: 5px;
+        left: 94%;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border-radius: 5px;
+   }
     .container-1 {
         min-height: 850px;
     }
@@ -11,22 +27,166 @@
         width: 60%;
         background-color: white;
         border-radius: 10px;
-        height: 320px;
+        height: 520px;
         padding: 15px;
     }
+    #pp-image-container {
+        margin: auto;
+        /* border: 1px solid black; */
+        height: 80px;
+        width: 80px;
+    }
+    #changePassBtn {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    }
+    #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn {
+        position: absolute;
+        left: 73%;
+    }
+    .field-item {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+    }
+    .userInfo {
+        font-family: 'Times New Roman', Times, serif;
+        /* margin-right: 60%; */
+    }
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+    a {
+        color: orange;
+    }
+    
+    @media only screen and (max-width: 950px) {
+        #logoutBtn {
+            left: 3%;
+        }
+    }
+    @media only screen and (max-width: 770px) {
+        .acc-container {
+            width: 85%;
+        }
+    }
+    @media only screen and (max-width: 660px) {
+        #welcomeHeading {
+            font-size: 30px;
+        }
+    }
+    @media only screen and (max-width: 420px) {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn {
+            left: 80%;
+        }
+    }
+    @media only screen and (max-width: 375px) {
+        .acc-container {
+            width: 95%;
+        }
+    }
+    @media only screen and (max-width: 360px) {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn {
+            left: 83%;
+        }
+
+    }
+   
 </style>
 {% endblock %}
 
 {% block body %}
+<!-- LOGOUT BUTTON -->
+<form action="/logout">
+    <button  id="logoutBtn" class="btn btn-primary">Logout</button>
+</form>
+
 <div class="container-1">
     <center>
         <div id="mainHeading">Account</div>
     </center>
     <div class="acc-container">
-
+        <div id="pp-image-container">
+            <!-- <img src="/static/profile_pic2.png" -->
+            <img src="{{ url_for('static', filename = 'profile_pic2.png') }}">
+        </div>
+        
+        <div id="welcomeHeading"></div>
+        
+        <div class="field-container">
+            <!-- USERNAME -->
+            <div class="field-item">Username: <span id="userNameField" class="userInfo" style=""></span>
+                <a href="#" id="editUserNameBtn" class="edit" data-toggle="modal">
+                    <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
+                </a>
+            </div>
+            <hr>
+            <!-- EMAIL -->
+            <div class="field-item">Email: <span id="emailField" class="userInfo" style=""></span>
+                <a href="#" id="editEmailBtn" class="edit" data-toggle="modal">
+                    <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
+                </a>
+            </div>
+            <hr>
+            <!-- PHONE NUMBER -->
+            <div class="field-item">Phone Number: <span id="phoneNumberField" class="userInfo" style=""></span>
+                <a href="#" id="editPhoneNumberBtn" class="edit" data-toggle="modal">
+                    <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
+                </a>
+            </div>
+            <hr>
+            <!-- UPDATE PASSWORD -->
+            <button id="changePassBtn" class="btn btn-light">Update Password</button>
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        populateFields()
+    })
+
+    function populateFields() {
+        const request = new XMLHttpRequest()
+        request.open('GET', '/getUserInfo')
+        request.onload = () => {
+            const data = JSON.parse(request.responseText)
+            let userName = data['userName']
+            let userEmail = data['Email']
+            let userPhoneNumber = data['phoneNumber']
+
+            console.log(userPhoneNumber)
+
+            let welcomeHeading = document.querySelector('#welcomeHeading')
+            let userNameField = document.querySelector('#userNameField')
+            let emailField = document.querySelector('#emailField')
+            let phoneNumberField = document.querySelector('#phoneNumberField')
+
+            welcomeHeading.textContent = `Welcome ${userName}`
+            userNameField.textContent = userName
+            if (userEmail === null) {
+                emailField.textContent = "Not Set"
+            }
+            else {
+                emailField.textContent = userEmail
+            }
+            if (userPhoneNumber === null) {
+                phoneNumberField.textContent = "Not Set"
+            }
+            else {
+                phoneNumberField.textContent = userPhoneNumber
+            }
+            
+
+
+
+
+
+            // console.log(data)
+        }
+        request.send()
+    }
+</script>
 {% endblock %}
