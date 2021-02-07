@@ -8,6 +8,7 @@ from models import *
 
 import datetime
 from datetime import date, timedelta, tzinfo, datetime
+from math import inf
 
 
 
@@ -102,6 +103,19 @@ def getUserInfo():
     }
     return jsonify(userInfo)
 
+@app.route("/updateUserInfo/<string:userID>/<string:infoToUpdate>/<string:newInfo>", methods=["POST"])
+def updateUserInfo(userID, infoToUpdate, newInfo):
+    user = User.query.get(userID)
+    if infoToUpdate == 'userName':
+        user.name = newInfo
+        db.session.commit()
+    elif infoToUpdate == 'userEmail':
+        user.email = newInfo
+        db.session.commit()
+    elif infoToUpdate == 'userPhoneNumber':
+        user.phone_number = infoToUpdate
+        db.session.commit()
+    return ''
 
 
 @app.route("/addExpense", methods=["POST"])
@@ -302,19 +316,24 @@ def getThisWeekForQuery():
 
 def getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=False):
     dayTolerance = {}
-    allTolerances = []
+    foundPositiveTolerance = False
     if not takeLastSunday:
         for sunday in getSundays(currentYear, monthIndex):
             dayTolerance.update({sunday: (todayDay - sunday)})
     else:
-        return (getSundays(currentYear, monthIndex-1)[-1], monthIndex-1)
+        return (getSundays(currentYear, monthIndex - 1)[-1], monthIndex - 1)
 
+    startOfWeek = None
+    minTolerance = inf
     for t in dayTolerance:
         if dayTolerance[t] >= 0:
-            allTolerances.append(t)
+            foundPositiveTolerance = True
+        if dayTolerance[t] < minTolerance and dayTolerance[t] >= 0:
+            minTolerance = dayTolerance[t]
+            startOfWeek = t
 
-    if len(allTolerances) != 0:
-        return dayTolerance[min(allTolerances)]
+    if foundPositiveTolerance:
+        return startOfWeek
     else:
         # WE ARE IN A NEW MONTH AND THE START OF THE WEEK IS STILL IN THE PREVIOUS MONTH
         return getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=True)

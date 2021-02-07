@@ -112,6 +112,9 @@
     <button  id="logoutBtn" class="btn btn-primary">Logout</button>
 </form>
 
+<!-- ALERT MESSAGE -->
+<div id="alertMessage" class="alert alert-primary" style="display: none;" role="alert"></div>
+
 <div class="container-1">
     <center>
         <div id="mainHeading">Account</div>
@@ -125,14 +128,14 @@
         
         <div class="field-container">
             <!-- USERNAME -->
-            <div class="field-item">Username: <span id="userNameField" class="userInfo" style=""></span>
+            <div class="field-item">Username: <span id="userNameField" class="userInfo"></span>
                 <a href="#editUserNameModal" id="editUserNameBtn" class="edit" data-toggle="modal">
                     <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
                 </a>
             </div>
             <hr>
             <!-- EMAIL -->
-            <div class="field-item">Email: <span id="emailField" class="userInfo" style=""></span>
+            <div class="field-item">Email: <span id="emailField" class="userInfo"></span>
                 <a href="#editEmailModal" id="editEmailBtn" class="edit" data-toggle="modal">
                     <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
                 </a>
@@ -282,10 +285,12 @@
 
 {% block script %}
 <script>
+    var alertBox = document.getElementById('alertMessage')
+
     document.addEventListener('DOMContentLoaded', () => {
         populateFields()
     })
-
+    // POPULATE FIELDS
     function populateFields() {
         const request = new XMLHttpRequest()
         request.open('GET', '/getUserInfo')
@@ -318,8 +323,7 @@
         request.send()
     }
 
-    // VALIDATE MODAL FORMS
-
+    //                                       VALIDATE MODAL FORMS
     // USERNAME FORM
     document.querySelector('#editUsernameForm').onkeyup = () => {
         let newUserNameField = document.forms['editUsernameForm']['newUsername'].value
@@ -385,5 +389,88 @@
 
     }
     
+    //                                       UPDATE USER ACCOUNT
+    // UPDATE USERNAME
+    document.querySelector('#saveUsernameBtn').onclick = () => {
+        let newUsername = document.forms['editUsernameForm']['newUsername']
+        // GET USER ID
+        const request = new XMLHttpRequest()
+        request.open('GET', '/getUserInfo')
+        request.onload = () => {
+            const data = JSON.parse(request.responseText)
+            let userID = data['id']
+            // SEND REQUEST TO UPDATE USERNAME
+            const u_request = new XMLHttpRequest()
+            u_request.open('POST', `/updateUserInfo/${userID}/userName/${newUsername.value}`)
+            u_request.onload = () => {
+                document.querySelector('#welcomeHeading').textContent = `Welcome ${newUsername.value}`
+                newUsername.value = ""
+                document.querySelector('#cancelUsernameBtn').click()
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                showAlert("Username Changed")
+            }
+            u_request.send()
+        }
+        request.send()
+    }
+    // UPDATE USER EMAIL
+    document.querySelector('#saveEmailBtn').onclick = () => {
+        let newUserEmail = document.forms['editEmailForm']['newEmail']
+        // GET USER ID
+        const request = new XMLHttpRequest()
+        request.open('GET', '/getUserInfo')
+        request.onload = () => {
+            const data = JSON.parse(request.responseText)
+            const userID = data['id']
+            // SEND REQUEST TO UPDATE EMAIL
+            const e_request = new XMLHttpRequest()
+            e_request.open('POST', `/updateUserInfo/${userID}/userEmail/${newUserEmail.value}`)
+            e_request.onload = () => {
+                document.querySelector('#emailField').textContent = newUserEmail.value
+                newUserEmail.value = ""
+                document.querySelector('#cancelEmailBtn').click()
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                showAlert('Email Changed')
+            }
+            e_request.send()
+        }
+        request.send()
+    }
+    // UPDATE USER PHONE NUMBER
+    document.querySelector('#savePhoneNumberBtn').onclick = () => {
+        let newUserPhoneNumber = document.forms['editPhoneNumberForm']['newPhoneNumber']
+        //  GET USER ID
+        const request = new XMLHttpRequest()
+        request.open('GET', '/getUserInfo')
+        request.onload = () => {
+            const data = JSON.parse(request.responseText)
+            const userID = data['id']
+            // SEND REQUEST TO UPDATE USER PHONE NUMBER
+            const p_request = new XMLHttpRequest()
+            p_request.open('POST', `/updateUserInfo/${userID}/userPhoneNumber/${newUserPhoneNumber.value}`)
+            p_request.onload = () => {
+                document.querySelector('#phoneNumberField').textContent = newUserPhoneNumber.value
+                newUserPhoneNumber.value = ""
+                document.querySelector('#cancelPhoneNumberBtn').click()
+                window.scrollTo({ top: 0, behavior: 'smooth' })
+                showAlert('Phone Number Changed')
+            }
+            p_request.send()
+        }
+        request.send()
+    }
+
+
+     // SHOW ALERT
+     function showAlert(message) {
+        alertBox.textContent = message
+        alertBox.style.display = "block"
+        setTimeout(removeAlert, 4000)
+    }
+    function removeAlert() {
+        alertBox.style.display = "none"
+    }
+
+
 </script>
 {% endblock %}
