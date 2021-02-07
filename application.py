@@ -2,6 +2,7 @@ import os
 import requests
 import hashlib
 from flask import Flask, render_template, request, redirect, jsonify
+from dotenv import load_dotenv
 from flask_session import Session
 from sqlalchemy import and_
 from models import *
@@ -13,6 +14,7 @@ from math import inf
 
 
 # Check for environment variable
+load_dotenv()
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
 
@@ -113,7 +115,7 @@ def updateUserInfo(userID, infoToUpdate, newInfo):
         user.email = newInfo
         db.session.commit()
     elif infoToUpdate == 'userPhoneNumber':
-        user.phone_number = infoToUpdate
+        user.phone_number = newInfo
         db.session.commit()
     return ''
 
