@@ -31,6 +31,7 @@
     }
     #setSpendingLimitBtn {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        color: white;
         border: none;
         border-radius: 10px;
         background-color: blueviolet;
@@ -51,6 +52,10 @@
         border: none;
         border-radius: 10px;
         background-color: blueviolet;
+    }
+    #expenseLimitModalSelect {
+        margin: auto;
+        width: 86%;
     }
     #saveEditBtn {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -88,6 +93,21 @@
         color: red;
 
     }
+    #expenseLimitModalLabel {
+        margin-left: 28px;
+    }
+    #expenseLimtSetText {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size: 18px;
+        font-weight: 500;
+        margin-left: 28px;
+        margin-bottom: 10px;
+        color: goldenrod;
+    }
+    /* #setExpenseLimitModal {
+        margin: auto;
+        width: 90%;
+    } */
     #closeBtn {
         position: absolute;
         top: -2%;
@@ -96,15 +116,12 @@
         transform: rotate(45deg);
         cursor: pointer;
     }
-    
     .table_data {
-        /* font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif; */
         font-weight: 600;
     }
     .container-1 {
         display: flex;
         flex-wrap: wrap;
-        /* height: 850px; */
         min-height: 850px;
     }
     .add-expense-container {
@@ -168,6 +185,7 @@
     }
     @media only screen and (max-width: 700px) {
         #mainTable {
+            /* MAKE TABLE SCROLLABLE */
             display: block;
             max-width: -moz-fit-content;
             max-width: fit-content;
@@ -176,9 +194,12 @@
             white-space: nowrap;
         }
     }
-    @media only screen and (max-width: 600px) {
-        .modal-content-expense-limit {
-            width: 60%;
+    
+    @media only screen and (max-width: 570px) {
+        #setExpenseLimitModalContainer {
+            margin: auto;
+            margin-left: 2%;
+            width: 90%;
         }
     }
     @media only screen and (max-width: 768px) {
@@ -201,9 +222,6 @@
     @media only screen and (max-width: 375px) {
         body {
             background-size: 100% 90%;
-        }
-        .modal-content-expense-limit {
-            width: 70%;
         }
     }
     @media only screen and (max-width: 360px) {
@@ -282,7 +300,9 @@
                     <option value="all-time">All Time</option>
                 </select>
                 <br>
-                <button class="btn btn-primary" id="setSpendingLimitBtn" type="button">Set Expense Limit</button>
+                <a href="#setExpenseLimitModal" class="edit" data-toggle="modal">
+                    <button class="btn btn-light" id="setSpendingLimitBtn" type="button">Set Expense Limit</button>
+                </a>
             </form>
             
         </div>
@@ -344,24 +364,47 @@
 
 </div>
 
-<!-- SET EXPENSE LIMIT POP UP -->
-<div class="bg-modal">
-    <div class="modal-content-expense-limit">
-        <div id="closeBtn">+</div>
-        <center>
-        <div id="expenseLimitText"></div>
-        <br>
-        </center>
-        <form id="limitForm">
-            <div class="form-group">
-                <label class="inputLabel" for="expense_limit">Expense Limit</label>
-                <input class="form-control" name="expenseLimit" placeholder="Amount">
-                <button id="setLimitBtn" class="btn btn-primary" type="button" disabled>Set Limit</button>
-            </div>
-        </form>
-        <div id="expenseLimitSet"></div>
+<!-- SET EXPENSE LIMIT POP MODAL -->
+<div id="setExpenseLimitModal" class="modal fade">
+    <div class="modal-dialog">
+        <div id="setExpenseLimitModalContainer" class="modal-content">
+            <form id="limitForm">
+              <!-- HEADER -->
+				<div class="modal-header">						
+					<h4 id="expenseLimitModalHeading" class="modal-title">Set Expense Limit For Today</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- BODY -->
+                <br>
+                <!-- TIME FRAME SELECT -->
+                <label id="expenseLimitModalLabel" class="inputLabel" for="expenseLimitPeriod">Time Frame</label>
+                <select id="expenseLimitModalSelect" class="form-control" name="expenseLimitPeriod">
+                    <option value="this-day">Today</option>
+                    <option value="this-week">This Week</option>
+                    <option value="this-month">This Month</option>
+                    <option value="this-year">This Year</option>
+                </select>
+
+                <!-- SET EXPENSE LIMIT FIELD -->
+				<div class="modal-body">					
+					<div class="form-group">
+						<label class="inputLabel" for="expenseLimit">Expense Limit</label>
+						<input class="form-control" name="expenseLimit" autocomplete="off" placeholder="Amount">
+                    </div>
+                </div>
+                <div id="expenseLimtSetText"></div>
+                <!-- SAVE AND CANCEL BUTTON -->
+				<div class="modal-footer">
+					<input type="button" class="btn btn-default" id="setExpenseLimitCancelBtn" data-dismiss="modal" value="Cancel">
+					<button id="setLimitBtn" class="btn btn-primary" type="button" disabled>Set Limit</button>
+				</div>
+            </form>
+        </div>
     </div>
 </div>
+
+
+
 
 <!-- Edit Modal HTML -->
 <div id="editExpenseModal" class="modal fade">
@@ -425,38 +468,26 @@
 
     var alertBox = document.getElementById('alertMessage')
 
-
-    // SHOW SET EXPENSE LIMIT POP UP
-    let bgModal = document.querySelector('.bg-modal')
-    document.querySelector('#setSpendingLimitBtn').onclick = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        let expenseLimitBeingSet = document.querySelector('#expenseLimitSelect').value
-        let expenseLimitText = document.querySelector('#expenseLimitText')
-        
-        if (expenseLimitBeingSet === 'this-day') {
-            expenseLimitText.textContent = "Set Expense Limit For Today"
+    // UPDATE EXPENSE LIMIT MODAL HEADING
+    document.querySelector('#expenseLimitModalSelect').onchange = function() {
+        let expenseLimitModalHeading = document.querySelector('#expenseLimitModalHeading')
+        if (this.value === 'this-day') {
+            console.log("Day")
+            expenseLimitModalHeading.textContent = "Set Expense Limit For Today"
         }
-        else if (expenseLimitBeingSet === 'this-week') {
-            expenseLimitText.textContent = "Set Expense Limit For This Week"
+        else if (this.value === 'this-week') {
+            expenseLimitModalHeading.textContent = "Set Expense Limit For This Week"
         }
-        else if (expenseLimitBeingSet === 'this-month') {
-            expenseLimitText.textContent = "Set Expense Limit For This Month"
+        else if (this.value === 'this-month') {
+            expenseLimitModalHeading.textContent = "Set Expense Limit For This Month"
         }
-        else if (expenseLimitBeingSet === 'this-year') {
-            expenseLimitText.textContent = "Set Expense Limit For This Year"
+        else if (this.value === 'this-year') {
+            expenseLimitModalHeading.textContent = "Set Expense Limit For This Year"
         }
-
-        document.querySelector('#addExpenseBtn').style.display = "none"
-        bgModal.style.display = "flex"
-        setTimeout(disableScroll, 1000)
-        
     }
-    // HIDE EXPENSE LIMIT POP UP
-    document.querySelector('#closeBtn').addEventListener('click', () => {
-        bgModal.style.display = "none"
-        document.querySelector('#addExpenseBtn').style.display = "inline-block"
-        enableScroll()
-    })
+
+
+
     // VALIDATE EXPENSE LIMIT INPUT
     document.querySelector('#limitForm').onkeyup = () => {
         let expenseLimit = document.forms["limitForm"]["expenseLimit"].value
@@ -469,13 +500,13 @@
     }
     // ADD THE EXPENSE LIMIT
     document.querySelector('#setLimitBtn').onclick = () => {
-        let timePeriod = document.querySelector('#expenseLimitSelect').value
-        let expenseLimtSetText = document.querySelector('#expenseLimitSet')
+        let timePeriod = document.querySelector('#expenseLimitModalSelect').value
+        let expenseLimtSetText = document.querySelector('#expenseLimtSetText')
         let expenseLimit = document.forms["limitForm"]["expenseLimit"]
 
         request = new XMLHttpRequest()
         request.open('POST', `/setExpenseLimit/${expenseLimit.value}/${timePeriod}`)
-        request.send(200)
+        request.send()
 
         let periodToDisplay
         if (timePeriod === 'this-day') {
@@ -494,6 +525,7 @@
         document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: $${expenseLimit.value}`
         expenseLimit.value = ""
         setTimeout(() => {expenseLimtSetText.textContent = ""}, 3000)
+        setTimeout(() => {document.querySelector('#setExpenseLimitCancelBtn').click()}, 3000)
     }
 
     // DOM CONTENT LOADED

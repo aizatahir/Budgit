@@ -117,6 +117,17 @@ def updateUserInfo(userID, infoToUpdate, newInfo):
     elif infoToUpdate == 'userPhoneNumber':
         user.phone_number = newInfo
         db.session.commit()
+    elif infoToUpdate == 'userPassword':
+        storedHashOfUserPassword = user.password
+        # CHECK IF THE CURRENT PASSWORD ENTERED MATCHES THE HASH STORED
+        currentUserEnteredPassword = request.form.get('currentPassword')
+        if check_password_hash(currentUserEnteredPassword, storedHashOfUserPassword):
+            # UPDATE THE USER PASSWORD
+            user.password = hash_password(newInfo)
+            db.session.commit()
+        else:
+            return '-1'
+
     return ''
 
 

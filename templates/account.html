@@ -244,37 +244,34 @@
 <div id="updatePasswordModal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="updatePasswordForm">
-              <!-- HEADER -->
-				<div class="modal-header">						
-					<h4 class="modal-title">Update Password</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                </div>
-                <!-- BODY -->
-				<div class="modal-body">	
-                    <!-- CURRENT PASSWORD -->
-					<div class="form-group">
-						<label class="inputLabel" for="currentPassword">Current Password</label>
-						<input class="form-control" name="currentPassword" type="password" autocomplete="new-password">
+            <div class="form-group">
+                <form id="updatePasswordForm">
+                <!-- HEADER -->
+                    <div class="modal-header">						
+                        <h4 class="modal-title">Update Password</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     </div>
-                    <!-- NEW PASSWORD -->
-                    <div class="form-group">
+                    <!-- BODY -->
+                    <div class="modal-body">
+                        <!-- CURRENT PASSWORD -->
+                        <label class="inputLabel" for="currentPassword">Current Password</label>
+                        <input class="form-control" name="currentPassword" type="password" autocomplete="new-password">
+                        <!-- NEW PASSWORD -->
                         <label class="inputLabel" for="newPassword">New Password</label>
                         <input class="form-control" name="newPassword" type="password" autocomplete="new-password">
-                    </div>
-                     <!-- CONFIRM PASSWORD -->
-                     <div class="form-group">
+                        <!-- CONFIRM PASSWORD -->
                         <label class="inputLabel" for="confirmPassword">Confirm Password</label>
                         <input class="form-control" name="confirmPassword" type="password" autocomplete="new-password">
-                    </div>
                         <p id="passwordErrorMessage" class="text-warning"></p>
-                </div>
-                <!-- SAVE AND CANCEL BUTTON -->
-				<div class="modal-footer">
-					<input id="cancelPasswordBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-					<button id="savePasswordBtn" class="btn btn-primary" type="button" disabled>Save</button>
-				</div>
-            </form>
+                    
+                    </div>
+                    <!-- SAVE AND CANCEL BUTTON -->
+                    <div class="modal-footer">
+                        <input id="cancelPasswordBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                        <button id="savePasswordBtn" class="btn btn-primary" type="button" disabled>Save</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -363,8 +360,12 @@
         let newPasswordField =  document.forms['updatePasswordForm']['newPassword'].value
         let confirmPasswordField = document.forms['updatePasswordForm']['confirmPassword']
         let errorMessage = document.querySelector('#passwordErrorMessage')
-        console.log(errorMessage)
         let savePasswordBtn = document.querySelector('#savePasswordBtn')
+
+        if (currentPasswordField != '' && newPasswordField != '' && confirmPasswordField.value === '') {
+                 errorMessage.textContent = ''
+                 confirmPasswordField.style.borderColor = ''
+             }
 
         if (currentPasswordField === '' || newPasswordField === '' || confirmPasswordField.value === '') {
             savePasswordBtn.disabled = true
@@ -375,7 +376,6 @@
             if ((confirmPasswordField.value != '') && confirmPasswordField.value != newPasswordField) {
                 confirmPasswordField.style.borderColor = 'red'
                 errorMessage.textContent = "Passwords don't match"
-                console.log(errorMessage)
                 savePasswordBtn.disabled = true
             }
             else {
@@ -456,6 +456,46 @@
                 showAlert('Phone Number Changed')
             }
             p_request.send()
+        }
+        request.send()
+    }
+    // UPDATE USER PASSWORD
+    document.querySelector('#savePasswordBtn').onclick = () => {
+        let currentPasswordField = document.forms['updatePasswordForm']['currentPassword']
+        let newPasswordField =  document.forms['updatePasswordForm']['newPassword']
+        let confirmPasswordField = document.forms['updatePasswordForm']['confirmPassword']
+        let errorMessage = document.querySelector('#passwordErrorMessage')
+
+        // GET USER ID
+        const request = new XMLHttpRequest()
+        request.open('GET', '/getUserInfo')
+        request.onload = () => {
+            const data = JSON.parse(request.responseText)
+            let userID = data['id']
+            // SEND REQUEST TO UPDATE PASSWORD
+            const pw_request = new XMLHttpRequest()
+            pw_request.open('POST', `/updateUserInfo/${userID}/userPassword/${newPasswordField.value}`)
+            pw_request.onload = () => {
+                const response = pw_request.responseText
+                if (response === '-1') {
+                    // THE CURRENT PASSWORD THAT WAS ENTERED IS INCORRECT
+                    errorMessage.textContent = "Current password entered is incorrect"
+                }
+                else {
+                    // CLEAR THE TEXT FIELDS
+                    currentPasswordField.value = ''
+                    newPasswordField.value = ''
+                    confirmPasswordField.value = ''
+                    document.querySelector('#cancelPasswordBtn').click()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    showAlert('Password Updated')
+                }
+            }
+            // SEND THE HASH OF THE CURRENT USER'S PASSWORD 
+            const pwdData = new FormData()
+            pwdData.append('currentPassword', currentPasswordField.value)
+
+            pw_request.send(pwdData)
         }
         request.send()
     }
