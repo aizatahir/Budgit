@@ -1,7 +1,8 @@
 import os
 import requests
 import hashlib
-from flask import Flask, render_template, request, redirect, jsonify
+from flask import Flask, session, render_template, request, redirect, jsonify
+from functools import wraps
 from dotenv import load_dotenv
 from flask_session import Session
 from sqlalchemy import and_
@@ -21,12 +22,17 @@ if not os.getenv("DATABASE_URL"):
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# app.config["SESSION_TYPE"] = "filesystem"
+app.config['SESSION_PERMANENT'] = True
+app.config["SESSION_TYPE"] = "filesystem"
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=5)
+# The maximum number of items the session stores
+# before it starts deleting some, default 500
+app.config['SESSION_FILE_THRESHOLD'] = 500
 db.init_app(app)
 
 # ENABLE SESSION
-# Session(app)
-session = {}
+Session(app)
+# session = {}
 
 class EST(tzinfo):
     def utcoffset(self, dt):
@@ -38,11 +44,22 @@ class EST(tzinfo):
     def dst(self, dt):
         return timedelta(0)
 
+# INDEX
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# LOGIN REQUIRED
+def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            return redirect("/")
+    return wrap
 
+# AUTHENTICATE
 @app.route("/authenticate", methods=["POST"])
 def authenticate():
     userName = request.form.get('userName')
@@ -59,6 +76,7 @@ def authenticate():
         session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
         session["userName"] = user.name
         session["userPassword"] = user.email
+        session["logged_in"] = True
         return redirect(f"/home/{session['user_id']}")
     else:
         # LOGIN
@@ -66,9 +84,12 @@ def authenticate():
             return render_template("index.html", alert=True, alertType="danger", alertMessage="You Are Not Registered")
         session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
         session["userName"] = user.name
+        session["logged_in"] = True
         return redirect(f"/home/{session['user_id']}")
 
+# HOME
 @app.route("/home/<string:user_id>")
+@login_required
 def home(user_id):
     limitQuery = ExpenseLimit.query.filter_by(user_id=int(user_id)).first()
     try:
@@ -90,7 +111,9 @@ def home(user_id):
     return render_template("home.html", user_id=user_id, user_expense_limits=str(expenseLimits), total_expenses=str(totalExpenses))
 
 
+# GET USER INFO
 @app.route("/getUserInfo", methods=["GET"])
+@login_required
 def getUserInfo():
     try:
         user = User.query.get(session['user_id'])
@@ -105,7 +128,9 @@ def getUserInfo():
     }
     return jsonify(userInfo)
 
+# UPDATE USER INFO
 @app.route("/updateUserInfo/<string:userID>/<string:infoToUpdate>/<string:newInfo>", methods=["POST"])
+@login_required
 def updateUserInfo(userID, infoToUpdate, newInfo):
     user = User.query.get(userID)
     if infoToUpdate == 'userName':
@@ -130,33 +155,31 @@ def updateUserInfo(userID, infoToUpdate, newInfo):
 
     return ''
 
-
+# ADD EXPENSE
 @app.route("/addExpense", methods=["POST"])
+@login_required
 def addExpend():
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
-
     expenseName = request.form.get("expenseName")
     expensePrice = request.form.get("expensePrice")
     date = now
-    print(date)
     time = getCurrentTime()
 
-    try:
-        expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"])
-    except KeyError:
-        return redirect("/")
+
+    expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"])
+
     expense.addExpense()
 
     return redirect(f"/home/{session['user_id']}")
 
+# EDIT EXPENSE
 @app.route("/editExpense/<string:item_id>/<string:newItemName>/<string:newItemPrice>", methods=["POST"])
+@login_required
 def editExpense(item_id, newItemName, newItemPrice):
-    try:
-        userID = session['user_id']
-    except KeyError:
-        return redirect("/")
+    userID = session['user_id']
+
     userExpense = Expense.query.filter(and_(Expense.user_id == userID, Expense.id == item_id)).first()
     # ITEM NAME BEING EDITED
     if newItemPrice == "Empty" and newItemName != "":
@@ -173,15 +196,18 @@ def editExpense(item_id, newItemName, newItemPrice):
         db.session.commit()
     return ""
 
+# DELETE EXPENSE
 @app.route("/deleteExpense/<string:item_id>", methods=["POST"])
+@login_required
 def deleteExpense(item_id):
     userExpense = Expense.query.get(item_id)
     db.session.delete(userExpense)
     db.session.commit()
     return ""
 
-
+# GET EXPENSES
 @app.route("/getExpenses/<string:period>", methods=["GET"])
+@login_required
 def getExpenses(period):
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
@@ -212,37 +238,38 @@ def getExpenses(period):
 
     return jsonify(userExpenses)
 
+# GET TOTAL EXPENSE
 @app.route("/getTotalExpense/<string:period>", methods=["GET"])
+@login_required
 def getTotalExpense(period):
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
     totalExpense = 0
-    try:
-        if period == 'all-time':
-            expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
-        elif period == 'this-day':
-            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
-        elif period == 'this-week':
-            thisWeek = getThisWeekForQuery()
-            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
-        elif period == 'this-month':
-            thisMonth, thisYear = now.split()[0], now.split()[2]
-            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
-        elif period == 'this-year':
-            thisYear = now.split()[2]
-            expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
-    except KeyError:
-        return redirect("/")
+
+    if period == 'all-time':
+        expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+    elif period == 'this-day':
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+    elif period == 'this-week':
+        thisWeek = getThisWeekForQuery()
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+    elif period == 'this-month':
+        thisMonth, thisYear = now.split()[0], now.split()[2]
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+    elif period == 'this-year':
+        thisYear = now.split()[2]
+        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+
 
     for expense in expenseQuery:
         totalExpense += expense.item_price
 
     return str(format(totalExpense, ".2f"))
 
-
-
+# SET EXPENSE LIMIT
 @app.route("/setExpenseLimit/<string:limit>/<string:period>", methods=["POST", "GET"])
+@login_required
 def setExpenseLimit(limit, period):
     day = week = month = year = None
     if period == 'this-day':
@@ -254,15 +281,16 @@ def setExpenseLimit(limit, period):
     elif period == 'this-year':
         year = limit
 
-    try:
-        expenseLimit = ExpenseLimit(day=day,week=week,month=month,year=year, user_id=session['user_id'])
-    except KeyError:
-        return redirect("/")
+
+    expenseLimit = ExpenseLimit(day=day,week=week,month=month,year=year, user_id=session['user_id'])
+
 
     expenseLimit.addExpenseLimit(limit, period)
     return ""
 
+# GET EXPENSE LIMIT
 @app.route("/getExpenseLimit/<string:userID>/<string:period>/", methods=["GET"])
+@login_required
 def getExpenseLimit(userID, period):
     userID = int(userID)
     try:
@@ -279,15 +307,26 @@ def getExpenseLimit(userID, period):
 
     return str(limitQuery)
 
+# ACCOUNT
 @app.route("/account", methods=["GET"])
+@login_required
 def account():
     return render_template("account.html")
+
+# LOG OUT
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
+
 
 
 
 @app.route("/test")
 def test():
     return render_template("test.html")
+
+
 
 
 def getCurrentTime():
@@ -301,14 +340,6 @@ def getCurrentTime():
         hour -= 12
     time = f"{hour}:{minute}"
     return time
-
-
-
-@app.route("/logout")
-def logout():
-    session.clear()
-    return redirect("/")
-
 
 def getThisWeekForQuery():
     now = datetime.now(EST()).date()
@@ -324,8 +355,6 @@ def getThisWeekForQuery():
         return getWeeks(currentYear, lastMonthIndex, startOfWeek[0])
 
     return getWeeks(currentYear, monthIndex, startOfWeek)
-
-
 
 def getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=False):
     dayTolerance = {}
@@ -351,8 +380,6 @@ def getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=False):
         # WE ARE IN A NEW MONTH AND THE START OF THE WEEK IS STILL IN THE PREVIOUS MONTH
         return getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=True)
 
-
-
 def getSundays(year, currentMonthIndex: int):
     Sundays = []
     def allsundays(year, currentMonthIndex: int):
@@ -365,7 +392,6 @@ def getSundays(year, currentMonthIndex: int):
     for d in allsundays(year, currentMonthIndex):
         Sundays.append(d.day)
     return Sundays
-
 
 def getWeeks(year, monthIndex, day):
     import datetime
@@ -386,7 +412,6 @@ def getWeeks(year, monthIndex, day):
 
     return weeks[0]
 
-
 def getCurrentDay(now):
     day = now.split()[1]
     return int(day.replace(',', ''))
@@ -405,7 +430,6 @@ def getMonthIndex(now):
             return i
     return None
 
-
 def hash_password(password):
     return hashlib.sha256(str.encode(password)).hexdigest()
 
@@ -415,4 +439,4 @@ def check_password_hash(password, hash):
     return False
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
