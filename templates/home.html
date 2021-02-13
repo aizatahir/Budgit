@@ -406,7 +406,7 @@
 
 
 
-<!-- Edit Modal HTML -->
+<!-- Edit EXPENSE MODAL -->
 <div id="editExpenseModal" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
@@ -722,14 +722,17 @@
                     newPriceField.style.borderColor = "red"
                     saveEditBtn.disabled = true
                 }
-                else {
-                    saveEditBtn.disabled = false
-                }
                 if (newPriceField.value === "") {
                     newPriceField.style.borderColor = ""
                     errorMessage.textContent = ""
                 }
             }
+
+
+
+
+
+            
             // SUBMIT FORM
             saveEditBtn.onclick = () => {
                 let newNameField = document.forms["editExpenseForm"]["newName"].value

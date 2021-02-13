@@ -15,6 +15,7 @@
     #loginButton, #registerButton {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         border-radius: 10px;
+        margin-right: 5px;
     }
     #confirmPass {
         display: none;
@@ -22,7 +23,21 @@
     #Email {
         display: none;
     }
-   
+    #passwordErrorMsg, #emailErrorMsg {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 20px;
+        color: rgb(219, 14, 14);
+        margin: 5px;
+    }
+    #emailErrorMsg {
+        color: orange;
+    }
+   .button-and-error-msg-container {
+       /* border: 2px solid black; */
+       display: flex;
+       align-items: flex-start;
+       /* padding: 10px; */
+   }
     .container-1 {
         height: 650px;
     }
@@ -34,6 +49,24 @@
         .form-container {
             width: 90%;
             margin-top: 40px;
+        }
+    }
+    @media only screen and (max-width: 475px) {
+        #passwordErrorMsg, #emailErrorMsg {
+            font-size: 17px;
+        }
+    }
+    @media only screen and (max-width: 320px) {
+        #passwordErrorMsg, #emailErrorMsg {
+            font-size: 15px;
+        }
+        .form-container {
+            width: 95%;
+        }
+    }
+    @media only screen and (max-width: 280px) {
+        #passwordErrorMsg, #emailErrorMsg {
+            display: none;
         }
     }
   
@@ -82,9 +115,14 @@
                 </div>
                 <br>
                 <!-- LOGIN BTN -->
-                <button id="loginButton" class="btn btn-primary" type="button" disabled="true" onclick="removeConfirmPassword();" action="/login" >Login</button>
-                <button id="registerButton" class="btn btn-success" type="button" onclick="showConfirmPassword();">Register</button>
-                <!-- <button id="testBtn" class="btn btn-dark" type="button">Click Me</button> -->
+                <div class="button-and-error-msg-container">
+                    <button id="loginButton" class="btn btn-primary" type="button" disabled="true" onclick="removeConfirmPasswordAndEmail();">Login</button>
+                    <button id="registerButton" class="btn btn-success" type="button" onclick="showConfirmPasswordAndEmail();">Register</button>
+                     <!-- ERROR MESSAGE -->
+                    <div id="passwordErrorMsg"></div>
+                    <div id="emailErrorMsg"></div>
+                </div>
+               
             </div>
         </form>
 
@@ -117,16 +155,18 @@
 
     function validateForm() {
         // console.log("validateForm")
-
-        confirmPass =  document.getElementById("confirmPass");
+        let confirmPass =  document.getElementById("confirmPass");
        
-        loginBtn = document.getElementById("loginButton");
-        registerBtn = document.getElementById("registerButton");
+        let loginBtn = document.getElementById("loginButton");
+        let registerBtn = document.getElementById("registerButton");
 
-        nameField = document.forms["Form"]["userName"].value;
-        passwordField = document.forms["Form"]["userPassword"].value;
-        emalField = document.forms["Form"]["userEmail"].value;
-        confirmPassField = document.forms["Form"]["confirmPassword"].value;
+        let nameField = document.forms["Form"]["userName"].value;
+        let passwordField = document.forms["Form"]["userPassword"].value;
+        let emalField = document.forms["Form"]["userEmail"];
+        let confirmPassField = document.forms["Form"]["confirmPassword"].value;
+
+        let passwordErrorMsg = document.querySelector('#passwordErrorMsg');
+        let emailErrorMsg = document.querySelector('#emailErrorMsg')
 
 
          //  LOGIN BUTTON
@@ -142,8 +182,6 @@
                 loginBtn.type ="button";
             }
         }
-        
-
 
         // REGISTER BUTTON
         var byPassDisable = false
@@ -151,18 +189,36 @@
              // VALIDATE PASSWORDS
             var confirmPassInput = document.getElementById('cPass')
 
+            // Passwords don't match
             if ((passwordField != "" && confirmPassField != "") && passwordField != confirmPassField) {
+                adjustContainerWidth(screen.width)
                 confirmPassInput.style.borderColor = "red"
+                passwordErrorMsg.textContent = "Passwords don't match"
                 byPassDisable = true
                 registerBtn.disabled = true
             }
             else {
+                revertContainerWidth(screen.width)
                 confirmPassInput.style.borderColor = ""
+                passwordErrorMsg.textContent = ""
                 registerBtn.disabled = false
             }
-
-            
-            if ((nameField != "" && passwordField != "" && confirmPassField != "" && emalField != "") && !byPassDisable) {
+            // Invalid email address
+            if (!(emalField.value.includes('@'))) {
+                adjustContainerWidth(screen.width)
+                emalField.style.borderColor = "orange"
+                emailErrorMsg.textContent = "Invalid email address"
+                byPassDisable = true
+                registerBtn.disabled = true
+            }
+            else {
+                revertContainerWidth(screen.width)
+                emalField.style.borderColor = ""
+                emailErrorMsg.textContent =  ""
+                registerBtn.disabled = false
+            }
+            // Everything is validated and user is able to register
+            if ((nameField != "" && passwordField != "" && confirmPassField != "" && emalField.value != "") && !byPassDisable) {
                 registerBtn.disabled = false;
                 registerBtn.type = "submit"
             }
@@ -174,13 +230,14 @@
 
     }
     
-    function showConfirmPassword() {
+    function showConfirmPasswordAndEmail() {
         // console.log("show Confirm")
         // EXTEND THE HEIGHT
         document.querySelector('.form-container').style.height = "460px"
+        document.querySelector('#loginButton').type = "button"
 
-        confirmPass =  document.getElementById("confirmPass");
-        emalField = document.getElementById('Email');
+        let confirmPass =  document.getElementById("confirmPass");
+        let emalField = document.getElementById('Email');
 
         if (confirmPass.style.display === "") {
             loginBtn = document.getElementById("loginButton");
@@ -197,42 +254,45 @@
        
     }
 
-    function removeConfirmPassword() {
+    function removeConfirmPasswordAndEmail() {
         // console.log("remove Confirm")
         document.querySelector('.form-container').style.height = "290px"
 
-        nameField = document.forms["Form"]["userName"].value;
-        passwordField = document.forms["Form"]["userPassword"].value;
-        confirmPassField = document.forms["Form"]["confirmPassword"].value;
+        let nameField = document.forms["Form"]["userName"].value;
+        let passwordField = document.forms["Form"]["userPassword"].value;
+        let confirmPassField = document.forms["Form"]["confirmPassword"].value;
 
   
-        loginBtn = document.getElementById("loginButton");
-        registerBtn = document.getElementById("registerButton");
+        let loginBtn = document.getElementById("loginButton");
+        let registerBtn = document.getElementById("registerButton");
 
-        confirmPass =  document.getElementById("confirmPass");
-        emalField = document.getElementById("Email");
+        let confirmPass =  document.getElementById("confirmPass");
+        let emalField = document.getElementById("Email");
 
         confirmPass.style.display = "";
         emalField.style.display = ""
-
+        // loginBtn.type = "submit"
         registerBtn.disabled = false;
         
-        if (nameField != '' && passwordField != '')
+        if (nameField != '' && passwordField != '') {
             loginBtn.disabled = false
-        else
+            // loginBtn.type = "submit"
+        }
+        else {
             loginBtn.disabled = true
-        // loginBtn.disabled = true;
+        }
+            
     }
 
-    function clearAllFields() {
-
-        console.log()
-
-        // document.forms["Form"]["userName"].value = ""
-        // document.forms["Form"]["userPassword"].value = ""
-        // document.forms["Form"]["confirmPassword"].value = ""
-
-
+    function adjustContainerWidth(screenWidth) {
+        if (screenWidth < 630) {
+            document.querySelector('.form-container').style.height = "480px"
+        }
+    }
+    function revertContainerWidth(screenWidth) {
+        if (screenWidth < 630) {
+            document.querySelector('.form-container').style.height = "460px"
+        }
     }
     
 </script>

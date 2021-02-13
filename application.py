@@ -1,6 +1,9 @@
 import os
 import requests
 import hashlib
+import smtplib
+from email.message import EmailMessage
+
 from flask import Flask, session, render_template, request, redirect, jsonify
 from functools import wraps
 from dotenv import load_dotenv
@@ -14,13 +17,23 @@ from math import inf
 
 
 
-# Check for environment variable
+# Check for environment variables
 load_dotenv()
 if not os.getenv("DATABASE_URL"):
     raise RuntimeError("DATABASE_URL is not set")
 
+if not os.getenv("EMAIL_ADDRESS"):
+    raise RuntimeError("EMAIL_ADDRESS is not set")
+
+if not os.getenv("EMAIL_PASSWORD"):
+    raise RuntimeError("EMAIL_PASSWORD is not set")
+
+# EMAIL
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
+
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SESSION_PERMANENT'] = True
 app.config["SESSION_TYPE"] = "filesystem"
@@ -158,7 +171,7 @@ def updateUserInfo(userID, infoToUpdate, newInfo):
 # ADD EXPENSE
 @app.route("/addExpense", methods=["POST"])
 @login_required
-def addExpend():
+def addExpense():
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
@@ -167,12 +180,54 @@ def addExpend():
     date = now
     time = getCurrentTime()
 
-
     expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"])
-
     expense.addExpense()
+    # CHECK IF EXPENSE WENT OVER SPENDING LIMIT
+    if not userWentOverSpendingLimit():
+        return redirect(f"/home/{session['user_id']}")
+    else:
+        # SEND EMAIL TO USER INFORMING THEM THAT THEY WENT OVER THEIR SPENDING LIMIT
+        limitsWentOver = userWentOverSpendingLimit()
+        userEmailAddress = User.query.get(session['user_id']).email
+        if userEmailAddress == None:
+            return redirect(f"/home/{session['user_id']}")
+        for limit in limitsWentOver:
+            Message = f"You have just exceeded your expense limit for {limit} on the purchase: {expenseName} by ${limitsWentOver[limit]}\n\n" \
+                      f"Item Price: ${expensePrice}\n" \
+                      f"Expense Limit For {limit.title()}: ${getExpenseLimit(session['user_id'], limit.replace(' ', '-'))}\n" \
+                      f"Total Expense For {limit.title()}: ${getTotalExpense(limit.replace(' ', '-'))}"
 
-    return redirect(f"/home/{session['user_id']}")
+            sendEmail(userEmailAddress, 'Expense Limit Exceeded', Message)
+        return redirect(f"/home/{session['user_id']}")
+
+
+def userWentOverSpendingLimit():
+    exceededLimits = {}
+
+    userExpenseLimit = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+    userTotalExpenses = {
+        'this-day': float(getTotalExpense('this-day')),
+        'this-week': float(getTotalExpense('this-week')),
+        'this-month': float(getTotalExpense('this-month')),
+        'this-year': float(getTotalExpense('this-year'))
+    }
+    userExpenseLimits = {
+        'this-day': userExpenseLimit.day,
+        'this-week': userExpenseLimit.week,
+        'this-month': userExpenseLimit.month,
+        'this-year': userExpenseLimit.year
+    }
+
+    for item in userTotalExpenses:
+        if userExpenseLimits[item] == None:
+            continue
+        if userTotalExpenses[item] > userExpenseLimits[item]:
+            exceededLimits.update({item.replace('-', ' '): format(userTotalExpenses[item] - userExpenseLimits[item], ',.2f')})
+
+    if exceededLimits == {}:
+        return False
+    else:
+        return exceededLimits
 
 # EDIT EXPENSE
 @app.route("/editExpense/<string:item_id>/<string:newItemName>/<string:newItemPrice>", methods=["POST"])
@@ -312,6 +367,22 @@ def getExpenseLimit(userID, period):
 @login_required
 def account():
     return render_template("account.html")
+
+
+# SEND EMAIL
+def sendEmail(To, Subject, Message):
+    msg = EmailMessage()
+    msg["Subject"] = Subject
+    msg["From"] = EMAIL_ADDRESS
+    msg["To"] = To
+    msg.set_content(Message)
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+        # LOGIN TO THE MAIL SERVER
+        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+
+        # smtp.sendmail(SENDER, RECEIVER, msg)
+        smtp.send_message(msg)
 
 # LOG OUT
 @app.route("/logout")
