@@ -192,7 +192,7 @@ def addExpense():
         if userEmailAddress == None:
             return redirect(f"/home/{session['user_id']}")
         for limit in limitsWentOver:
-            Message = f"You have just exceeded your expense limit for {limit} on the purchase: {expenseName} by ${limitsWentOver[limit]}\n\n" \
+            Message = f"You have just exceeded your expense limit for {limit} by ${limitsWentOver[limit]} on the purchase: {expenseName}\n\n" \
                       f"Item Price: ${expensePrice}\n" \
                       f"Expense Limit For {limit.title()}: ${getExpenseLimit(session['user_id'], limit.replace(' ', '-'))}\n" \
                       f"Total Expense For {limit.title()}: ${getTotalExpense(limit.replace(' ', '-'))}"
