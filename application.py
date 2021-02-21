@@ -121,7 +121,7 @@ def home(user_id):
         "this-month": getTotalExpense("this-month"),
         "this-year": getTotalExpense("this-year")
     }
-    return render_template("home.html", user_id=user_id, user_expense_limits=str(expenseLimits), total_expenses=str(totalExpenses))
+    return render_template("home.html", user_id=user_id)
 
 
 # GET USER INFO
@@ -177,6 +177,7 @@ def addExpense():
 
     expenseName = request.form.get("expenseName")
     expensePrice = request.form.get("expensePrice")
+    autoSendEmail = request.form.get('auto-send-email')
     date = now
     time = getCurrentTime()
 
@@ -186,19 +187,22 @@ def addExpense():
     if not userWentOverSpendingLimit():
         return redirect(f"/home/{session['user_id']}")
     else:
-        # SEND EMAIL TO USER INFORMING THEM THAT THEY WENT OVER THEIR SPENDING LIMIT
-        limitsWentOver = userWentOverSpendingLimit()
-        userEmailAddress = User.query.get(session['user_id']).email
-        if userEmailAddress == None:
-            return redirect(f"/home/{session['user_id']}")
-        for limit in limitsWentOver:
-            Message = f"You have just exceeded your expense limit for {limit} by ${limitsWentOver[limit]} on the purchase: {expenseName}\n\n" \
-                      f"Item Price: ${expensePrice}\n" \
-                      f"Expense Limit For {limit.title()}: ${getExpenseLimit(session['user_id'], limit.replace(' ', '-'))}\n" \
-                      f"Total Expense For {limit.title()}: ${getTotalExpense(limit.replace(' ', '-'))}"
+        if autoSendEmail == 'enabled':
+            # SEND EMAIL TO USER INFORMING THEM THAT THEY WENT OVER THEIR SPENDING LIMIT
+            limitsWentOver = userWentOverSpendingLimit()
+            userEmailAddress = User.query.get(session['user_id']).email
+            if userEmailAddress == None:
+                return redirect(f"/home/{session['user_id']}")
+            for limit in limitsWentOver:
+                Message = f"You have just exceeded your expense limit for {limit} by ${limitsWentOver[limit]} on the purchase: {expenseName}\n\n" \
+                          f"Item Price: ${expensePrice}\n" \
+                          f"Expense Limit For {limit.title()}: ${getExpenseLimit(limit.replace(' ', '-'))}\n" \
+                          f"Total Expense For {limit.title()}: ${getTotalExpense(limit.replace(' ', '-'))}"
 
-            sendEmail(userEmailAddress, 'Expense Limit Exceeded', Message)
-        return redirect(f"/home/{session['user_id']}")
+                sendEmail(userEmailAddress, 'Expense Limit Exceeded', Message)
+            return redirect(f"/home/{session['user_id']}")
+        else:
+            return redirect(f"/home/{session['user_id']}")
 
 
 def userWentOverSpendingLimit():
@@ -315,6 +319,14 @@ def getTotalExpense(period):
     elif period == 'this-year':
         thisYear = now.split()[2]
         expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+    elif period == 'all-expenses-JSON':
+        allTotalExpenses = {
+            'this-day': getTotalExpense('this-day'),
+            'this-week': getTotalExpense('this-week'),
+            'this-month': getTotalExpense('this-month'),
+            'this-year': getTotalExpense('this-year'),
+        }
+        return jsonify(allTotalExpenses)
 
 
     for expense in expenseQuery:
@@ -344,10 +356,10 @@ def setExpenseLimit(limit, period):
     return ""
 
 # GET EXPENSE LIMIT
-@app.route("/getExpenseLimit/<string:userID>/<string:period>/", methods=["GET"])
+@app.route("/getExpenseLimit/<string:period>", methods=["GET"])
 @login_required
-def getExpenseLimit(userID, period):
-    userID = int(userID)
+def getExpenseLimit(period):
+    userID = int(session['user_id'])
     try:
         if period == 'this-day':
             limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().day
@@ -357,6 +369,19 @@ def getExpenseLimit(userID, period):
             limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().month
         elif period == 'this-year':
             limitQuery = ExpenseLimit.query.filter_by(user_id = userID).first().year
+        elif period == 'all-limits-json':
+            limitQuery = ExpenseLimit.query.filter_by(user_id= userID).first()
+            try:
+                expenseLimits = {
+                    "this-day": limitQuery.day,
+                    "this-week": limitQuery.week,
+                    "this-month": limitQuery.month,
+                    "this-year": limitQuery.year
+                }
+            except AttributeError:
+                expenseLimits = {"this-day": None, "this-week": None, "this-month": None, "this-year": None}
+            return jsonify(expenseLimits)
+
     except AttributeError:
         return ""
 

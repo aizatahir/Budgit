@@ -254,8 +254,8 @@
 <script src="{{url_for('static', filename='/scripts/home_table.js')}}"></script>
 
 <div id="userID" data-user_id="{{ user_id }}"></div>
-<div id="userExpenseLimits" data-user_expense_limits="{{ user_expense_limits }}"></div>
-<div id="totalUserExpenses" data-total_user_expenses="{{ total_expenses }}"></div>
+<div id="userExpenseLimits" data-user_expense_limits=""></div>
+<div id="totalUserExpenses" data-total_user_expenses=""></div>
 
 <!-- LOGOUT BUTTON -->
 <form action="/logout">
@@ -314,7 +314,7 @@
         <center>
             <div id="addExpenseHeading">Add Expense</div>
         </center>
-        <form id="addExpenseForm" action="/addExpense" method="POST">
+        <form id="addExpenseForm">
             <div class="form-group">
                 <!-- ITEM NAME -->
                 <label class="inputLabel" for="expenseName">Item Name</label>
@@ -325,7 +325,7 @@
                 <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense">
                 <br>
                 <div class="exceed-limit-container">
-                    <button id="addExpenseBtn" class="btn btn-primary" type="submit" disabled>Add Expense</button>
+                    <button id="addExpenseBtn" class="btn btn-primary" type="button" disabled>Add Expense</button>
                     <div id="exceedLimitText"></div>
                 </div>
                 
@@ -532,9 +532,13 @@
     document.addEventListener('DOMContentLoaded', () => {
         let expensePeriodForTable = document.getElementById('expenseTableSelect').value
         populateTable(expensePeriodForTable)
+        loadTotalUserExpenses()
+        loadUserExpenseLimits()
         displayTotalExpense('this-day')
-        displayExpenseLimit(userID, 'this-day')
+        displayExpenseLimit('this-day')
     })
+
+   
 
     // EXPENSE TABLE SELECT
     document.querySelector('#expenseTableSelect').onchange = function() {
@@ -566,6 +570,8 @@
 
     // POPULATE TABLE
     function populateTable(period) {
+        // Clear the table
+        removeAllChildNodes(document.getElementById('tableBody'))
 
         // Initialize new request
         const request = new XMLHttpRequest();
@@ -718,21 +724,20 @@
                    }
                    else {
                        errorMessage.textContent = ""
+                       newPriceField.style.borderColor = ""
                    }
-                    newPriceField.style.borderColor = "red"
+                    newPriceField.style.borderColor = "orange"
                     saveEditBtn.disabled = true
+                }
+                else {
+                    newPriceField.style.borderColor = ""
+                    errorMessage.textContent = ""
                 }
                 if (newPriceField.value === "") {
                     newPriceField.style.borderColor = ""
                     errorMessage.textContent = ""
                 }
-            }
-
-
-
-
-
-            
+            }            
             // SUBMIT FORM
             saveEditBtn.onclick = () => {
                 let newNameField = document.forms["editExpenseForm"]["newName"].value
@@ -806,9 +811,9 @@
         displayTotalExpense(timePeriod)
     }
     // DISPLAY EXPENSE LIMIT
-    function displayExpenseLimit(userID, period) {
+    function displayExpenseLimit(period) {
         request = new XMLHttpRequest()
-        request.open('GET', `/getExpenseLimit/${userID}/${period}`)
+        request.open('GET', `/getExpenseLimit/${period}`)
 
         request.onload = () => {
             const data = parseFloat(request.responseText)
@@ -820,12 +825,13 @@
             }
             
         }
-        request.send(200)
+        request.send()
     }
     document.querySelector('#expenseLimitSelect').onchange = function() {
-        displayExpenseLimit(userID, this.value)
+        displayExpenseLimit(this.value)
     }
 
+    // AVERAGE EXPENSE
     function computeAverageExpense(data) {
         let totalExpense = 0
         for (let i = 0; i < data.length; i ++) {
@@ -835,8 +841,52 @@
         return average
     }
 
-    // ADD EXPENSE FORM -onkeyup
+    // NEAR EXPENSE LIMIT
+    function userNearExpenseLimit(period) {
+        let userExpenseLimit = getUserExpenseLimit(period)
+        // let userTotalExpense = getTotalUserExpenses(period)
+
+        console.log(userExpenseLimit)
+        // console.log(userExpenseLimit)
+
+    }
+
+
+    // ADD EXPENSE FORM
+    // Validate form
     document.querySelector('#addExpenseForm').onkeyup = () => {
+        var expenseNameField = document.forms["addExpenseForm"]["expenseName"].value
+        var expensePriceField = document.forms["addExpenseForm"]["expensePrice"].value
+        var addExpenseBtn = document.querySelector('#addExpenseBtn')
+        var exceedLimitText = document.getElementById('exceedLimitText')
+
+        if (expenseNameField != '' && expensePriceField != '') {
+            addExpenseBtn.disabled = false
+        }
+        else {
+            addExpenseBtn.disabled = true
+        }
+
+        if (expensePriceField != '') {
+            if (isNaN(expensePriceField)) {
+                if (expensePriceField.includes('$')) {
+                    exceedLimitText.style.color = "orange"
+                    exceedLimitText.textContent = "Enter the price without the use of '$'"
+                }
+                document.querySelector('#itemPrice').style.borderColor = "red"
+                addExpenseBtn.disabled = true
+            }
+            else {
+                document.querySelector('#itemPrice').style.borderColor = ""
+            }
+        }
+        else {
+            document.querySelector('#itemPrice').style.borderColor = ""
+        }
+
+    }
+    // Check if expense that is about to be added will exceed a limit
+    document.querySelector('#itemPrice').onkeyup = () => {
         var expenseNameField = document.forms["addExpenseForm"]["expenseName"].value
         var expensePriceField = document.forms["addExpenseForm"]["expensePrice"].value
         var addExpenseBtn = document.querySelector('#addExpenseBtn')
@@ -857,66 +907,83 @@
         let over = false
         if ((totalDay + parseFloat(expensePriceField)) > dayLimit && dayLimit != null) {
             over = true
+            exceedLimitText.style.color = "red"
             exceedLimitText.textContent = "This expense will go over your limit for the day"
         }
         if ((totalWeek + parseFloat(expensePriceField)) > weekLimit && weekLimit != null) {
             over = true
+            exceedLimitText.style.color = "red"
             exceedLimitText.textContent = "This expense will go over your limit for the week"
         }
          if ((totalMonth + parseFloat(expensePriceField)) > monthLimit && monthLimit != null) {
-             over = true
+            over = true
+            exceedLimitText.style.color = "red"
             exceedLimitText.textContent = "This expense will go over your limit for the month"
         }
         if ((totalYear + parseFloat(expensePriceField)) > yearLimit && yearLimit != null) {
             over = true
+            exceedLimitText.style.color = "red"
             exceedLimitText.textContent = "This expense will go over your limit for the year"
         }
         if (over === false) {
             exceedLimitText.textContent = ""
         }
        
-        // VALIDATE FIELD
-        if (expenseNameField != '' && expensePriceField != '') {
-            addExpenseBtn.disabled = false
-        }
-        else {
-            addExpenseBtn.disabled = true
-        }
-
-        if (expensePriceField != '') {
-            if (isNaN(expensePriceField)) {
-            document.querySelector('#itemPrice').style.borderColor = "red"
-            addExpenseBtn.disabled = true
-            }
-            else {
-                document.querySelector('#itemPrice').style.borderColor = ""
-            }
-        }
     }
 
     function getUserExpenseLimit(period) {
-        return loadUserExpenseLimits()[period]
+        loadUserExpenseLimits()
+        let userExpenseLimits = JSON.parse(document.querySelector('#userExpenseLimits').dataset.user_expense_limits)
+        return userExpenseLimits[period]
     }
     function getTotalUserExpenses(period) {
-        return loadTotalUserExpenses()[period]
+        loadTotalUserExpenses()
+        let totalExpenses = JSON.parse(document.querySelector('#totalUserExpenses').dataset.total_user_expenses)
+        return totalExpenses[period]
     }
 
     function loadUserExpenseLimits() {
-        let expenseLimit = document.querySelector('#userExpenseLimits').dataset.user_expense_limits.replace(/'/g, '"').replace(/'/g, '"').replace(/None/g, "null")
-        expenseLimit = JSON.parse(expenseLimit)
-        return expenseLimit
+        const request = new XMLHttpRequest()
+        request.open('GET', '/getExpenseLimit/all-limits-json')
+        request.onload = () => {
+            const data = JSON.stringify(JSON.parse(request.responseText))
+            document.querySelector('#userExpenseLimits').dataset.user_expense_limits = data
+        }
+        request.send()
     }
     function loadTotalUserExpenses() {
-        let totalExpenses = document.querySelector('#totalUserExpenses').dataset.total_user_expenses.replace(/'/g, '"').replace(/'/g, '"').replace(/None/g, "null")
-        totalExpenses = JSON.parse(totalExpenses)
-        return totalExpenses
-
+        const request = new XMLHttpRequest()
+        request.open('GET', '/getTotalExpense/all-expenses-JSON')
+        request.onload = () => {
+            const data = JSON.stringify(JSON.parse(request.responseText))
+            document.querySelector('#totalUserExpenses').dataset.total_user_expenses = data
+        }
+        request.send()
     }
     
-    // ADD EXPENSE FORM - onsubmit
-    document.querySelector('#addExpenseForm').onsubmit = () => {
-        var expenseName = document.forms["addExpenseForm"]["expenseName"].value
-        showAlert(`${expenseName} Has Been Added`)
+    // ADD EXPENSE - onclick
+    document.querySelector('#addExpenseBtn').onclick = function() {
+        let expenseName = document.forms["addExpenseForm"]["expenseName"]
+        let expensePrice =  document.forms["addExpenseForm"]["expensePrice"]
+        let exceedLimitText = document.querySelector('#exceedLimitText')
+
+        const request = new XMLHttpRequest()
+        request.open('POST', '/addExpense')
+        request.onload = () => {
+            this.disabled = true
+            scrollToTop()
+            populateTable(document.querySelector('#expenseTableSelect').value)
+            showAlert(`${expenseName.value} Has Been Added`)
+            expenseName.value = ""
+            expensePrice.value = ""
+            exceedLimitText.textContent = ""
+            
+        }
+        const data = new FormData()
+        data.append('expenseName', expenseName.value)
+        data.append('expensePrice', expensePrice.value)
+        data.append('auto-send-email', localStorage.getItem('auto-send-email'))
+        request.send(data)
     }
 
     // SHOW ALERT
@@ -957,7 +1024,10 @@
 
     function enableScroll() { 
         window.onscroll = function() {}; 
-    } 
+    }
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
 
 
 </script>

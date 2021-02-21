@@ -39,11 +39,18 @@
     #changePassBtn {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
-    #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn {
+    #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #autoSendEmailsBtn {
         position: absolute;
         left: 73%;
     }
-    #passwordErrorMessage {
+    #autoSendEmailsSelect {
+        margin: auto;
+        width: 70%;
+    }
+    #sendEmailModalHeader, #sendEmailModalFooter {
+        border-color: white;
+    }
+    #passwordErrorMessage, #editEmailErrorMessage, #phoneNumberErrorMessage {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
     .field-item {
@@ -79,7 +86,7 @@
         }
     }
     @media only screen and (max-width: 420px) {
-        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #autoSendEmailsBtn {
             left: 80%;
         }
     }
@@ -98,7 +105,7 @@
         }
     }
     @media only screen and (max-width: 360px) {
-        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #autoSendEmailsBtn {
             left: 83%;
         }
     }
@@ -148,6 +155,14 @@
                 </a>
             </div>
             <hr>
+            <!-- AUTO SEND EMAILS -->
+            <div class="field-item">Send Email After Expense Limit Reached: <span id="autoSendEmailField" class="userInfo"></span>
+                <a href="#autoSendEmailsModal" id="autoSendEmailsBtn" class="edit" data-toggle="modal">
+                    <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
+                </a>
+            </div>
+            <hr>
+
             <!-- UPDATE PASSWORD -->
             <a href="#updatePasswordModal" class="edit" data-toggle="modal">
                 <button id="changePassBtn" class="btn btn-light">Update Password</button>
@@ -200,7 +215,7 @@
 						<label class="inputLabel" for="newEmail">New Email</label>
 						<input class="form-control" name="newEmail" autocomplete="off">
                     </div>
-                        <p id="errorMessage" class="text-warning"><small></small></p>
+                        <p id="editEmailErrorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE AND CANCEL BUTTON -->
 				<div class="modal-footer">
@@ -228,7 +243,7 @@
 						<label class="inputLabel" for="newPhoneNumber">New Phone Number</label>
 						<input class="form-control" name="newPhoneNumber" autocomplete="off">
                     </div>
-                        <p id="errorMessage" class="text-warning"><small></small></p>
+                        <p id="phoneNumberErrorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE AND CANCEL BUTTON -->
 				<div class="modal-footer">
@@ -239,6 +254,33 @@
         </div>
     </div>
 </div>
+
+<!-- AUTO SEND EMAILS MODAL -->
+<div id="autoSendEmailsModal" class="modal fade">
+	<div class="modal-dialog">
+		<div class="modal-content">
+            <!-- AUTO SEND EMAILS -->
+            <div id="sendEmailModalHeader" class="modal-header">						
+                <h4 class="modal-title">Auto Send Emails</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <!-- NEW OPTION -->
+            <select id="autoSendEmailsSelect" class="form-control">
+                <option id="ASMenabled" value="enabled">Enabled</option>
+                <option id="ASMdisabled" value="disabled">Disabled</option>
+            </select>
+           
+            <!-- SAVE AND CANCEL BUTTON -->
+            <div id="sendEmailModalFooter" class="modal-footer">
+                <input id="cancelAutoSendEmailBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <button id="saveAutoSendEmailBtn" class="btn btn-primary" type="button" disabled>Save</button>
+            </div>
+		
+		</div>
+	</div>
+</div>
+
+
 
 <!-- UPDATE PASSWORD MODAL -->
 <div id="updatePasswordModal" class="modal fade">
@@ -286,6 +328,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         populateFields()
+        loadSettings()
     })
     // POPULATE FIELDS
     function populateFields() {
@@ -319,8 +362,24 @@
         }
         request.send()
     }
+    // LOAD SETTINGS
+    function loadSettings() {
+        // LOAD AUTO SEND EMAILS
+        if (!(localStorage.getItem('auto-send-email'))) {
+            localStorage.setItem('auto-send-email', 'enabled')
+        }
+        document.querySelector('#autoSendEmailField').textContent = capitalize(localStorage.getItem('auto-send-email'))
+        // Set the default select option in the modal box
+        if (localStorage.getItem('auto-send-email') === 'enabled') {
+            document.querySelector('#ASMenabled').selected = true
+        }
+        if (localStorage.getItem('auto-send-email') === 'disabled') {
+            document.querySelector('#ASMdisabled').selected = true
+        }
+    }
 
-    //                                       VALIDATE MODAL FORMS
+
+    //                               VALIDATE MODAL FORMS                         //
     // USERNAME FORM
     document.querySelector('#editUsernameForm').onkeyup = () => {
         let newUserNameField = document.forms['editUsernameForm']['newUsername'].value
@@ -334,24 +393,49 @@
     }
     // EMAIL FORM
     document.querySelector('#editEmailForm').onkeyup = () => {
-        let newEmailField = document.forms['editEmailForm']['newEmail'].value
+        let newEmailField = document.forms['editEmailForm']['newEmail']
         let saveEmailBtn = document.querySelector('#saveEmailBtn')
-        if (newEmailField === '') {
+        let errorMessage = document.querySelector('#editEmailErrorMessage')
+        if (newEmailField.value === '') {
+            errorMessage.textContent = ""
             saveEmailBtn.disabled = true
+            newEmailField.style.borderColor = ""
         }
         else {
-            saveEmailBtn.disabled = false
+            if (!(newEmailField.value.includes('@')) || newEmailField.value.includes(' ')) {
+                saveEmailBtn.disabled = true
+                errorMessage.textContent = "Invalid email address"
+                newEmailField.style.borderColor = "orange"
+            }
+            else {
+                saveEmailBtn.disabled = false
+                errorMessage.textContent = ""
+                newEmailField.style.borderColor = ""
+            }
+            
         }
     }
     // PHONE NUMBER FORM
     document.querySelector('#editPhoneNumberForm').onkeyup = () => {
-        let newPhoneNumberField = document.forms['editPhoneNumberForm']['newPhoneNumber'].value
+        let newPhoneNumberField = document.forms['editPhoneNumberForm']['newPhoneNumber']
         let savePhoneNumberBtn = document.querySelector('#savePhoneNumberBtn')
-        if (newPhoneNumberField === '') {
+        let errorMessage = document.querySelector('#phoneNumberErrorMessage')
+        if (newPhoneNumberField.value === '') {
             savePhoneNumberBtn.disabled = true
+            errorMessage.textContent = ""
+            newPhoneNumberField.style.borderColor = ""
         }
         else {
-            savePhoneNumberBtn.disabled = false
+            if (isNaN(newPhoneNumberField.value)) {
+                savePhoneNumberBtn.disabled = true
+                errorMessage.textContent = "Invalid phone number"
+                newPhoneNumberField.style.borderColor = "orange"
+            }
+            else {
+                savePhoneNumberBtn.disabled = false
+                errorMessage.textContent = ""
+                newPhoneNumberField.style.borderColor = ""
+            }
         }
     }
     // PASSWORD FORM
@@ -388,7 +472,20 @@
        
 
     }
-    
+    // AUTO SEND EMAIL SELECT
+    document.querySelector('#autoSendEmailsSelect').onchange = function() {
+        let currentSetting = localStorage.getItem('auto-send-email')
+        let saveAutoSendEmailBtn = document.querySelector('#saveAutoSendEmailBtn')
+
+        if (this.value !== currentSetting) {
+            saveAutoSendEmailBtn.disabled = false
+        }
+        else {
+            saveAutoSendEmailBtn.disabled = true
+        }
+    }
+
+
     //                                       UPDATE USER ACCOUNT
     // UPDATE USERNAME
     document.querySelector('#saveUsernameBtn').onclick = () => {
@@ -499,6 +596,21 @@
         }
         request.send()
     }
+    // UPDATE AUTO SEND EMAILS
+    document.querySelector('#saveAutoSendEmailBtn').onclick = () => {
+        let newSettingValue = document.querySelector('#autoSendEmailsSelect').value
+        localStorage.setItem('auto-send-email', newSettingValue)
+        document.querySelector('#autoSendEmailField').textContent = capitalize(newSettingValue)
+        document.querySelector('#cancelAutoSendEmailBtn').click()
+        scrollToTop()
+        showAlert(`Auto Send Email ${capitalize(newSettingValue)}`)
+
+    }
+
+    function capitalize(s) {
+        if (typeof s !== 'string') return null
+        return s.charAt(0).toUpperCase() + s.slice(1)
+    }
 
 
      // SHOW ALERT
@@ -506,6 +618,9 @@
         alertBox.textContent = message
         alertBox.style.display = "block"
         setTimeout(removeAlert, 4000)
+    }
+    function scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
     }
     function removeAlert() {
         alertBox.style.display = "none"
