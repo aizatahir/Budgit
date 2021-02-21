@@ -82,9 +82,16 @@
         color: white;
         text-decoration: none;
     }
-    #expenseTableSelect {
+    #expenseTableSelectPeriod {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: 600;
+        margin-right: 1%;
         width: 125px;
+    }
+    #expenseTableSortSelectSort {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: 600;
+        width: 155px;
     }
     #exceedLimitText {
         margin-left: 10px;
@@ -104,10 +111,6 @@
         margin-bottom: 10px;
         color: goldenrod;
     }
-    /* #setExpenseLimitModal {
-        margin: auto;
-        width: 90%;
-    } */
     #closeBtn {
         position: absolute;
         top: -2%;
@@ -152,28 +155,13 @@
         min-height: 280px;
         padding: 15px;
     }
+    .expense-table-select {
+        display: flex;
+    }
     .exceed-limit-container {
         display: flex;
     }
-    .bg-modal {
-        display: none;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        min-height: 720px;
-        background-color: rgba(0, 0, 0, 0.7);
-        position: absolute;
-        top: 0;
-    }
-    .modal-content-expense-limit {
-        position: relative;
-        width: 40%;
-        height: 300px;
-        padding: 20px;
-        background-color: white;
-        border: none;
-        border-radius: 10px;
-    }
+    
     th {
         width: 1%;
     }
@@ -334,13 +322,25 @@
     </div>
     <!-- EXPENSE TABLE CONTAINER -->
     <div class="expense-table-container">
-        <select id="expenseTableSelect" class="form-control">
-            <option value="this-day">Today</option>
-            <option value="this-week">This Week</option>
-            <option value="this-month">This Month</option>
-            <option value="this-year">This Year</option>
-            <option value="all-time">All Time</option>
-        </select>
+        <!-- EXPENSE TABLE SELECT -->
+        <div class="expense-table-select">
+        <!-- Expense table select: period -->
+            <select id="expenseTableSelectPeriod" class="form-control">
+                <option value="this-day">Today</option>
+                <option value="this-week">This Week</option>
+                <option value="this-month">This Month</option>
+                <option value="this-year">This Year</option>
+                <option value="all-time">All Time</option>
+            </select>
+            <!-- Expense table select: sort -->
+            <select id="expenseTableSortSelectSort" class="form-control">
+                <option value="item_name" data-order="asc">By Name(Asc)</option>
+                <option value="item_name" data-order="desc">By Name(Desc)</option>
+                <option value="item_price" data-order="asc">By Price(Asc)</option>
+                <option value="item_price" data-order="desc">By Price(Desc)</option>
+                <option value="date">By Date</option>
+            </select>
+        </div>
         <!-- EXPENSE TABLE -->
         <center>
             <div id="expenseTableHeading">Expenses For Today</div>
@@ -530,19 +530,19 @@
 
     // DOM CONTENT LOADED
     document.addEventListener('DOMContentLoaded', () => {
-        let expensePeriodForTable = document.getElementById('expenseTableSelect').value
-        populateTable(expensePeriodForTable)
+        // let expensePeriodForTable = document.getElementById('expenseTableSelect').value
+        populateTable('this-day', 'item_name', 'asc')
         loadTotalUserExpenses()
         loadUserExpenseLimits()
         displayTotalExpense('this-day')
         displayExpenseLimit('this-day')
     })
 
-   
-
-    // EXPENSE TABLE SELECT
-    document.querySelector('#expenseTableSelect').onchange = function() {
+    // EXPENSE TABLE SELECT: Period
+    document.querySelector('#expenseTableSelectPeriod').onchange = function() {
         let timePeriod
+        let sort = document.querySelector('#expenseTableSortSelectSort').value
+        let order = document.querySelector('#expenseTableSortSelectSort').selectedOptions[0].dataset.order
         if (this.value === 'all-time') {
             timePeriod = 'All Time Expenses'
         }
@@ -565,17 +565,25 @@
         // REMOVE PREVEIOUS DATA FROM TABLE TO POPULATE IT WITH NEW ONE DATA
         removeAllChildNodes(tableBody)
 
-        populateTable(this.value)
+        populateTable(this.value, sort, order)
+    }
+    // EXPENSE TABLE SELECT: Sort
+
+    document.querySelector('#expenseTableSortSelectSort').onchange = function() {
+        let timePeriod = document.querySelector('#expenseTableSelectPeriod').value
+        let sort = this.value
+        let order = this.selectedOptions[0].dataset.order
+        populateTable(timePeriod, sort, order)
     }
 
     // POPULATE TABLE
-    function populateTable(period) {
+    function populateTable(period, sort, order) {
         // Clear the table
         removeAllChildNodes(document.getElementById('tableBody'))
 
         // Initialize new request
         const request = new XMLHttpRequest();
-        request.open('GET', `/getExpenses/${period}`);
+        request.open('GET', `/getExpenses/${period}/${sort}/${order}`);
 
         // Callback function for when request completes
         request.onload = () => {
@@ -671,6 +679,7 @@
             extraTr.className = "table-active"
 
             let averageExpenseTdHeading = document.createElement('td')
+            averageExpenseTdHeading.id = "averageExpenseHeading"
             averageExpenseTdHeading.style.fontWeight = "bold"
             averageExpenseTdHeading.textContent = "Average Expense"
 
@@ -701,6 +710,9 @@
     // TABLE BUTTONS
     document.querySelector('#mainTable').addEventListener('click', (e) =>{
         var itemID = e.target.dataset.item_id
+        let sort = document.querySelector('#expenseTableSortSelectSort').value
+        let order = document.querySelector('#expenseTableSortSelectSort').selectedOptions[0].dataset.order
+
         // EDIT BUTTON
         if (e.target.className === "material-icons" && e.target.title === "Edit") {
             // VALIDATE EDIT MODAL FORM
@@ -753,30 +765,31 @@
                 request.open('POST', `/editExpense/${itemID}/${newNameField}/${newPriceField}`)
                 request.onload = () => {
                     let tableBody = document.getElementById('tableBody')
-                    let timePeriod = document.querySelector('#expenseTableSelect').value
+                    let timePeriod = document.querySelector('#expenseTableSelectPeriod').value
                     document.forms["editExpenseForm"]["newName"].value = ""
                     document.forms["editExpenseForm"]["newPrice"].value = ""
                     removeEditExpenseModal()
                     showAlert("Expense Changed")
                     removeAllChildNodes(tableBody)
                     displayTotalExpense(timePeriod)
-                    populateTable(timePeriod)
+                    populateTable(timePeriod, sort, order)
                 }
                 request.send()
             }    
         }
+        // DELETE BUTTON
         else if (e.target.className === "material-icons" && e.target.title === "Delete") {
             document.querySelector('#deleteExpenseBtn').onclick = () => {
                 const request = new XMLHttpRequest()
                 request.open('POST', `/deleteExpense/${itemID}`)
                 request.onload = () => {
                     let tableBody = document.getElementById('tableBody')
-                    let timePeriod = document.querySelector('#expenseTableSelect').value
+                    let timePeriod = document.querySelector('#expenseTableSelectPeriod').value
                     removeDeleteExpenseModal()
                     showAlert("Expense Deleted")
                     removeAllChildNodes(tableBody)
                     displayTotalExpense(timePeriod)
-                    populateTable(timePeriod)
+                    populateTable(timePeriod, sort, order)
                 }
                 request.send()
             }
@@ -967,12 +980,15 @@
         let expensePrice =  document.forms["addExpenseForm"]["expensePrice"]
         let exceedLimitText = document.querySelector('#exceedLimitText')
 
+        let sort = document.querySelector('#expenseTableSortSelectSort').value
+        let order = document.querySelector('#expenseTableSortSelectSort').selectedOptions[0].dataset.order
+
         const request = new XMLHttpRequest()
         request.open('POST', '/addExpense')
         request.onload = () => {
             this.disabled = true
             scrollToTop()
-            populateTable(document.querySelector('#expenseTableSelect').value)
+            populateTable(document.querySelector('#expenseTableSelectPeriod').value, sort, order)
             showAlert(`${expenseName.value} Has Been Added`)
             expenseName.value = ""
             expensePrice.value = ""

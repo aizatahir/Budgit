@@ -265,26 +265,44 @@ def deleteExpense(item_id):
     return ""
 
 # GET EXPENSES
-@app.route("/getExpenses/<string:period>", methods=["GET"])
+@app.route("/getExpenses/<string:period>/<string:sort>/<string:order>", methods=["GET"])
 @login_required
-def getExpenses(period):
+def getExpenses(period, sort, order):
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
     userExpenses = []
     if period == 'all-time':
-        expenseQuery = Expense.query.filter_by(user_id = session['user_id']).all()
+        if order == 'asc':
+            # Hard Coded Way: expenseQuery = Expense.query.order_by(Expense.item_name).filter_by(user_id=session['user_id']).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter_by(user_id = session['user_id']).all()
+        else:
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter_by(user_id=session['user_id']).all()
     elif period == 'this-day':
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+        if order == 'asc':
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+        else:
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
     elif period == 'this-week':
         thisWeek = getThisWeekForQuery()
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+        if order == 'asc':
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+        else:
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
     elif period == 'this-month':
         thisMonth, thisYear = now.split()[0], now.split()[2]
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+        if order == 'asc':
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+        else:
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
     elif period == 'this-year':
         thisYear = now.split()[2]
-        expenseQuery = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+        if order == 'asc':
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+        else:
+            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+
+
 
     for i, expense in enumerate(expenseQuery):
         userExpenses.append({
