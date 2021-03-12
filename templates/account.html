@@ -8,6 +8,10 @@
         font-weight: bold;
         margin-bottom: 20px;
     }
+    #alertMessage {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: bold;
+    }
     #logoutBtn {
         position: relative;
         background-color: white;
@@ -426,7 +430,7 @@
             newPhoneNumberField.style.borderColor = ""
         }
         else {
-            if (isNaN(newPhoneNumberField.value)) {
+            if (!(isValidPhoneNumber(newPhoneNumberField.value))) {
                 savePhoneNumberBtn.disabled = true
                 errorMessage.textContent = "Invalid phone number"
                 newPhoneNumberField.style.borderColor = "orange"
@@ -446,7 +450,7 @@
         let errorMessage = document.querySelector('#passwordErrorMessage')
         let savePasswordBtn = document.querySelector('#savePasswordBtn')
 
-        if (currentPasswordField != '' && newPasswordField != '' && confirmPasswordField.value === '') {
+        if (currentPasswordField !== '' && newPasswordField !== '' && confirmPasswordField.value === '') {
                  errorMessage.textContent = ''
                  confirmPasswordField.style.borderColor = ''
              }
@@ -457,7 +461,7 @@
         else {
             savePasswordBtn.disabled = false
              // CHECKING IF PASSWORDS MATCH
-            if ((confirmPasswordField.value != '') && confirmPasswordField.value != newPasswordField) {
+            if ((confirmPasswordField.value !== '') && confirmPasswordField.value !== newPasswordField) {
                 confirmPasswordField.style.borderColor = 'red'
                 errorMessage.textContent = "Passwords don't match"
                 savePasswordBtn.disabled = true
@@ -496,15 +500,28 @@
         request.onload = () => {
             const data = JSON.parse(request.responseText)
             let userID = data['id']
+            let prevUsername = data['userName']
             // SEND REQUEST TO UPDATE USERNAME
             const u_request = new XMLHttpRequest()
-            u_request.open('POST', `/updateUserInfo/${userID}/userName/${newUsername.value}`)
+            u_request.open('POST', `/updateUserInfo/${userID}/userName/${newUsername.value}/${prevUsername}`)
             u_request.onload = () => {
-                document.querySelector('#welcomeHeading').textContent = `Welcome ${newUsername.value}`
-                newUsername.value = ""
-                document.querySelector('#cancelUsernameBtn').click()
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-                showAlert("Username Changed")
+                const response = u_request.responseText
+                if (response === '-1') {
+                    // The name entered was the same as the name already stored
+                    document.querySelector('#cancelUsernameBtn').click()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    showAlert(`Your Username is Already ${prevUsername}`, 'secondary')
+                }
+                else if (response === 'Update Successful') {
+                    // UPDATE UI
+                    document.querySelector('#welcomeHeading').textContent = `Welcome ${newUsername.value}`
+                    document.querySelector('#userNameField').textContent = newUsername.value
+                    newUsername.value = ""
+                    // EXIT MODAL BOX
+                    document.querySelector('#cancelUsernameBtn').click()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    showAlert("Username Changed")
+                }
             }
             u_request.send()
         }
@@ -519,15 +536,27 @@
         request.onload = () => {
             const data = JSON.parse(request.responseText)
             const userID = data['id']
+            const prevEmail = data['Email']
             // SEND REQUEST TO UPDATE EMAIL
             const e_request = new XMLHttpRequest()
-            e_request.open('POST', `/updateUserInfo/${userID}/userEmail/${newUserEmail.value}`)
+            e_request.open('POST', `/updateUserInfo/${userID}/userEmail/${newUserEmail.value}/${prevEmail}`)
             e_request.onload = () => {
-                document.querySelector('#emailField').textContent = newUserEmail.value
-                newUserEmail.value = ""
-                document.querySelector('#cancelEmailBtn').click()
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-                showAlert('Email Changed')
+                const response = e_request.responseText
+                if (response === '-1') {
+                    // The email entered was the same as the email stored
+                    document.querySelector('#cancelEmailBtn').click()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    showAlert(`Your Email is Already ${prevEmail}`, 'secondary')
+                }
+                else if (response === 'Update Successful') {
+                    // UPDATE UI
+                    document.querySelector('#emailField').textContent = newUserEmail.value
+                    newUserEmail.value = ""
+                    // EXIT MODAL BOX
+                    document.querySelector('#cancelEmailBtn').click()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    showAlert('Email Changed')
+                }
             }
             e_request.send()
         }
@@ -542,15 +571,27 @@
         request.onload = () => {
             const data = JSON.parse(request.responseText)
             const userID = data['id']
+            const prevPhoneNumber = data['phoneNumber']
             // SEND REQUEST TO UPDATE USER PHONE NUMBER
             const p_request = new XMLHttpRequest()
-            p_request.open('POST', `/updateUserInfo/${userID}/userPhoneNumber/${newUserPhoneNumber.value}`)
+            p_request.open('POST', `/updateUserInfo/${userID}/userPhoneNumber/${newUserPhoneNumber.value}/${prevPhoneNumber}`)
             p_request.onload = () => {
-                document.querySelector('#phoneNumberField').textContent = newUserPhoneNumber.value
-                newUserPhoneNumber.value = ""
-                document.querySelector('#cancelPhoneNumberBtn').click()
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-                showAlert('Phone Number Changed')
+                const response = p_request.responseText
+                if (response === '-1') {
+                    // The phone number entered is the same as the phone number stored
+                    document.querySelector('#cancelPhoneNumberBtn').click()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    showAlert(`Your Phone Number is Already ${prevPhoneNumber}`, 'secondary')
+                }
+                else if (response === 'Update Successful') {
+                    // UPDATE UI
+                    document.querySelector('#phoneNumberField').textContent = newUserPhoneNumber.value
+                    newUserPhoneNumber.value = ""
+                    // EXIT MODAL BOX
+                    document.querySelector('#cancelPhoneNumberBtn').click()
+                    window.scrollTo({ top: 0, behavior: 'smooth' })
+                    showAlert('Phone Number Changed')
+                }
             }
             p_request.send()
         }
@@ -569,9 +610,10 @@
         request.onload = () => {
             const data = JSON.parse(request.responseText)
             let userID = data['id']
+            let prevPassword = data['Password']
             // SEND REQUEST TO UPDATE PASSWORD
             const pw_request = new XMLHttpRequest()
-            pw_request.open('POST', `/updateUserInfo/${userID}/userPassword/${newPasswordField.value}`)
+            pw_request.open('POST', `/updateUserInfo/${userID}/userPassword/${newPasswordField.value}/${currentPasswordField.value}`)
             pw_request.onload = () => {
                 const response = pw_request.responseText
                 if (response === '-1') {
@@ -607,16 +649,38 @@
 
     }
 
+    // CAPITALIZE
     function capitalize(s) {
         if (typeof s !== 'string') return null
         return s.charAt(0).toUpperCase() + s.slice(1)
     }
+    // PHONE NUMBER IS VALID
+    function isValidPhoneNumber(number) {
+        number = number.split('-')
+        if (number.length === 3) {
+            return (isDigit(number[0]) && number[0].length === 3) && (isDigit(number[1]) && number[1].length === 3) && (isDigit(number[2]) && number[2].length === 4)
+        }
+        else {
+            return false
+        }
+    }
+    // ISDIGIT
+    function isDigit(n) {
+        return !(isNaN(n))
+    }
 
 
-     // SHOW ALERT
-     function showAlert(message) {
+    // SHOW ALERT
+    function showAlert(message, type) {
         alertBox.textContent = message
         alertBox.style.display = "block"
+
+        if (type !== undefined) {
+            alertBox.className = `alert alert-${type}`
+        }
+        else {
+            alertBox.className = 'alert alert-primary'
+        }
         setTimeout(removeAlert, 4000)
     }
     function scrollToTop() {

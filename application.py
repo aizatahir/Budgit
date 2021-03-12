@@ -2,6 +2,7 @@ import os
 import requests
 import hashlib
 import smtplib
+import json
 from email.message import EmailMessage
 
 from flask import Flask, session, render_template, request, redirect, jsonify
@@ -33,6 +34,7 @@ EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 app = Flask(__name__)
+app.config['TESTING'] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SESSION_PERMANENT'] = True
@@ -62,16 +64,27 @@ class EST(tzinfo):
 def index():
     return render_template("index.html")
 
-# LOGIN REQUIRED
-def login_required(f):
-    @wraps(f)
-    def wrap(*args, **kwargs):
-        if 'logged_in' in session:
-            return f(*args, **kwargs)
-        else:
-            return redirect("/")
-    return wrap
 
+# LOGIN REQUIRED
+if app.config['TESTING'] == False:
+    def login_required(f):
+        @wraps(f)
+        def wrap(*args, **kwargs):
+            if 'logged_in' in session:
+                if session['logged_in'] == True:
+                    return f(*args, **kwargs)
+                else:
+                    return redirect('/')
+            else:
+                return redirect('/')
+        return wrap
+else:
+    session = {}
+    def login_required(f):
+        @wraps(f)
+        def wrap(*args, **kwargs):
+            return f(*args, **kwargs)
+        return wrap
 # AUTHENTICATE
 @app.route("/authenticate", methods=["POST"])
 def authenticate():
@@ -104,23 +117,24 @@ def authenticate():
 @app.route("/home/<string:user_id>")
 @login_required
 def home(user_id):
+    # print(f"User ID: {user_id}")
     limitQuery = ExpenseLimit.query.filter_by(user_id=int(user_id)).first()
-    try:
-        expenseLimits = {
-            "this-day": limitQuery.day,
-            "this-week": limitQuery.week,
-            "this-month": limitQuery.month,
-            "this-year": limitQuery.year
-        }
-    except AttributeError:
-        expenseLimits = {"this-day":None, "this-week":None, "this-month":None, "this-year":None}
-
-    totalExpenses = {
-        "this-day": getTotalExpense("this-day"),
-        "this-week": getTotalExpense("this-week"),
-        "this-month": getTotalExpense("this-month"),
-        "this-year": getTotalExpense("this-year")
-    }
+    # try:
+    #     expenseLimits = {
+    #         "this-day": limitQuery.day,
+    #         "this-week": limitQuery.week,
+    #         "this-month": limitQuery.month,
+    #         "this-year": limitQuery.year
+    #     }
+    # except AttributeError:
+    #     expenseLimits = {"this-day":None, "this-week":None, "this-month":None, "this-year":None}
+    #
+    # totalExpenses = {
+    #     "this-day": getTotalExpense("this-day"),
+    #     "this-week": getTotalExpense("this-week"),
+    #     "this-month": getTotalExpense("this-month"),
+    #     "this-year": getTotalExpense("this-year")
+    # }
     return render_template("home.html", user_id=user_id)
 
 
@@ -128,37 +142,46 @@ def home(user_id):
 @app.route("/getUserInfo", methods=["GET"])
 @login_required
 def getUserInfo():
-    try:
-        user = User.query.get(session['user_id'])
-    except KeyError:
-        return redirect("/")
+    user = User.query.get(session['user_id'])
+
 
     userInfo = {
         'id': user.id,
         'userName': user.name,
         'Email': user.email,
-        'phoneNumber': user.phone_number
+        'phoneNumber': user.phone_number,
+        'Password': user.password
     }
     return jsonify(userInfo)
 
 # UPDATE USER INFO
-@app.route("/updateUserInfo/<string:userID>/<string:infoToUpdate>/<string:newInfo>", methods=["POST"])
+@app.route("/updateUserInfo/<string:userID>/<string:infoToUpdate>/<string:newInfo>/<string:prevInfo>", methods=["POST"])
 @login_required
-def updateUserInfo(userID, infoToUpdate, newInfo):
+def updateUserInfo(userID, infoToUpdate, newInfo, prevInfo):
     user = User.query.get(userID)
     if infoToUpdate == 'userName':
+        # CHECK IF THE UPDATED NAME IS THE SAME AS THE NAME ALREADY STORED
+        if newInfo == prevInfo:
+            return '-1'
         user.name = newInfo
         db.session.commit()
     elif infoToUpdate == 'userEmail':
+        # CHECK IF THE UPDATED EMAIL IS THE SAME AS THE EMAIL ALREADY STORED
+        if newInfo == prevInfo:
+            return '-1'
         user.email = newInfo
         db.session.commit()
     elif infoToUpdate == 'userPhoneNumber':
+        # CHECK IF THE UPDATED PHONE NUMBER IS THE SAME AS THE PHONE NUMBER ALREADY STORED
+        if newInfo == prevInfo:
+            return '-1'
         user.phone_number = newInfo
         db.session.commit()
     elif infoToUpdate == 'userPassword':
         storedHashOfUserPassword = user.password
         # CHECK IF THE CURRENT PASSWORD ENTERED MATCHES THE HASH STORED
-        currentUserEnteredPassword = request.form.get('currentPassword')
+        currentUserEnteredPassword = prevInfo
+        # print(currentUserEnteredPassword)
         if check_password_hash(currentUserEnteredPassword, storedHashOfUserPassword):
             # UPDATE THE USER PASSWORD
             user.password = hash_password(newInfo)
@@ -166,33 +189,41 @@ def updateUserInfo(userID, infoToUpdate, newInfo):
         else:
             return '-1'
 
-    return ''
+    return 'Update Successful'
 
 # ADD EXPENSE
-@app.route("/addExpense", methods=["POST"])
+@app.route("/addExpense/<string:expenseData>", methods=["POST"])
 @login_required
-def addExpense():
+def addExpense(expenseData):
+    expenseData = json.loads(expenseData)
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
-    expenseName = request.form.get("expenseName")
-    expensePrice = request.form.get("expensePrice")
-    autoSendEmail = request.form.get('auto-send-email')
-    date = now
+    expenseName = expenseData['expenseName']
+    expensePrice = expenseData['expensePrice']
+    autoSendEmail = expenseData['auto-send-email']
+
+    try:
+        date = expenseData['expenseDate']
+    except KeyError:
+        date = now
+
     time = getCurrentTime()
 
     expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"])
     expense.addExpense()
     # CHECK IF EXPENSE WENT OVER SPENDING LIMIT
     if not userWentOverSpendingLimit():
-        return redirect(f"/home/{session['user_id']}")
+        return 'Expense Added, Spending Limit Not Exceeded'
+        # return redirect(f"/home/{session['user_id']}")
     else:
         if autoSendEmail == 'enabled':
             # SEND EMAIL TO USER INFORMING THEM THAT THEY WENT OVER THEIR SPENDING LIMIT
             limitsWentOver = userWentOverSpendingLimit()
             userEmailAddress = User.query.get(session['user_id']).email
             if userEmailAddress == None:
-                return redirect(f"/home/{session['user_id']}")
+                return 'Expense Added, Spending Limit Exceeded'
+                # return redirect(f"/home/{session['user_id']}")
             for limit in limitsWentOver:
                 Message = f"You have just exceeded your expense limit for {limit} by ${limitsWentOver[limit]} on the purchase: {expenseName}\n\n" \
                           f"Item Price: ${expensePrice}\n" \
@@ -200,15 +231,19 @@ def addExpense():
                           f"Total Expense For {limit.title()}: ${getTotalExpense(limit.replace(' ', '-'))}"
 
                 sendEmail(userEmailAddress, 'Expense Limit Exceeded', Message)
-            return redirect(f"/home/{session['user_id']}")
+            return 'Expense Added, Spending Limit Exceeded'
+            # return redirect(f"/home/{session['user_id']}")
         else:
-            return redirect(f"/home/{session['user_id']}")
+            return 'Expense Added, Spending Limit Exceeded'
+            # return redirect(f"/home/{session['user_id']}")
 
 
 def userWentOverSpendingLimit():
     exceededLimits = {}
 
     userExpenseLimit = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+    if userExpenseLimit == None:
+        return False
     userTotalExpenses = {
         'this-day': float(getTotalExpense('this-day')),
         'this-week': float(getTotalExpense('this-week')),
@@ -234,40 +269,47 @@ def userWentOverSpendingLimit():
         return exceededLimits
 
 # EDIT EXPENSE
-@app.route("/editExpense/<string:item_id>/<string:newItemName>/<string:newItemPrice>", methods=["POST"])
+@app.route("/editExpense/<string:item_id>/<string:newExpenseName>/<string:newExpensePrice>", methods=["POST"])
 @login_required
-def editExpense(item_id, newItemName, newItemPrice):
+def editExpense(item_id, newExpenseName, newExpensePrice):
     userID = session['user_id']
 
     userExpense = Expense.query.filter(and_(Expense.user_id == userID, Expense.id == item_id)).first()
     # ITEM NAME BEING EDITED
-    if newItemPrice == "Empty" and newItemName != "":
-        userExpense.item_name = newItemName
+    if newExpensePrice == "Empty" and newExpenseName != "Empty":
+        userExpense.item_name = newExpenseName
         db.session.commit()
+        return 'Expense Name Successfully Changed'
     # ITEM PRICE BEING EDITED
-    if newItemName == "Empty" and newItemPrice != "":
-        userExpense.item_price = float(newItemPrice)
+    elif newExpenseName == "Empty" and newExpensePrice != "Empty":
+        userExpense.item_price = float(newExpensePrice)
         db.session.commit()
+        return 'Expense Price Successfully Changed'
     # BOTH NAME AND PRICE BEING EDITED
-    if newItemName != "Empty" and newItemPrice != "Empty":
-        userExpense.item_name = newItemName
-        userExpense.item_price = float(newItemPrice)
+    elif newExpenseName != "Empty" and newExpensePrice != "Empty":
+        userExpense.item_name = newExpenseName
+        userExpense.item_price = float(newExpensePrice)
         db.session.commit()
-    return ""
+        return 'Expense Name and Price Successfully Changed'
+    else:
+        return 'No Changes Made'
+
 
 # DELETE EXPENSE
-@app.route("/deleteExpense/<string:item_id>", methods=["POST"])
+@app.route("/deleteExpense/<expense_id>", methods=["POST"])
 @login_required
-def deleteExpense(item_id):
-    userExpense = Expense.query.get(item_id)
+def deleteExpense(expense_id):
+    userExpense = Expense.query.get(expense_id)
+    if userExpense == None:
+        return 'Expense Not Found'
     db.session.delete(userExpense)
     db.session.commit()
-    return ""
+    return 'Expense Successfully Deleted'
 
 # GET EXPENSES
-@app.route("/getExpenses/<string:period>/<string:sort>/<string:order>", methods=["GET"])
+@app.route("/getExpenses/<string:period>/<sortBy>/<string:order>", methods=["GET"])
 @login_required
-def getExpenses(period, sort, order):
+def getExpenses(period, sortBy, order):
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
@@ -275,32 +317,32 @@ def getExpenses(period, sort, order):
     if period == 'all-time':
         if order == 'asc':
             # Hard Coded Way: expenseQuery = Expense.query.order_by(Expense.item_name).filter_by(user_id=session['user_id']).all()
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter_by(user_id = session['user_id']).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter_by(user_id = session['user_id']).all()
         else:
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter_by(user_id=session['user_id']).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy).desc()).filter_by(user_id=session['user_id']).all()
     elif period == 'this-day':
         if order == 'asc':
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
         else:
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date == now)).all()
     elif period == 'this-week':
         thisWeek = getThisWeekForQuery()
         if order == 'asc':
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
         else:
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.in_(thisWeek))).all()
     elif period == 'this-month':
         thisMonth, thisYear = now.split()[0], now.split()[2]
         if order == 'asc':
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
         else:
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).all()
     elif period == 'this-year':
         thisYear = now.split()[2]
         if order == 'asc':
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort)).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
         else:
-            expenseQuery = Expense.query.order_by(getattr(Expense, sort).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
+            expenseQuery = Expense.query.order_by(getattr(Expense, sortBy).desc()).filter(and_(Expense.user_id == session['user_id'], Expense.date.like(f"%{thisYear}%"))).all()
 
 
 

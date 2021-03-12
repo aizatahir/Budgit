@@ -18,7 +18,11 @@ class User(db.Model):
     phone_number = db.Column(db.String)
 
     def addUser(self):
-        newUser = User(name=self.name, email=self.email, password=self.password)
+        if self.id == None:
+            newUser = User(name=self.name, email=self.email, password=self.password, phone_number=self.phone_number)
+        else:
+            newUser = User(id=self.id, name=self.name, email=self.email, password=self.password, phone_number=self.phone_number)
+
         # CHECK IF USER ALREADY EXIST
         checkUsers = User.query.filter(and_(User.name == self.name, User.password == self.password)).all()
         if len(checkUsers) != 0:

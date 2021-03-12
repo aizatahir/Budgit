@@ -88,7 +88,7 @@
         margin-right: 1%;
         width: 125px;
     }
-    #expenseTableSortSelectSort {
+    #expenseTableSort {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-weight: 600;
         width: 155px;
@@ -333,7 +333,7 @@
                 <option value="all-time">All Time</option>
             </select>
             <!-- Expense table select: sort -->
-            <select id="expenseTableSortSelectSort" class="form-control">
+            <select id="expenseTableSort" class="form-control">
                 <option value="item_name" data-order="asc">By Name(Asc)</option>
                 <option value="item_name" data-order="desc">By Name(Desc)</option>
                 <option value="item_price" data-order="asc">By Price(Asc)</option>
@@ -472,7 +472,6 @@
     document.querySelector('#expenseLimitModalSelect').onchange = function() {
         let expenseLimitModalHeading = document.querySelector('#expenseLimitModalHeading')
         if (this.value === 'this-day') {
-            console.log("Day")
             expenseLimitModalHeading.textContent = "Set Expense Limit For Today"
         }
         else if (this.value === 'this-week') {
@@ -493,7 +492,7 @@
         let expenseLimit = document.forms["limitForm"]["expenseLimit"].value
         let setLimitBtn = document.getElementById("setLimitBtn")
 
-        if (expenseLimit == '' || isNaN(expenseLimit))
+        if (expenseLimit === '' || isNaN(expenseLimit))
             setLimitBtn.disabled = true
         else
             setLimitBtn.disabled = false
@@ -541,8 +540,8 @@
     // EXPENSE TABLE SELECT: Period
     document.querySelector('#expenseTableSelectPeriod').onchange = function() {
         let timePeriod
-        let sort = document.querySelector('#expenseTableSortSelectSort').value
-        let order = document.querySelector('#expenseTableSortSelectSort').selectedOptions[0].dataset.order
+        let sortBy = document.querySelector('#expenseTableSort').value
+        let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
         if (this.value === 'all-time') {
             timePeriod = 'All Time Expenses'
         }
@@ -565,25 +564,25 @@
         // REMOVE PREVEIOUS DATA FROM TABLE TO POPULATE IT WITH NEW ONE DATA
         removeAllChildNodes(tableBody)
 
-        populateTable(this.value, sort, order)
+        populateTable(this.value, sortBy, order)
     }
     // EXPENSE TABLE SELECT: Sort
 
-    document.querySelector('#expenseTableSortSelectSort').onchange = function() {
+    document.querySelector('#expenseTableSort').onchange = function() {
         let timePeriod = document.querySelector('#expenseTableSelectPeriod').value
-        let sort = this.value
+        let sortBy = this.value
         let order = this.selectedOptions[0].dataset.order
-        populateTable(timePeriod, sort, order)
+        populateTable(timePeriod, sortBy, order)
     }
 
     // POPULATE TABLE
-    function populateTable(period, sort, order) {
+    function populateTable(period, sortBy, order) {
         // Clear the table
         removeAllChildNodes(document.getElementById('tableBody'))
 
         // Initialize new request
         const request = new XMLHttpRequest();
-        request.open('GET', `/getExpenses/${period}/${sort}/${order}`);
+        request.open('GET', `/getExpenses/${period}/${sortBy}/${order}`);
 
         // Callback function for when request completes
         request.onload = () => {
@@ -690,7 +689,7 @@
             // AVERAGE EXPENSE
             let averageExpenseTd = document.createElement('td')
             averageExpenseTd.className = "table_data"
-            if (data.length != 0)
+            if (data.length !== 0)
                 averageExpenseTd.textContent = "$" + computeAverageExpense(data).toFixed(2)
             else
                 averageExpenseTd.textContent = ""
@@ -710,8 +709,8 @@
     // TABLE BUTTONS
     document.querySelector('#mainTable').addEventListener('click', (e) =>{
         var itemID = e.target.dataset.item_id
-        let sort = document.querySelector('#expenseTableSortSelectSort').value
-        let order = document.querySelector('#expenseTableSortSelectSort').selectedOptions[0].dataset.order
+        let sortBy = document.querySelector('#expenseTableSort').value
+        let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
 
         // EDIT BUTTON
         if (e.target.className === "material-icons" && e.target.title === "Edit") {
@@ -766,13 +765,14 @@
                 request.onload = () => {
                     let tableBody = document.getElementById('tableBody')
                     let timePeriod = document.querySelector('#expenseTableSelectPeriod').value
+                    // UPDATE UI
                     document.forms["editExpenseForm"]["newName"].value = ""
                     document.forms["editExpenseForm"]["newPrice"].value = ""
                     removeEditExpenseModal()
                     showAlert("Expense Changed")
                     removeAllChildNodes(tableBody)
                     displayTotalExpense(timePeriod)
-                    populateTable(timePeriod, sort, order)
+                    populateTable(timePeriod, sortBy, order)
                 }
                 request.send()
             }    
@@ -789,7 +789,7 @@
                     showAlert("Expense Deleted")
                     removeAllChildNodes(tableBody)
                     displayTotalExpense(timePeriod)
-                    populateTable(timePeriod, sort, order)
+                    populateTable(timePeriod, sortBy, order)
                 }
                 request.send()
             }
@@ -812,7 +812,7 @@
         const request = new XMLHttpRequest()
         request.open('GET', `/getTotalExpense/${perioid}`)
 
-        // Callback function for when request comples
+        // Callback function for when request completes
         request.onload = () => {
             var totalExpense = parseFloat(request.responseText)
             totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
@@ -873,14 +873,14 @@
         var addExpenseBtn = document.querySelector('#addExpenseBtn')
         var exceedLimitText = document.getElementById('exceedLimitText')
 
-        if (expenseNameField != '' && expensePriceField != '') {
+        if (expenseNameField !== '' && expensePriceField !== '') {
             addExpenseBtn.disabled = false
         }
         else {
             addExpenseBtn.disabled = true
         }
 
-        if (expensePriceField != '') {
+        if (expensePriceField !== '') {
             if (isNaN(expensePriceField)) {
                 if (expensePriceField.includes('$')) {
                     exceedLimitText.style.color = "orange"
@@ -944,6 +944,7 @@
        
     }
 
+    // USER EXPENSE LIMIT AND TOTAL EXPENSE
     function getUserExpenseLimit(period) {
         loadUserExpenseLimits()
         let userExpenseLimits = JSON.parse(document.querySelector('#userExpenseLimits').dataset.user_expense_limits)
@@ -980,32 +981,39 @@
         let expensePrice =  document.forms["addExpenseForm"]["expensePrice"]
         let exceedLimitText = document.querySelector('#exceedLimitText')
 
-        let sort = document.querySelector('#expenseTableSortSelectSort').value
-        let order = document.querySelector('#expenseTableSortSelectSort').selectedOptions[0].dataset.order
+        let expenseData = {
+            'expenseName': expenseName.value,
+            'expensePrice': expensePrice.value,
+            'auto-send-email': localStorage.getItem('auto-send-email')
+
+        }
+
+        let sortBy = document.querySelector('#expenseTableSort').value
+        let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
 
         const request = new XMLHttpRequest()
-        request.open('POST', '/addExpense')
+        request.open('POST', `/addExpense/${JSON.stringify(expenseData)}`)
         request.onload = () => {
             this.disabled = true
             scrollToTop()
-            populateTable(document.querySelector('#expenseTableSelectPeriod').value, sort, order)
+            populateTable(document.querySelector('#expenseTableSelectPeriod').value, sortBy, order)
             showAlert(`${expenseName.value} Has Been Added`)
             expenseName.value = ""
             expensePrice.value = ""
             exceedLimitText.textContent = ""
             
         }
-        const data = new FormData()
-        data.append('expenseName', expenseName.value)
-        data.append('expensePrice', expensePrice.value)
-        data.append('auto-send-email', localStorage.getItem('auto-send-email'))
-        request.send(data)
+        request.send()
     }
 
     // SHOW ALERT
-    function showAlert(message) {
+    function showAlert(message, type) {
         alertBox.textContent = message
         alertBox.style.display = "block"
+
+        if (type !== undefined) {
+            alertBox.className = `alert alert ${type}`
+        }
         setTimeout(removeAlert, 4000)
     }
     function removeAlert() {
