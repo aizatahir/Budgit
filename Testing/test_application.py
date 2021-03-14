@@ -511,9 +511,9 @@ class TestApplication(unittest.TestCase):
             self.deleteAllTestExpenses()
             """ ADD EXPENSES TO TEST FOR PERIOD: all-time, this-day """
 
-            testExpensesPrices = [float(i) for i in range(5)]
+            testExpensePrices = [float(i) for i in range(5)]
 
-            for i, testPrice in enumerate(testExpensesPrices):
+            for i, testPrice in enumerate(testExpensePrices):
                 expenseData = {
                     'expenseName': f'Test Item {i}',
                     'expensePrice': testPrice,
@@ -527,15 +527,106 @@ class TestApplication(unittest.TestCase):
 
             # CHECK IF THE TOTAL EXPENSE RETURNED IS CORRECT FOR PERIOD: all-time
             Response = Tester.get(f"/getTotalExpense/all-time")
-            self.assertEqual(float(Response.data.decode('utf-8')), sum(testExpensesPrices))
+            self.assertEqual(float(Response.data.decode('utf-8')), sum(testExpensePrices))
             # CHECK IF THE TOTAL EXPENSE RETURNED IS CORRECT FOR PERIOD: this-day
             Response = Tester.get(f"/getTotalExpense/this-day")
-            self.assertEqual(float(Response.data.decode('utf-8')), sum(testExpensesPrices))
+            self.assertEqual(float(Response.data.decode('utf-8')), sum(testExpensePrices))
 
 
             self.deleteAllTestExpenses()
-            """ ADD EXPENSES TO TEST FOR PERIOD: all-time, this-day """
-            # TODO
+            """ ADD EXPENSES TO TEST FOR PERIOD: this-week """
+
+            testExpenseDates = getThisWeekForQuery()
+            testExpensePrices = [float(i) for i in range(len(testExpenseDates))]
+
+            for i, testDate in enumerate(testExpenseDates):
+                expenseData = {
+                    'expenseName': f'Test Item {i}',
+                    'expensePrice': testExpensePrices[i],
+                    'expenseDate': testDate,
+                    'expenseTime': getCurrentTime(),
+                    'user_id': session['user_id'],
+                    'auto-send-email': 'disabled'
+                }
+                Response = Tester.post(f"/addExpense/{json.dumps(expenseData)}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Added, Spending Limit Not Exceeded')
+
+            # CHECK IF THE TOTAL EXPENSE RETURNED IS CORRECT FOR PERIOD: this-week
+            Response = Tester.get(f"/getTotalExpense/this-week")
+            self.assertEqual(float(Response.data.decode('utf-8')), sum(testExpensePrices))
+
+
+            self.deleteAllTestExpenses()
+            """ ADD EXPENSES TO TEST FOR PERIOD: this-month """
+
+            Today = getCurrentDay(now)
+            thisYear = getCurrentYear(now)
+            currentMonthIndex = getMonthIndex(now) - 1
+
+            testExpenseDates = [f"{self.getMonth(currentMonthIndex + i)} {Today}, {thisYear}" for i in range(12)]
+            testExpensePrices = [float(i) for i in range(len(testExpenseDates))]
+
+            """
+            testExpensesDates is an array of dates that is generated with dates of varying months, each iteration adds
+            a date with month +1 of the previous month(adds a date with January, then February, then March, and so on..)
+            We then make a request to get the total expense of this month, testExpensesDates start populating dates
+            starting with the current month that we are in; so the first expenses that is added, is THE expense of this month.
+            So we check to see if the price of that expense matches with the first price that was populated(which is
+            the expense price of this month)
+            Same logic applies when testing for this-year, the only change is the dates that are generated are of different years
+            2021, then 2022, and so on..
+            """
+            for i, testDate in enumerate(testExpenseDates):
+                expenseData = {
+                    'expenseName': f'Test Item {i}',
+                    'expensePrice': testExpensePrices[i],
+                    'expenseDate': testDate,
+                    'expenseTime': getCurrentTime(),
+                    'user_id': session['user_id'],
+                    'auto-send-email': 'disabled'
+                }
+                Response = Tester.post(f"/addExpense/{json.dumps(expenseData)}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Added, Spending Limit Not Exceeded')
+
+            # CHECK IF THE TOTAL EXPENSE RETURNED IS CORRECT FOR PERIOD: this-month
+            Response = Tester.get(f"/getTotalExpense/this-month")
+            self.assertEqual(float(Response.data.decode('utf-8')), testExpensePrices[0])
+
+
+            self.deleteAllTestExpenses()
+            """ ADD EXPENSES TO TEST FOR PERIOD: this-year """
+
+            Today = getCurrentDay(now)
+            thisYear = int(getCurrentYear(now))
+            currentMonthIndex = getMonthIndex(now) - 1
+
+            testExpenseDates = [f"{self.getMonth(currentMonthIndex)} {Today}, {thisYear + i}" for i in range(5)]
+            testExpensePrices = [float(i) for i in range(len(testExpenseDates))]
+
+            for i, testDate in enumerate(testExpenseDates):
+                expenseData = {
+                    'expenseName': f'Test Item {i}',
+                    'expensePrice': testExpensePrices[i],
+                    'expenseDate': testDate,
+                    'expenseTime': getCurrentTime(),
+                    'user_id': session['user_id'],
+                    'auto-send-email': 'disabled'
+                }
+                Response = Tester.post(f"/addExpense/{json.dumps(expenseData)}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Added, Spending Limit Not Exceeded')
+
+            # CHECK IF THE TOTAL EXPENSE RETURNED IS CORRECT FOR PERIOD: this-month
+            Response = Tester.get(f"/getTotalExpense/this-year")
+            self.assertEqual(float(Response.data.decode('utf-8')), testExpensePrices[0])
+
+            self.deleteAllTestExpenses()
+
+
+
+
+
+
+
 
 
 
