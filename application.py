@@ -408,12 +408,10 @@ def setExpenseLimit(limit, period):
     elif period == 'this-year':
         year = limit
 
-
     expenseLimit = ExpenseLimit(day=day,week=week,month=month,year=year, user_id=session['user_id'])
 
-
     expenseLimit.addExpenseLimit(limit, period)
-    return ""
+    return 'Expense Limit Successfully Set'
 
 # GET EXPENSE LIMIT
 @app.route("/getExpenseLimit/<string:period>", methods=["GET"])
@@ -441,7 +439,8 @@ def getExpenseLimit(period):
             except AttributeError:
                 expenseLimits = {"this-day": None, "this-week": None, "this-month": None, "this-year": None}
             return jsonify(expenseLimits)
-
+        else:
+            return 'Invalid period'
     except AttributeError:
         return ""
 
@@ -539,11 +538,11 @@ def getStartOfWeek(currentYear, monthIndex, todayDay, takeLastSunday=False):
 def getSundays(year, currentMonthIndex: int):
     Sundays = []
     def allsundays(year, currentMonthIndex: int):
-       d = date(year, currentMonthIndex, 1)
-       d += timedelta(days = 6 - d.weekday())
-       while d.month == currentMonthIndex:
-          yield d
-          d += timedelta(days = 7)
+        d = date(year, currentMonthIndex, 1)
+        d += timedelta(days = 6 - d.weekday())
+        while d.month == currentMonthIndex:
+            yield d
+            d += timedelta(days = 7)
 
     for d in allsundays(year, currentMonthIndex):
         Sundays.append(d.day)

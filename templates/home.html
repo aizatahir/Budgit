@@ -71,13 +71,13 @@
         left: 94%;
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         border-radius: 5px;
-   }
-   #accountBtn {
-       position: absolute;
-       margin-top: 0;
-       top: 1%;
-       left: 86%;
-   }
+    }
+    #accountBtn {
+        position: absolute;
+        margin-top: 0;
+        top: 1%;
+        left: 86%;
+    }
     a, a:hover {
         color: white;
         text-decoration: none;
@@ -161,11 +161,11 @@
     .exceed-limit-container {
         display: flex;
     }
-    
+
     th {
         width: 1%;
     }
-    
+
     @media only screen and (max-width: 950px) {
         #logoutBtn {
             left: 3%;
@@ -182,7 +182,7 @@
             white-space: nowrap;
         }
     }
-    
+
     @media only screen and (max-width: 570px) {
         #setExpenseLimitModalContainer {
             margin: auto;
@@ -292,11 +292,11 @@
                     <button class="btn btn-light" id="setSpendingLimitBtn" type="button">Set Expense Limit</button>
                 </a>
             </form>
-            
+
         </div>
-        
+
     </div>
-    
+
     <!-- ADD EXPENSE CONTAINER -->
     <div class="add-expense-container">
         <center>
@@ -316,7 +316,7 @@
                     <button id="addExpenseBtn" class="btn btn-primary" type="button" disabled>Add Expense</button>
                     <div id="exceedLimitText"></div>
                 </div>
-                
+
             </div>
         </form>
     </div>
@@ -324,7 +324,7 @@
     <div class="expense-table-container">
         <!-- EXPENSE TABLE SELECT -->
         <div class="expense-table-select">
-        <!-- Expense table select: period -->
+            <!-- Expense table select: period -->
             <select id="expenseTableSelectPeriod" class="form-control">
                 <option value="this-day">Today</option>
                 <option value="this-week">This Week</option>
@@ -348,17 +348,17 @@
         <br>
         <table id="mainTable" class="table table-striped" style="width: 90%; margin: auto;" >
             <thead class="table-dark">
-                <tr>
-                    <th>Name</th>
-                    <th>Price</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Actions</th>
-                </tr>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Actions</th>
+            </tr>
             </thead>
             <tbody id="tableBody"></tbody>
         </table>
-        
+
 
     </div>
 
@@ -369,10 +369,10 @@
     <div class="modal-dialog">
         <div id="setExpenseLimitModalContainer" class="modal-content">
             <form id="limitForm">
-              <!-- HEADER -->
-				<div class="modal-header">						
-					<h4 id="expenseLimitModalHeading" class="modal-title">Set Expense Limit For Today</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <!-- HEADER -->
+                <div class="modal-header">
+                    <h4 id="expenseLimitModalHeading" class="modal-title">Set Expense Limit For Today</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <!-- BODY -->
                 <br>
@@ -386,18 +386,18 @@
                 </select>
 
                 <!-- SET EXPENSE LIMIT FIELD -->
-				<div class="modal-body">					
-					<div class="form-group">
-						<label class="inputLabel" for="expenseLimit">Expense Limit</label>
-						<input class="form-control" name="expenseLimit" autocomplete="off" placeholder="Amount">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="inputLabel" for="expenseLimit">Expense Limit</label>
+                        <input class="form-control" name="expenseLimit" autocomplete="off" placeholder="Amount">
                     </div>
                 </div>
                 <div id="expenseLimtSetText"></div>
                 <!-- SAVE AND CANCEL BUTTON -->
-				<div class="modal-footer">
-					<input type="button" class="btn btn-default" id="setExpenseLimitCancelBtn" data-dismiss="modal" value="Cancel">
-					<button id="setLimitBtn" class="btn btn-primary" type="button" disabled>Set Limit</button>
-				</div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" id="setExpenseLimitCancelBtn" data-dismiss="modal" value="Cancel">
+                    <button id="setLimitBtn" class="btn btn-primary" type="button" disabled>Set Limit</button>
+                </div>
             </form>
         </div>
     </div>
@@ -408,56 +408,56 @@
 
 <!-- Edit EXPENSE MODAL -->
 <div id="editExpenseModal" class="modal fade">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form id="editExpenseForm">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="editExpenseForm">
                 <!-- EDIT EXPENSE -->
-				<div class="modal-header">						
-					<h4 class="modal-title">Edit Expense</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Expense</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <!-- NEW ITEM NAME -->
-				<div class="modal-body">					
-					<div class="form-group">
-						<label class="inputLabel" for="newName">New Name</label>
-						<input class="form-control" name="newName" autocomplete="off">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="inputLabel" for="newName">New Name</label>
+                        <input class="form-control" name="newName" autocomplete="off">
                     </div>
                     <!-- NEW ITEM PRICE -->
-					<div class="form-group">
-						<label class="inputLabel" for="newPrice">New Price</label>
-						<input class="form-control" name="newPrice" autocomplete="off">
+                    <div class="form-group">
+                        <label class="inputLabel" for="newPrice">New Price</label>
+                        <input class="form-control" name="newPrice" autocomplete="off">
                     </div>
-                        <p id="errorMessage" class="text-warning"><small></small></p>
+                    <p id="errorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE BUTTON -->
-				<div class="modal-footer">
-					<input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
-					<button id="saveEditBtn" class="btn btn-primary" type="button" disabled>Save</button>
-				</div>
-			</form>
-		</div>
-	</div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
+                    <button id="saveEditBtn" class="btn btn-primary" type="button" disabled>Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 <!-- Delete Modal HTML -->
 <div id="deleteExpenseModal" class="modal fade">
-	<div class="modal-dialog">
-		<div class="modal-content">
-			<form>
-				<div class="modal-header">						
-					<h4 class="modal-title">Delete Expense</h4>
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				</div>
-				<div class="modal-body">					
-					<p>Are you sure you want to delete this expense?</p>
-					<p class="text-warning"><small>This action cannot be undone.</small></p>
-				</div>
-				<div class="modal-footer">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header">
+                    <h4 class="modal-title">Delete Expense</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this expense?</p>
+                    <p class="text-warning"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
                     <input type="button" class="btn btn-default" id="deleteExpenseCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="deleteExpenseBtn" class="btn btn-danger" type="button">Delete</button>
-				</div>
-			</form>
-		</div>
-	</div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -600,7 +600,7 @@
 
             for (let i = 0; i < data.length; i ++) {
                 let tr = document.createElement('tr')
-                
+
                 // NAME DATA
                 let tdName = document.createElement('td')
                 tdName.className = "table_data"
@@ -629,7 +629,7 @@
 
                 // ACTIONS BUTTON
                 let tdButton  = document.createElement('td')
-        
+
                 // EDIT BUTTON
                 let editBtn = document.createElement('a')
                 editBtn.href = "#editExpenseModal"
@@ -719,7 +719,7 @@
             document.querySelector('#editExpenseForm').onkeyup = () => {
                 let newNameField = document.forms["editExpenseForm"]["newName"].value
                 let newPriceField = document.forms["editExpenseForm"]["newPrice"]
-                
+
                 let errorMessage = document.querySelector('#errorMessage')
                 // INPUT FIELDS EMPTY
                 if (newNameField === "" && newPriceField.value === "") {
@@ -730,13 +730,13 @@
                 }
                 // PRICE FIELD NOT A NUMBER
                 if (isNaN(newPriceField.value)) {
-                   if (newPriceField.value.includes('$')) {
-                       errorMessage.textContent = "Enter the price without the use of '$'"
-                   }
-                   else {
-                       errorMessage.textContent = ""
-                       newPriceField.style.borderColor = ""
-                   }
+                    if (newPriceField.value.includes('$')) {
+                        errorMessage.textContent = "Enter the price without the use of '$'"
+                    }
+                    else {
+                        errorMessage.textContent = ""
+                        newPriceField.style.borderColor = ""
+                    }
                     newPriceField.style.borderColor = "orange"
                     saveEditBtn.disabled = true
                 }
@@ -748,7 +748,7 @@
                     newPriceField.style.borderColor = ""
                     errorMessage.textContent = ""
                 }
-            }            
+            }
             // SUBMIT FORM
             saveEditBtn.onclick = () => {
                 let newNameField = document.forms["editExpenseForm"]["newName"].value
@@ -775,7 +775,7 @@
                     populateTable(timePeriod, sortBy, order)
                 }
                 request.send()
-            }    
+            }
         }
         // DELETE BUTTON
         else if (e.target.className === "material-icons" && e.target.title === "Delete") {
@@ -794,7 +794,7 @@
                 request.send()
             }
         }
-       
+
     })
     //  REMOVE MODALS
     function removeEditExpenseModal() {
@@ -807,7 +807,7 @@
     // DISPLAY TOTAL EXPENSE
     function displayTotalExpense(perioid) {
         let totalExpenseLabel = document.getElementById('totalExpenseLabel')
-        
+
         // Initialize new request
         const request = new XMLHttpRequest()
         request.open('GET', `/getTotalExpense/${perioid}`)
@@ -836,7 +836,7 @@
             else {
                 document.querySelector('#expenseLimitLabel').textContent = `Spedning Limit: $${data.toFixed(2)}`
             }
-            
+
         }
         request.send()
     }
@@ -913,7 +913,7 @@
         var totalWeek = parseFloat(getTotalUserExpenses('this-week'))
         var totalMonth = parseFloat(getTotalUserExpenses('this-month'))
         var totalYear = parseFloat(getTotalUserExpenses('this-year'))
-       
+
         var exceedLimitText = document.getElementById('exceedLimitText')
 
         // CHECK IF THE EXPENSE THAT IS ABOUT TO BE ADDED WILL EXCEED THE EXPENSE LIMIT SET
@@ -928,7 +928,7 @@
             exceedLimitText.style.color = "red"
             exceedLimitText.textContent = "This expense will go over your limit for the week"
         }
-         if ((totalMonth + parseFloat(expensePriceField)) > monthLimit && monthLimit != null) {
+        if ((totalMonth + parseFloat(expensePriceField)) > monthLimit && monthLimit != null) {
             over = true
             exceedLimitText.style.color = "red"
             exceedLimitText.textContent = "This expense will go over your limit for the month"
@@ -941,7 +941,7 @@
         if (over === false) {
             exceedLimitText.textContent = ""
         }
-       
+
     }
 
     // USER EXPENSE LIMIT AND TOTAL EXPENSE
@@ -974,7 +974,7 @@
         }
         request.send()
     }
-    
+
     // ADD EXPENSE - onclick
     document.querySelector('#addExpenseBtn').onclick = function() {
         let expenseName = document.forms["addExpenseForm"]["expenseName"]
@@ -1001,7 +1001,7 @@
             expenseName.value = ""
             expensePrice.value = ""
             exceedLimitText.textContent = ""
-            
+
         }
         request.send()
     }
@@ -1034,20 +1034,20 @@
             parent.removeChild(parent.firstChild)
         }
     }
-    
-    function disableScroll() { 
+
+    function disableScroll() {
         // Get the current page scroll position 
-        scrollTop = window.pageYOffset || document.documentElement.scrollTop; 
-        scrollLeft = window.pageXOffset || document.documentElement.scrollLeft, 
+        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
 
-		// if any scroll is attempted, set this to the previous value 
-		window.onscroll = function() { 
-			window.scrollTo(scrollLeft, scrollTop); 
-		}; 
-    } 
+            // if any scroll is attempted, set this to the previous value
+            window.onscroll = function() {
+                window.scrollTo(scrollLeft, scrollTop);
+            };
+    }
 
-    function enableScroll() { 
-        window.onscroll = function() {}; 
+    function enableScroll() {
+        window.onscroll = function() {};
     }
     function scrollToTop() {
         window.scrollTo({ top: 0, behavior: 'smooth' })

@@ -39,6 +39,11 @@ class TestApplication(unittest.TestCase):
             for expense in expenseToRemove:
                 db.session.delete(expense)
                 db.session.commit()
+            # RESET EXPENSE LIMITS
+            testExpenseToRemove = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+            if testExpenseToRemove != None:
+                db.session.delete(testExpenseToRemove)
+                db.session.commit()
             # REMOVE USER
             userToRemove = User.query.get(session['user_id'])
             db.session.delete(userToRemove)
@@ -500,6 +505,7 @@ class TestApplication(unittest.TestCase):
 
                 self.deleteAllTestExpenses()
 
+    # ENSURE THAT getTotalExpense RETURNED THE CORRECT TOTAL FOR THE DIFFERENT PERIODS
     def test_getTotalExpenses(self):
         with app.app_context():
             Tester = app.test_client(self)
@@ -621,13 +627,67 @@ class TestApplication(unittest.TestCase):
 
             self.deleteAllTestExpenses()
 
+            """ TEST FOR PERIOD: all-expenses-json """
+            Response = Tester.get(f"/getTotalExpense/all-expenses-JSON")
+            testExpensesJSON = json.loads(Response.data.decode('utf-8'))
+            self.assertDictEqual(testExpensesJSON, {
+                'this-day': '0.00',
+                'this-month': '0.00',
+                'this-week': '0.00',
+                'this-year': '0.00'
+            })
+            # print(f"Response Data: {testExpensesJSON}")
+
+    def test_setExpenseLimit(self):
+        with app.app_context():
+            Tester = app.test_client(self)
 
 
+            """ 
+            Two expense limits were used for the test because setting the first limit covers the case for a user setting
+            an expense limit for the first time and the second limit covers the case of a user re-setting their expense limit
+            after already setting it for the first time
+            """
 
+            # TEST SETTING LIMITS FOR THE DAY
+            testLimitsForTheDay = ['1.0', '1.5']
+            for limit in testLimitsForTheDay:
+                # SET EXPENSE LIMIT FOR THE DAY
+                Response = Tester.post(f"/setExpenseLimit/{limit}/this-day")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Limit Successfully Set')
+                # CHECK IF EXPENSE LIMIT WAS SUCCESSFULLY SET
+                testExpenseLimit = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+                self.assertEqual(testExpenseLimit.day, float(limit))
 
+            # TEST SETTING LIMITS FOR THE WEEK
+            testLimitsForTheWeek = ['2.0', '2.5']
+            for limit in testLimitsForTheWeek:
+                # SET EXPENSE LIMIT FOR THE WEEK
+                Response = Tester.post(f"/setExpenseLimit/{limit}/this-week")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Limit Successfully Set')
+                # CHECK IF EXPENSE LIMIT WAS SUCCESSFULLY SET
+                testExpenseLimit = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+                self.assertEqual(testExpenseLimit.week, float(limit))
 
+            # TEST SETTING LIMITS FOR: THE MONTH
+            testLimitsForTheMonth = ['3.0', '3.5']
+            for limit in testLimitsForTheMonth:
+                # SET EXPENSE LIMIT FOR THE MONTH
+                Response = Tester.post(f"/setExpenseLimit/{limit}/this-month")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Limit Successfully Set')
+                # CHECK IF EXPENSE LIMIT WAS SUCCESSFULLY SET
+                testExpenseLimit = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+                self.assertEqual(testExpenseLimit.month, float(limit))
 
-
+            # TEST SETTING EXPENSE LIMITS FOR: THE YEAR
+            testLimitsForTheYear = ['4.0', '4.5']
+            for limit in testLimitsForTheYear:
+                # SET EXPENSE LIMIT FOR THE YEAR
+                Response = Tester.post(f"/setExpenseLimit/{limit}/this-year")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Limit Successfully Set')
+                # CHECK IF EXPENSE LIMIT WAS SUCCESSFULLY SET
+                testExpenseLimit = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+                self.assertEqual(testExpenseLimit.year, float(limit))
 
 
 
