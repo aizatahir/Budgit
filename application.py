@@ -395,7 +395,7 @@ def getTotalExpense(period):
     return str(format(totalExpense, ".2f"))
 
 # SET EXPENSE LIMIT
-@app.route("/setExpenseLimit/<string:limit>/<string:period>", methods=["POST", "GET"])
+@app.route("/setExpenseLimit/<string:limit>/<string:period>", methods=["POST"])
 @login_required
 def setExpenseLimit(limit, period):
     day = week = month = year = None
