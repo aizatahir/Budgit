@@ -334,12 +334,6 @@ class TestApplication(unittest.TestCase):
             now = datetime.now(EST()).date()
             now = now.strftime("%B %d, %Y")
 
-            # testLimits = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
-            # print(f"Day: {testLimits.day}")
-            # print(f"Week: {testLimits.week}")
-            # print(f"Month: {testLimits.month}")
-            # print(f"Year: {testLimits.year}")
-
             allPossibleSortBy = ['item_name', 'item_price']
 
             for sortBy in allPossibleSortBy:
@@ -701,7 +695,7 @@ class TestApplication(unittest.TestCase):
                 testExpenseLimit = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
                 self.assertEqual(testExpenseLimit.year, float(limit))
 
-
+    # ENSURE THAT getExpenseLimit CORRECTLY RETURNS THE CORRECT EXPENSE LIMIT FOR DIFFERENT PERIODS
     def test_getExpenseLimit(self):
         with app.app_context():
             Tester = app.test_client(self)
@@ -725,6 +719,107 @@ class TestApplication(unittest.TestCase):
             # CHECK IF getExpenseLimit RETURNS THE CORRECT JSON VALUE FOR ALL THE LIMITS
             Response = Tester.get(f"/getExpenseLimit/all-limits-json")
             self.assertDictEqual(json.loads(Response.data.decode('utf-8')), expenseLimitsToTest)
+
+    # ENSURE THAT WHEN AN EXPENSE IS ADDED THAT GOES OVER THE SPENDING LIMIT, IT IS NOTIFIED BY /addExpense AND
+    # userWentOverSpendingLimit RETURNS THE CORRECT VALUE WHEN A USER GOES OVER THEIR LIMIT
+    def test_userWentOverSpendingLimit(self):
+        with app.app_context():
+            now = datetime.now(EST()).date()
+            now = now.strftime("%B %d, %Y")
+
+            Tester = app.test_client(self)
+
+            # DELETE ANY PREVIOUS EXPENSES IF ANY
+            self.deleteAllTestExpenses()
+
+            """ TESTING EXPENSES THAT WILL GO OVER THE LIMIT """
+
+            exceededLimitPrices = [1.5, 2.5, 3.5, 4.5]
+            expenseLimitsToTest = {
+                'this-day': 1.0,
+                'this-week': 2.0,
+                'this-month': 3.0,
+                'this-year': 4.0
+            }
+            for limit in expenseLimitsToTest:
+                Response = Tester.post(f"/setExpenseLimit/{str(expenseLimitsToTest[limit])}/{limit}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Limit Successfully Set')
+
+            userWentOverSpendingLimitReturnValuesToExpect = {
+                0: {'this day': '0.50'},
+                1: {'this day': '1.50', 'this week': '0.50'},
+                2: {'this day': '2.50', 'this week': '1.50', 'this month': '0.50'},
+                3: {'this day': '3.50', 'this week': '2.50', 'this month': '1.50', 'this year': '0.50'},
+            }
+
+            """
+            The expenses that are going to be added in the following for loop will all have prices that will go over the expense
+            limits that were just set. Each expense is deleted right after it has been tested because every expense that is added
+            needs to be shown to go over an expense limit that was set (expense of price $1.5 needs to be shown to go over the
+            the limit for the day, expense of price $2.5 needs to be shown to go over the limit for the week, and so on...)
+            """
+            # ADD EXPENSES THAT GO OVER THE EXPENSE LIMITS
+            for i, testPrice in enumerate(exceededLimitPrices):
+                expenseData = {
+                    'expenseName': f'Test Item {i}',
+                    'expensePrice': testPrice,
+                    'expenseDate': now,
+                    'expenseTime': getCurrentTime(),
+                    'user_id': session['user_id'],
+                    'auto-send-email': 'disabled'
+                }
+                Response = Tester.post(f"/addExpense/{json.dumps(expenseData)}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Added, Spending Limit Exceeded')
+                testExpense = Expense.query.filter_by(user_id=session['user_id']).first()
+                # CHECK IF userWentOverSpendingLimit RETURNS THE CORRECT DICT
+                self.assertDictEqual(userWentOverSpendingLimit(), userWentOverSpendingLimitReturnValuesToExpect[i])
+
+                # DELETE THE EXPENSE THAT WAS JUST ADDED
+                Response = Tester.post(f"/deleteExpense/{testExpense.id}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Successfully Deleted')
+
+
+            self.deleteAllTestExpenses()
+            """ TESTING EXPENSES THAT WILL NOT GO OVER THE LIMIT """
+
+            expenseLimitsToTest = {
+                'this-day': 100,
+                'this-week': 200,
+                'this-month': 300,
+                'this-year': 400
+            }
+            for limit in expenseLimitsToTest:
+                Response = Tester.post(f"/setExpenseLimit/{str(expenseLimitsToTest[limit])}/{limit}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Limit Successfully Set')
+
+            # ADD EXPENSES THAT WILL NOT GO OVER THE EXPENSE LIMITS
+            for i, testPrice in enumerate(exceededLimitPrices):
+                expenseData = {
+                    'expenseName': f'Test Item {i}',
+                    'expensePrice': testPrice,
+                    'expenseDate': now,
+                    'expenseTime': getCurrentTime(),
+                    'user_id': session['user_id'],
+                    'auto-send-email': 'disabled'
+                }
+                Response = Tester.post(f"/addExpense/{json.dumps(expenseData)}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Added, Spending Limit Not Exceeded')
+                testExpense = Expense.query.filter_by(user_id=session['user_id']).first()
+                # CHECK IF userWentOverSpendingLimit RETURNS THE CORRECT DICT
+                self.assertEqual(userWentOverSpendingLimit(), False)
+
+                # DELETE THE EXPENSE THAT WAS JUST ADDED
+                Response = Tester.post(f"/deleteExpense/{testExpense.id}")
+                self.assertEqual(Response.data.decode('utf-8'), 'Expense Successfully Deleted')
+
+
+            """ TEST WHAT HAPPENS IF THE EXPENSE LIMITS ARE NOT SET """
+
+            # REMOVE THE EXPENSE LIMITS
+            expenseLimitsToRemove = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
+            db.session.delete(expenseLimitsToRemove)
+
+            self.assertEqual(userWentOverSpendingLimit(), False)
 
 
 
