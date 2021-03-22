@@ -34,7 +34,7 @@ EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 app = Flask(__name__)
-app.config['TESTING'] = True
+app.config['TESTING'] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config['SESSION_PERMANENT'] = True
@@ -85,33 +85,64 @@ else:
         def wrap(*args, **kwargs):
             return f(*args, **kwargs)
         return wrap
+
+@app.route('/test2', methods=['GET'])
+def newTest():
+    return redirect('/test')
 # AUTHENTICATE
-@app.route("/authenticate", methods=["POST"])
-def authenticate():
-    userName = request.form.get('userName')
-    userEmail = request.form.get('userEmail')
-    userPassword = hash_password(request.form.get('userPassword'))
-    confirmPassword = request.form.get('confirmPassword')
+@app.route("/authenticate/<string:userId>/<string:userName>/<string:userEmail>/<string:userPassword>/<string:confirmPassword>", methods=["POST"])
+def authenticate(userId, userName, userEmail, userPassword, confirmPassword):
+    if userId == 'null':
+        userId = None
+    if userEmail == 'null':
+        userEmail = None
+    if confirmPassword == 'null':
+        confirmPassword = None
 
-    user = User(name=userName, email=userEmail, password=userPassword)
+    userPassword = hash_password(userPassword)
 
-    if confirmPassword != '':
+    if userId != None:
+        user = User(id=int(userId), name=userName, email=userEmail, password=userPassword)
+    else:
+        user = User(name=userName, email=userEmail, password=userPassword)
+    # print(f'ConfirmPassword: {confirmPassword}')
+
+    if confirmPassword != None and userEmail != None:
         # REGISTER
         if user.addUser() == -1:
-            return render_template("index.html", alert=True, alertType="warning", alertMessage="You Are Already Registered")
+            dataRouteToReturn = {
+                'message': 'User Already Registered',
+                'route': None
+            }
+            return jsonify(dataRouteToReturn)
         session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
         session["userName"] = user.name
-        session["userPassword"] = user.email
         session["logged_in"] = True
-        return redirect(f"/home/{session['user_id']}")
+
+        dataRouteToReturn = {
+            'message': 'Register User',
+            'route': f"/home/{session['user_id']}"
+        }
+        return jsonify(dataRouteToReturn)
+
     else:
         # LOGIN
         if not user.validateCredentials():
-            return render_template("index.html", alert=True, alertType="danger", alertMessage="You Are Not Registered")
+            # return render_template("index.html", alert=True, alertType="danger", alertMessage="You Are Not Registered")
+            dataRouteToReturn = {
+                'message': 'User Not Registered',
+                'route': None
+            }
+            return jsonify(dataRouteToReturn)
         session["user_id"] = User.query.filter(and_(User.name == userName, User.password == userPassword)).first().id
         session["userName"] = user.name
         session["logged_in"] = True
-        return redirect(f"/home/{session['user_id']}")
+        # return redirect(f"/home/{session['user_id']}")
+        dataRouteToReturn = {
+            'message': 'Login User',
+            'route': f"/home/{session['user_id']}"
+        }
+        return jsonify(dataRouteToReturn)
 
 # HOME
 @app.route("/home/<string:user_id>")
@@ -238,6 +269,7 @@ def addExpense(expenseData):
             # return redirect(f"/home/{session['user_id']}")
 
 
+# USER WENT OVER SPENDING LIMIT
 def userWentOverSpendingLimit():
     exceededLimits = {}
 

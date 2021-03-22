@@ -78,6 +78,16 @@
         top: 1%;
         left: 86%;
     }
+    .alert-container-above-table, .alert-container-top {
+        width: 100%;
+    }
+    #alertMessage {
+        /*margin-top: 10%;*/
+        /*background-color: rgb(227, 148, 16);*/
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        color: white;
+
+    }
     a, a:hover {
         color: white;
         text-decoration: none;
@@ -121,11 +131,17 @@
     }
     .table_data {
         font-weight: 600;
+        font-size: 14px;
     }
     .container-1 {
         display: flex;
         flex-wrap: wrap;
         min-height: 850px;
+    }
+    .container-2 {
+        display: inherit;
+        width: 100%;
+        margin-bottom: 5%;
     }
     .add-expense-container {
         margin: auto;
@@ -259,67 +275,82 @@
 </center>
 
 
-<div id="alertMessage" class="alert alert-primary" style="display: none;" role="alert"></div>
+<!--<div id="alertMessage" class="alert alert-primary" style="display: none;" role="alert"></div>-->
+
+<div class="alert-container-top">
+    <!-- ALERT MESSAGE   -->
+<!--    <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>-->
+
+</div>
+
 
 <div class="container-1">
-    <!-- EXPENSE TRACKER CONTAINER -->
-    <div class="expense-tracker-conainer">
-        <center>
-            <div id="expenseInfo">Expense Info</div>
-        </center>
-        <div class="form-group">
-            <form>
-                <!-- SPENDING LIMIT FOR TIME-->
-                <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime"></label>
-                <select id="expenseLimitSelect" class="form-control" name="expensePerTime">
-                    <option value="this-day">Today</option>
-                    <option value="this-week">This Week</option>
-                    <option value="this-month">This Month</option>
-                    <option value="this-year">This Year</option>
-                </select>
-                <br>
-                <!-- TOTAL EXPENSE FOR TIME -->
-                <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $0</label>
-                <select id="totalExpenseSelect" class="form-control" name="totalExpense">
-                    <option value="this-day">Today</option>
-                    <option value="this-week">This Week</option>
-                    <option value="this-month">This Month</option>
-                    <option value="this-year">This Year</option>
-                    <option value="all-time">All Time</option>
-                </select>
-                <br>
-                <a href="#setExpenseLimitModal" class="edit" data-toggle="modal">
-                    <button class="btn btn-light" id="setSpendingLimitBtn" type="button">Set Expense Limit</button>
-                </a>
-            </form>
+    <div class="container-2">
+        <!-- EXPENSE TRACKER CONTAINER -->
+        <div class="expense-tracker-conainer">
+            <center>
+                <div id="expenseInfo">Expense Info</div>
+            </center>
+            <div class="form-group">
+                <form>
+                    <!-- SPENDING LIMIT FOR TIME-->
+                    <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime"></label>
+                    <select id="expenseLimitSelect" class="form-control" name="expensePerTime">
+                        <option value="this-day">Today</option>
+                        <option value="this-week">This Week</option>
+                        <option value="this-month">This Month</option>
+                        <option value="this-year">This Year</option>
+                    </select>
+                    <br>
+                    <!-- TOTAL EXPENSE FOR TIME -->
+                    <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $0</label>
+                    <select id="totalExpenseSelect" class="form-control" name="totalExpense">
+                        <option value="this-day">Today</option>
+                        <option value="this-week">This Week</option>
+                        <option value="this-month">This Month</option>
+                        <option value="this-year">This Year</option>
+                        <option value="all-time">All Time</option>
+                    </select>
+                    <br>
+                    <a href="#setExpenseLimitModal" class="edit" data-toggle="modal">
+                        <button class="btn btn-light" id="setSpendingLimitBtn" type="button">Set Expense Limit</button>
+                    </a>
+                </form>
 
+            </div>
+        </div>
+
+        <!-- ADD EXPENSE CONTAINER -->
+        <div class="add-expense-container">
+            <center>
+                <div id="addExpenseHeading">Add Expense</div>
+            </center>
+            <form id="addExpenseForm">
+                <div class="form-group">
+                    <!-- ITEM NAME -->
+                    <label class="inputLabel" for="expenseName">Item Name</label>
+                    <input class="form-control" name="expenseName" placeholder="Enter The Name of The Expense">
+                    <br>
+                    <!-- ITEM PRICE -->
+                    <label class="inputLabel" for="expensePrice">Item Price</label>
+                    <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense">
+                    <br>
+                    <div class="exceed-limit-container">
+                        <button id="addExpenseBtn" class="btn btn-primary" type="button" disabled>Add Expense</button>
+                        <div id="exceedLimitText"></div>
+                    </div>
+
+                </div>
+            </form>
         </div>
 
     </div>
 
-    <!-- ADD EXPENSE CONTAINER -->
-    <div class="add-expense-container">
-        <center>
-            <div id="addExpenseHeading">Add Expense</div>
-        </center>
-        <form id="addExpenseForm">
-            <div class="form-group">
-                <!-- ITEM NAME -->
-                <label class="inputLabel" for="expenseName">Item Name</label>
-                <input class="form-control" name="expenseName" placeholder="Enter The Name of The Expense">
-                <br>
-                <!-- ITEM PRICE -->
-                <label class="inputLabel" for="expensePrice">Item Price</label>
-                <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense">
-                <br>
-                <div class="exceed-limit-container">
-                    <button id="addExpenseBtn" class="btn btn-primary" type="button" disabled>Add Expense</button>
-                    <div id="exceedLimitText"></div>
-                </div>
-
-            </div>
-        </form>
+    <!-- ALERT MESSAGE   -->
+    <div class="alert-container-above-table">
+<!--        <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>-->
     </div>
+
     <!-- EXPENSE TABLE CONTAINER -->
     <div class="expense-table-container">
         <!-- EXPENSE TABLE SELECT -->
@@ -769,7 +800,7 @@
                     document.forms["editExpenseForm"]["newName"].value = ""
                     document.forms["editExpenseForm"]["newPrice"].value = ""
                     removeEditExpenseModal()
-                    showAlert("Expense Changed")
+                    showAlert("Expense Changed", 'primary', 'aboveTable')
                     removeAllChildNodes(tableBody)
                     displayTotalExpense(timePeriod)
                     populateTable(timePeriod, sortBy, order)
@@ -786,7 +817,7 @@
                     let tableBody = document.getElementById('tableBody')
                     let timePeriod = document.querySelector('#expenseTableSelectPeriod').value
                     removeDeleteExpenseModal()
-                    showAlert("Expense Deleted")
+                    showAlert("Expense Deleted", 'danger', 'aboveTable')
                     removeAllChildNodes(tableBody)
                     displayTotalExpense(timePeriod)
                     populateTable(timePeriod, sortBy, order)
@@ -805,12 +836,12 @@
     }
 
     // DISPLAY TOTAL EXPENSE
-    function displayTotalExpense(perioid) {
+    function displayTotalExpense(period) {
         let totalExpenseLabel = document.getElementById('totalExpenseLabel')
 
         // Initialize new request
         const request = new XMLHttpRequest()
-        request.open('GET', `/getTotalExpense/${perioid}`)
+        request.open('GET', `/getTotalExpense/${period}`)
 
         // Callback function for when request completes
         request.onload = () => {
@@ -997,7 +1028,7 @@
             this.disabled = true
             scrollToTop()
             populateTable(document.querySelector('#expenseTableSelectPeriod').value, sortBy, order)
-            showAlert(`${expenseName.value} Has Been Added`)
+            showAlert(`${expenseName.value} Has Been Added`, 'success', 'top')
             expenseName.value = ""
             expensePrice.value = ""
             exceedLimitText.textContent = ""
@@ -1007,14 +1038,45 @@
     }
 
     // SHOW ALERT
-    function showAlert(message, type) {
-        alertBox.textContent = message
-        alertBox.style.display = "block"
-
-        if (type !== undefined) {
-            alertBox.className = `alert alert ${type}`
+    function showAlert(alertText, type, position) {
+        if (type === undefined || !(['primary', 'warning', 'danger', 'success'].includes(type))) {
+            type = 'primary'
         }
-        setTimeout(removeAlert, 4000)
+        if (position === undefined || !(['top', 'aboveTable'].includes(position))) {
+            position = 'top'
+        }
+        // Create alert div
+        const alertDiv = document.createElement('div')
+        alertDiv.role = 'alert'
+        alertDiv.className = `alert alert-${type}`
+        alertDiv.id = 'alertMessage'
+        alertDiv.style.borderRadius = '10px'
+        alertDiv.textContent = alertText
+        // Adjust style
+        if (type === 'danger') {
+            alertDiv.style.backgroundColor = 'rgb(209,13,13)'
+        }
+        if (type === 'primary') {
+            alertDiv.style.backgroundColor = 'rgb(80, 113, 213)'
+        }
+        if (type === 'success') {
+            alertDiv.style.backgroundColor = 'rgb(76, 180, 40)'
+        }
+        if (type === 'warning') {
+            alertDiv.style.backgroundColor = 'rgb(227, 148, 16)'
+        }
+        // Adjust position
+        if (position === 'top') {
+            // Add alert to page
+            document.querySelector('.alert-container-top').appendChild(alertDiv)
+        }
+        if (position === 'aboveTable') {
+            // Add alert to page
+            document.querySelector('.alert-container-above-table').appendChild(alertDiv)
+        }
+
+        // Remove alert
+        setTimeout(()=>{alertDiv.remove()}, 3000)
     }
     function removeAlert() {
         alertBox.style.display = "none"

@@ -32,6 +32,17 @@
     #emailErrorMsg {
         color: orange;
     }
+    #alertDiv {
+        margin: auto;
+        /*width: 50%;*/
+    }
+    #alertMessage {
+        /*background-color: rgb(227, 148, 16);*/
+        font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        color: white;
+
+    }
+
    .button-and-error-msg-container {
        /* border: 2px solid black; */
        display: flex;
@@ -46,6 +57,9 @@
         height: 40px;
     }
     @media only screen and (max-width: 768px) {
+        #alertMessage {
+            width: 90%;
+        }
         .form-container {
             width: 90%;
             margin-top: 40px;
@@ -76,23 +90,18 @@
 {% block body %}
 
 <div class="container-1">
+<!--    <div class="alert alert-danger" role="alert">Alert</div>-->
         <center>
             <div id="mainHeading">BudgIt</div>
         </center>
     <!-- </div> -->
-    <!-- ALERT MESSAGE -->
-    {% if alert == True %}
-        {% set alertType = alertType %}
-        {% set alertMessage = alertMessage %}
 
-        <div id="alertMessage" class="alert alert-{{ alertType }}" role="alert">{{ alertMessage }}</div>
 
-    {% endif %}
-
-   
-    
+    <div id="alertDiv">
+<!--        <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>-->
+    </div>
     <div class="form-container">
-        <form action="/authenticate" name="Form" onkeyup="validateForm();" method="POST">
+        <form id="validateForm" name="Form" method="POST">
             <div class="form-group">
                 <!-- USERNAME -->
                 <label class="inputLabel" for="userName">Username</label>
@@ -108,15 +117,15 @@
                 <label class="inputLabel" for="userPassword">Password</label>
                 <input class="form-control" name="userPassword" placeholder="Type your password here" type="password">
                 <br>
-                <!-- CONFRIM PASSWORD -->
+                <!-- CONFIRM PASSWORD -->
                 <div id="confirmPass">
                     <label class="inputLabel" for="confirmPassword">Confirm Password</label>
                     <input id="cPass" class="form-control" name="confirmPassword" placeholder="Confirm your password" type="password">
                 </div>
                 <br>
-                <!-- LOGIN BTN -->
+                <!--  BUTTON CONTAINER -->
                 <div class="button-and-error-msg-container">
-                    <button id="loginButton" class="btn btn-primary" type="button" disabled="true" onclick="removeConfirmPasswordAndEmail();">Login</button>
+                    <button id="loginButton" class="btn btn-primary" type="button" disabled onclick="removeConfirmPasswordAndEmail();">Login</button>
                     <button id="registerButton" class="btn btn-success" type="button" onclick="showConfirmPasswordAndEmail();">Register</button>
                      <!-- ERROR MESSAGE -->
                     <div id="passwordErrorMsg"></div>
@@ -140,10 +149,14 @@
 
 <script>
 
-    window.onload = function() {
-        removeAlert()
-    };
+    // document.querySelector('#loginButton').addEventListener('click', submitForm)
+    // document.querySelector('#registerButton').addEventListener('click', submitForm)
 
+    // window.onload = function() {
+    //     removeAlert()
+    // };
+
+    // removeAlert
     function removeAlert() {
         var alertBox = document.getElementById('alertMessage')
         if (alertBox != null) {
@@ -152,45 +165,86 @@
         
     }
 
+    // Submit Form
+    function submitForm() {
+        let userName = document.forms['Form']['userName'].value
+        let userEmail = document.forms['Form']['userEmail'].value
+        let userPassword = document.forms['Form']['userPassword'].value
+        let confirmPassword = document.forms['Form']['confirmPassword'].value
 
-    function validateForm() {
+        if (userEmail === '')
+            userEmail = null
+        if (confirmPassword === '')
+            confirmPassword = null
+
+        const request = new XMLHttpRequest()
+        request.open('POST', `/authenticate/null/${userName}/${userEmail}/${userPassword}/${confirmPassword}`)
+        request.onload = () => {
+            // console.log(request.responseText)
+            const authenticateData = JSON.parse(request.responseText)
+            // console.log(authenticateData)
+
+            // Login User
+            if (authenticateData['message'] === 'Login User') {
+                window.location.href = authenticateData['route']
+            }
+            // User Not Registered
+            if (authenticateData['message'] === 'User Not Registered') {
+                showAlert('You Are Not Registered', 'danger')
+            }
+            // Register User
+            if (authenticateData['message'] === 'Register User') {
+                window.location.href = authenticateData['route']
+            }
+            // User Already Registered
+            if (authenticateData['message'] === 'User Already Registered') {
+                showAlert('You Are Already Registered', 'warning')
+            }
+
+        }
+        request.send()
+
+    }
+    document.querySelector('#loginButton').onclick = () => {
+
+    }
+
+
+    // Validate Form
+    document.querySelector('#validateForm').addEventListener('keyup', (e) => {
         // console.log("validateForm")
         let confirmPass =  document.getElementById("confirmPass");
-       
+
         let loginBtn = document.getElementById("loginButton");
         let registerBtn = document.getElementById("registerButton");
 
         let nameField = document.forms["Form"]["userName"].value;
         let passwordField = document.forms["Form"]["userPassword"].value;
-        let emalField = document.forms["Form"]["userEmail"];
+        let emailField = document.forms["Form"]["userEmail"];
         let confirmPassField = document.forms["Form"]["confirmPassword"].value;
 
         let passwordErrorMsg = document.querySelector('#passwordErrorMsg');
         let emailErrorMsg = document.querySelector('#emailErrorMsg')
 
-
-         //  LOGIN BUTTON
+        //  LOGIN BUTTON
         if (confirmPass.style.display === "") {
-            if (nameField != "" && passwordField != "") {
-                // console.log("Login Changed To Submit")
+            if (nameField !== "" && passwordField !== "") {
                 loginBtn.disabled = false;
-                loginBtn.type = "submit";
+                loginBtn.onclick = submitForm
             }
             else {
-                // console.log("Login Changed To Button")
-                loginBtn.disabled = true;
-                loginBtn.type ="button";
+                loginBtn.disabled = true
             }
         }
 
         // REGISTER BUTTON
         var byPassDisable = false
         if (confirmPass.style.display === "block") {
-             // VALIDATE PASSWORDS
+            // VALIDATE PASSWORDS
             var confirmPassInput = document.getElementById('cPass')
 
             // Passwords don't match
-            if ((passwordField != "" && confirmPassField != "") && passwordField != confirmPassField) {
+            if ((passwordField !== "" && confirmPassField !== "") && passwordField !== confirmPassField) {
                 adjustContainerWidth(screen.width)
                 confirmPassInput.style.borderColor = "red"
                 passwordErrorMsg.textContent = "Passwords don't match"
@@ -204,40 +258,46 @@
                 registerBtn.disabled = false
             }
             // Invalid email address
-            if (!(emalField.value.includes('@'))) {
+            if (!(emailField.value.includes('@')) && emailField.value !== '') {
                 adjustContainerWidth(screen.width)
-                emalField.style.borderColor = "orange"
+                emailField.style.borderColor = "orange"
                 emailErrorMsg.textContent = "Invalid email address"
                 byPassDisable = true
                 registerBtn.disabled = true
             }
             else {
                 revertContainerWidth(screen.width)
-                emalField.style.borderColor = ""
+                emailField.style.borderColor = ""
                 emailErrorMsg.textContent =  ""
                 registerBtn.disabled = false
             }
             // Everything is validated and user is able to register
-            if ((nameField != "" && passwordField != "" && confirmPassField != "" && emalField.value != "") && !byPassDisable) {
+            if ((nameField !== "" && passwordField !== "" && confirmPassField !== "" && emailField.value !== "") && !byPassDisable) {
                 registerBtn.disabled = false;
-                registerBtn.type = "submit"
+                registerBtn.onclick = submitForm
             }
             else {
                 registerBtn.disabled = true;
-                registerBtn.type = "button";
+
             }
         }
 
-    }
-    
+    })
+
+
+    // Show Confirm Password and Email
     function showConfirmPasswordAndEmail() {
-        // console.log("show Confirm")
-        // EXTEND THE HEIGHT
-        document.querySelector('.form-container').style.height = "460px"
-        document.querySelector('#loginButton').type = "button"
+        let loginBtn = document.querySelector('#loginButton')
+        let registerBtn = document.querySelector('#registerButton')
 
         let confirmPass =  document.getElementById("confirmPass");
-        let emalField = document.getElementById('Email');
+        let emailField = document.getElementById('Email');
+
+        // Change button states
+        loginBtn.onclick = removeConfirmPasswordAndEmail
+        registerBtn.onclick = submitForm
+        registerBtn.disabled = true
+        loginBtn.disabled = false
 
         if (confirmPass.style.display === "") {
             loginBtn = document.getElementById("loginButton");
@@ -245,45 +305,63 @@
 
             // confirmPass =  document.getElementById("confirmPass");
             confirmPass.style.display = "block";
-            emalField.style.display = "block"
+            emailField.style.display = "block"
 
-            registerBtn.disabled = true;
-            loginBtn.disabled = false;
+
+            // registerBtn.disabled = true;
+            // loginBtn.disabled = false;
             
         }
+
+        // EXTEND THE HEIGHT
+        document.querySelector('.form-container').style.height = "460px"
        
     }
 
+    // removeConfirmPassword and Email
     function removeConfirmPasswordAndEmail() {
         // console.log("remove Confirm")
         document.querySelector('.form-container').style.height = "290px"
 
-        let nameField = document.forms["Form"]["userName"].value;
-        let passwordField = document.forms["Form"]["userPassword"].value;
-        let confirmPassField = document.forms["Form"]["confirmPassword"].value;
+        let nameField = document.forms["Form"]["userName"].value
+        let passwordField = document.forms["Form"]["userPassword"].value
+        let emailField = document.forms["Form"]["userEmail"]
+        let confirmPassField = document.forms["Form"]["confirmPassword"]
 
   
         let loginBtn = document.getElementById("loginButton");
         let registerBtn = document.getElementById("registerButton");
 
-        let confirmPass =  document.getElementById("confirmPass");
-        let emalField = document.getElementById("Email");
+        let confirmPassInput =  document.getElementById("confirmPass");
+        let emailInput = document.getElementById("Email");
 
-        confirmPass.style.display = "";
-        emalField.style.display = ""
-        // loginBtn.type = "submit"
+        // Remove confirm password and email input
+        confirmPassInput.style.display = "";
+        confirmPassInput.value = ""
+        emailInput.style.display = ""
+        // Clear the fields of confirm password and email input
+        confirmPassField.value = ""
+        emailField.value = ""
+
+
+        // Change button states
         registerBtn.disabled = false;
-        
-        if (nameField != '' && passwordField != '') {
+        registerBtn.onclick = showConfirmPasswordAndEmail
+
+        if (nameField !== '' && passwordField !== '')
             loginBtn.disabled = false
-            // loginBtn.type = "submit"
-        }
-        else {
+        else
             loginBtn.disabled = true
-        }
+        
+
+        // loginBtn.disabled = false
+        loginBtn.onclick = submitForm
+        // loginBtn.type = "submit"
+
             
     }
 
+    // adjustContainer
     function adjustContainerWidth(screenWidth) {
         if (screenWidth < 630) {
             document.querySelector('.form-container').style.height = "480px"
@@ -294,7 +372,41 @@
             document.querySelector('.form-container').style.height = "460px"
         }
     }
-    
+
+    // Show alert
+    function showAlert(alertText, type) {
+        if (type === undefined || !(['primary', 'warning', 'danger', 'success'].includes(type))) {
+            type = 'primary'
+        }
+        // Create alert div
+        const alertDiv = document.createElement('div')
+        alertDiv.role = 'alert'
+        alertDiv.className = `alert alert-${type}`
+        alertDiv.id = 'alertMessage'
+        alertDiv.style.borderRadius = '10px'
+        alertDiv.textContent = alertText
+        if (type === 'danger') {
+            alertDiv.style.backgroundColor = 'rgb(209,13,13)'
+        }
+        if (type === 'primary') {
+            alertDiv.style.backgroundColor = 'rgb(80, 113, 213)'
+        }
+        if (type === 'success') {
+            alertDiv.style.backgroundColor = 'rgb(76, 180, 40)'
+        }
+        if (type === 'warning') {
+            alertDiv.style.backgroundColor = 'rgb(227, 148, 16)'
+        }
+
+        // Add alert to page
+        document.querySelector('#alertDiv').appendChild(alertDiv)
+        // document.querySelector('.form-container').insertBefore(alertDiv, document.querySelector('#alertDiv'))
+
+        // Remove alert
+        setTimeout(()=>{alertDiv.remove()}, 2000)
+    }
+
+
 </script>
 
 {% endblock %}

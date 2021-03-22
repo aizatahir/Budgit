@@ -14,6 +14,7 @@ class TestApplication(unittest.TestCase):
     # SET UP CLASS
     @classmethod
     def setUpClass(cls):
+        global idToUse
         if app.config['TESTING'] == False:
             raise RuntimeError('Set app.config[TESTING] = True before running unittest')
 
@@ -53,6 +54,7 @@ class TestApplication(unittest.TestCase):
     # SET UP
     def setUp(self):
         with app.app_context():
+            session['user_id'] = idToUse
             # RESET EXPENSE LIMIT
             testExpenseLimitToRemove = ExpenseLimit.query.filter_by(user_id=session['user_id']).first()
             if testExpenseLimitToRemove != None:
@@ -87,12 +89,88 @@ class TestApplication(unittest.TestCase):
         Response = Tester.get('/')
         self.assertEqual(Response.status_code, 200)
 
+    # ENSURE THAT USER CAN AUTHENTICATE CORRECTLY
+    def test_authenticate(self):
+        with app.app_context():
+            Tester = app.test_client(self)
+            currentSessionUserID = session['user_id']
+
+            usersToTest = [
+                {
+                    'id': currentSessionUserID + 1,
+                    'name': 'Test User 0',
+                    'email': 'Test Email 0',
+                    'password': 'testPassword_0',
+                    'confirmPassword': 'testPassword_0',
+                    'expectedRegisterDict': {
+                        'message': 'Register User',
+                        'route': f"/home/{currentSessionUserID+1}"
+                    },
+                    'expectedLoginDict': {
+                        'message': 'Login User',
+                        'route': f"/home/{currentSessionUserID+1}"
+                    }
+                },
+                {
+                    'id': currentSessionUserID + 2,
+                    'name': 'Test User 1',
+                    'email': 'Test Email 1',
+                    'password': 'testPassword_1',
+                    'confirmPassword': 'testPassword_1',
+                    'expectedRegisterDict': {
+                        'message': 'Register User',
+                        'route': f"/home/{currentSessionUserID+2}"
+                    },
+                    'expectedLoginDict': {
+                        'message': 'Login User',
+                        'route': f"/home/{currentSessionUserID+2}"
+                    }
+                }
+            ]
+
+            """TEST REGISTERING """
+
+            for user in usersToTest:
+                Response = Tester.post(f"/authenticate/{user['id']}/{user['name']}/{user['email']}/{user['password']}/{user['confirmPassword']}")
+                # CHECK IF USER WAS REGISTERED CORRECTLY
+                self.assertDictEqual(json.loads(Response.data.decode('utf-8')), user['expectedRegisterDict'])
+                # TRY TO REGISTER THE SAME USER TWICE
+                Response = Tester.post(f"/authenticate/{user['id']}/{user['name']}/{user['email']}/{user['password']}/{user['confirmPassword']}")
+                self.assertDictEqual(json.loads(Response.data.decode('utf-8')), {"message": "User Already Registered","route": None})
+
+
+
+
+            """ TEST LOGIN IN """
+
+            for user in usersToTest:
+                Response = Tester.post(f"/authenticate/null/{user['name']}/null/{user['password']}/null")
+                # CHECK IF USER WAS LOGGED IN CORRECTLY
+                self.assertDictEqual(json.loads(Response.data.decode('utf-8')), user['expectedLoginDict'])
+
+            # TRY TO LOGIN A USER THAT ISN'T REGISTERED
+            Response = Tester.post(f"/authenticate/null/a_user_that_does_not_exist/null/a_password_that_is_incorrect/null")
+            self.assertDictEqual(json.loads(Response.data.decode('utf-8')), {'message': 'User Not Registered','route': None})
+
+
+            # DELETE USERS ADDED
+            userToDeletes = User.query.filter(User.id.in_([currentSessionUserID + 1, currentSessionUserID + 2])).all()
+            for user in userToDeletes:
+                db.session.delete(user)
+                db.session.commit()
+
+
+            # RESET SESSION ID BACK TO DEFAULT
+            session['user_id'] = currentSessionUserID
+
+            # print(f"session: {session}")
     # ENSURE THAT THE HOME PAGE LOADS CORRECTLY
     def test_home(self):
         Tester = app.test_client(self)
         Response = Tester.get(f"/home/{session['user_id']}")
         # Response = Tester.get(f"/home/30")
-        self.assertTrue(b'Portfolio' in Response.data)
+        # self.assertTrue(b'Portfolio' in Response.data)
+        self.assertIn('Portfolio', Response.data.decode('utf-8'), 'Portfolio is not in response data')
 
     # ENSURE THAT getUserInfo RETURNS CORRECT INFO
     def test_getUserInfo(self):
@@ -822,7 +900,12 @@ class TestApplication(unittest.TestCase):
             self.assertEqual(userWentOverSpendingLimit(), False)
 
 
+    def test_account(self):
+        with app.app_context():
+            Tester = app.test_client(self)
 
+            Response = Tester.get('/account')
+            self.assertEqual(Response.status_code, 200)
 
 
 
