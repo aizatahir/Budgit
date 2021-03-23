@@ -82,6 +82,7 @@
         width: 100%;
     }
     #alertMessage {
+        width: 50%;
         /*margin-top: 10%;*/
         /*background-color: rgb(227, 148, 16);*/
         font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
@@ -113,7 +114,7 @@
     #expenseLimitModalLabel {
         margin-left: 28px;
     }
-    #expenseLimtSetText {
+    #expenseLimitSetText {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-size: 18px;
         font-weight: 500;
@@ -152,7 +153,7 @@
         height: 320px;
         padding: 15px;
     }
-    .expense-tracker-conainer {
+    .expense-tracker-container {
         margin: auto;
         margin-top: 70px;
         width: 30%;
@@ -163,7 +164,7 @@
     }
     .expense-table-container {
         margin: auto;
-        margin-top: 70px;
+        margin-top: 40px;
         margin-bottom: 10px;
         width: 90%;
         background-color: white;
@@ -213,10 +214,13 @@
         #addExpenseHeading, #expenseInfo, #expenseTableHeading {
             font-size: 30px;
         }
+        #alertMessage {
+            width: 90%;
+        }
         .add-expense-container {
             width: 90%;
         }
-        .expense-tracker-conainer {
+        .expense-tracker-container {
             width: 90%;
         }
         .table {
@@ -278,7 +282,7 @@
 <!--<div id="alertMessage" class="alert alert-primary" style="display: none;" role="alert"></div>-->
 
 <div class="alert-container-top">
-    <!-- ALERT MESSAGE   -->
+<!--     ALERT MESSAGE-->
 <!--    <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>-->
 
 </div>
@@ -287,7 +291,7 @@
 <div class="container-1">
     <div class="container-2">
         <!-- EXPENSE TRACKER CONTAINER -->
-        <div class="expense-tracker-conainer">
+        <div class="expense-tracker-container">
             <center>
                 <div id="expenseInfo">Expense Info</div>
             </center>
@@ -348,7 +352,7 @@
 
     <!-- ALERT MESSAGE   -->
     <div class="alert-container-above-table">
-<!--        <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>-->
+        <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>
     </div>
 
     <!-- EXPENSE TABLE CONTAINER -->
@@ -423,7 +427,7 @@
                         <input class="form-control" name="expenseLimit" autocomplete="off" placeholder="Amount">
                     </div>
                 </div>
-                <div id="expenseLimtSetText"></div>
+                <div id="expenseLimitSetText"></div>
                 <!-- SAVE AND CANCEL BUTTON -->
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" id="setExpenseLimitCancelBtn" data-dismiss="modal" value="Cancel">
@@ -531,7 +535,7 @@
     // ADD THE EXPENSE LIMIT
     document.querySelector('#setLimitBtn').onclick = () => {
         let timePeriod = document.querySelector('#expenseLimitModalSelect').value
-        let expenseLimtSetText = document.querySelector('#expenseLimtSetText')
+        let expenseLimitSetText = document.querySelector('#expenseLimitSetText')
         let expenseLimit = document.forms["limitForm"]["expenseLimit"]
 
         request = new XMLHttpRequest()
@@ -551,10 +555,10 @@
         else if (timePeriod === 'this-year') {
             periodToDisplay = "This Year"
         }
-        expenseLimtSetText.textContent = `Expense Limit Set To $${expenseLimit.value} For ${periodToDisplay}`
+        expenseLimitSetText.textContent = `Expense Limit Set To $${expenseLimit.value} For ${periodToDisplay}`
         document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: $${expenseLimit.value}`
         expenseLimit.value = ""
-        setTimeout(() => {expenseLimtSetText.textContent = ""}, 3000)
+        setTimeout(() => {expenseLimitSetText.textContent = ""}, 3000)
         setTimeout(() => {document.querySelector('#setExpenseLimitCancelBtn').click()}, 3000)
     }
 

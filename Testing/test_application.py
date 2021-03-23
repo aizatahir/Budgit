@@ -128,7 +128,7 @@ class TestApplication(unittest.TestCase):
                 }
             ]
 
-            """TEST REGISTERING """
+            """ TEST REGISTERING """
 
             for user in usersToTest:
                 Response = Tester.post(f"/authenticate/{user['id']}/{user['name']}/{user['email']}/{user['password']}/{user['confirmPassword']}")
@@ -137,8 +137,6 @@ class TestApplication(unittest.TestCase):
                 # TRY TO REGISTER THE SAME USER TWICE
                 Response = Tester.post(f"/authenticate/{user['id']}/{user['name']}/{user['email']}/{user['password']}/{user['confirmPassword']}")
                 self.assertDictEqual(json.loads(Response.data.decode('utf-8')), {"message": "User Already Registered","route": None})
-
-
 
 
             """ TEST LOGIN IN """
@@ -493,7 +491,7 @@ class TestApplication(unittest.TestCase):
                 self.deleteAllTestExpenses()
                 """ ADD EXPENSES TO TEST FOR PERIOD: this-week """
 
-                testExpenseDates = getThisWeekForQuery()
+                testExpenseDates = getThisWeekForQuery(now)
 
                 for i, testDate in enumerate(testExpenseDates):
                     expenseData = {
@@ -626,7 +624,7 @@ class TestApplication(unittest.TestCase):
             self.deleteAllTestExpenses()
             """ ADD EXPENSES TO TEST FOR PERIOD: this-week """
 
-            testExpenseDates = getThisWeekForQuery()
+            testExpenseDates = getThisWeekForQuery(now)
             testExpensePrices = [float(i) for i in range(len(testExpenseDates))]
 
             for i, testDate in enumerate(testExpenseDates):
@@ -899,7 +897,7 @@ class TestApplication(unittest.TestCase):
 
             self.assertEqual(userWentOverSpendingLimit(), False)
 
-
+    # ENSURE THAT THE ACCOUNT PAGE LOADS
     def test_account(self):
         with app.app_context():
             Tester = app.test_client(self)
@@ -908,7 +906,216 @@ class TestApplication(unittest.TestCase):
             self.assertEqual(Response.status_code, 200)
 
 
+    """ TESTING DATETIME FUNCTIONS"""
 
+    # ENSURE THAT getCurrentTime RETURNS THE CORRECT TIME
+    def test_getCurrentTime(self):
+        with app.app_context():
+            time = datetime.today().strftime("%H:%M %p")
+            time = time.split(':')
+            hour = int(time[0])
+            minute = time[1]
+            if hour <= 12:
+                pass
+            else:
+                hour -= 12
+            testTime = f"{hour}:{minute}"
+
+            self.assertEqual(getCurrentTime(), testTime)
+
+    # ENSURE THAT getCurrentDay RETURNS THE CORRECT DAY
+    def test_getCurrentDay(self):
+        with app.app_context():
+            TestDates = {
+                'March 22, 2021': 22,
+                'June 15, 2025': 15,
+                'April 5, 2023': 5
+            }
+
+            for date in TestDates:
+                self.assertEqual(getCurrentDay(date), TestDates[date])
+
+        """ TEST FOR INVALID ARGUMENTS """
+        self.assertRaises(ValueError, getCurrentDay, 'Not a date')
+
+    # ENSURE THAT getCurrentYear RETURNS THE CORRECT YEAR
+    def test_getCurrentYear(self):
+        with app.app_context():
+            TestDates = {
+                'March 22, 2021': 2021,
+                'June 15, 2025': 2025,
+                'April 5, 2023': 2023
+            }
+
+            for date in TestDates:
+                self.assertEqual(getCurrentYear(date), TestDates[date])
+
+        """ TEST FOR INVALID ARGUMENTS """
+        self.assertRaises(ValueError, getCurrentYear, 'Not a date')
+
+    # ENSURE THAT getMonthIndex RETURNS THE CORRECT MONTH INDEX
+    def test_getMonthIndex(self):
+        with app.app_context():
+            TestDates = {
+                'March 22, 2021': 3,
+                'June 15, 2025': 6,
+                'April 5, 2023': 4,
+                'December 20, 2030': 12
+            }
+            for date in TestDates:
+                self.assertEqual(getMonthIndex(date), TestDates[date])
+
+        """ TEST FOR INVALID ARGUMENTS """
+        self.assertRaises(ValueError, getMonthIndex, 'Not a date')
+    # ENSURE THAT getSundays RETURNS THE CORRECT SUNDAYS WHEN GIVEN THE YEAR AND MONTH INDEX
+    def test_getSundays(self):
+        with app.app_context():
+            TestDates = [
+                {
+                    'year': 2021,
+                    'monthIndex': 3,
+                    'Sundays': [7, 14, 21, 28]
+                },
+                {
+                    'year': 2021,
+                    'monthIndex': 10,
+                    'Sundays': [3, 10, 17, 24, 31]
+                },
+                {
+                    'year': 2023,
+                    'monthIndex': 2,
+                    'Sundays': [5, 12, 19, 26]
+                }
+            ]
+
+            for date in TestDates:
+                self.assertEqual(getSundays(date['year'], date['monthIndex']), date['Sundays'])
+
+            """ TEST FOR INVALID ARGUMENTS (year, monthIndex) """
+
+            # year OUT OF RANGE
+            self.assertRaises(ValueError, getSundays, 100000, 3)
+            # monthIndex OUT OF RANGE
+            self.assertRaises(ValueError, getSundays, 100000, 50)
+
+    # ENSURE THAT getStartOfWeek RETURNS THE CORRECT START OF THE WEEK WHEN GIVEN year, monthIndex and todayDay, ALSO ENSURE
+    # THAT IT RETURNS A TUPLE WHEN TAKING THE START OF THE WEEK FROM THE PREV MONTH
+    def test_getStartOfWeek(self):
+        with app.app_context():
+            TestDates = [
+                {
+                    'year': 2021,
+                    'monthIndex': 2,
+                    'todayDay': 22,
+                    'startOfWeek': 21,
+                },
+                {
+                    'year': 2021,
+                    'monthIndex': 3,
+                    'todayDay': 1,
+                    'startOfWeek': (28, 2),
+                },
+                {
+                    'year': 2023,
+                    'monthIndex': 6,
+                    'todayDay': 8,
+                    'startOfWeek': 4,
+                },
+                {
+                    'year': 2023,
+                    'monthIndex': 8,
+                    'todayDay': 4,
+                    'startOfWeek': (30, 7),
+                }
+            ]
+
+            for date in TestDates:
+                self.assertEqual(getStartOfWeek(date['year'], date['monthIndex'], date['todayDay']), date['startOfWeek'])
+
+            """ TEST FOR INVALID ARGUMENTS (year, monthIndex, todayDay) """
+
+            # year OUT OF RANGE
+            self.assertRaises(ValueError, getStartOfWeek, 100000, 3, 10)
+            # monthIndex OUT OF RANGE
+            self.assertRaises(ValueError, getStartOfWeek, 100000, 50, 10)
+            # todayDay OUT OF RANGE
+            self.assertRaises(ValueError, getStartOfWeek, 100000, 50, 100)
+
+    # ENSURE THAT getWeek RETURNS THE CORRECT WEEK WITH THE GIVEN startDay
+    def test_getWeek(self):
+        with app.app_context():
+            TestDates = [
+                {
+                    'year': 2021,
+                    'monthIndex': 3,
+                    'startDay': 22,
+                    'Week': ['March 22, 2021', 'March 23, 2021', 'March 24, 2021', 'March 25, 2021',
+                             'March 26, 2021', 'March 27, 2021', 'March 28, 2021']
+                },
+                {
+                    'year': 2021,
+                    'monthIndex': 2,
+                    'startDay': 27,
+                    'Week': ['February 27, 2021', 'February 28, 2021', 'March 01, 2021', 'March 02, 2021',
+                             'March 03, 2021', 'March 04, 2021', 'March 05, 2021']
+                },
+                {
+                    'year': 2023,
+                    'monthIndex': 5,
+                    'startDay': 6,
+                    'Week': ['May 06, 2023', 'May 07, 2023', 'May 08, 2023', 'May 09, 2023', 'May 10, 2023',
+                             'May 11, 2023', 'May 12, 2023']
+                },
+                {
+                    'year': 2023,
+                    'monthIndex': 12,
+                    'startDay': 29,
+                    'Week': ['December 29, 2023', 'December 30, 2023', 'December 31, 2023', 'January 01, 2024',
+                             'January 02, 2024', 'January 03, 2024', 'January 04, 2024']
+                }
+            ]
+
+            for date in TestDates:
+                self.assertEqual(getWeek(date['year'], date['monthIndex'], date['startDay']), date['Week'])
+
+            """ TEST FOR INVALID ARGUMENTS (year, monthIndex, startDay) """
+
+            # year OUT OF RANGE
+            self.assertRaises(ValueError, getWeek, 100000, 3, 10)
+            # monthIndex OUT OF RANGE
+            self.assertRaises(ValueError, getWeek, 100000, 50, 10)
+            # startDay OUT OF RANGE
+            self.assertRaises(ValueError, getWeek, 100000, 50, 100)
+
+    # ENSURE THAT getThisWeekForQuery RETURNS THE CORRECT WEEK WHEN GIVEN A DATE
+    def test_getThisWeekForQuery(self):
+        with app.app_context():
+            TestDates = {
+                'March 22, 2021': ['March 21, 2021', 'March 22, 2021', 'March 23, 2021', 'March 24, 2021', 'March 25, 2021', 'March 26, 2021', 'March 27, 2021'],
+                'March 2, 2021': ['February 28, 2021', 'March 01, 2021', 'March 02, 2021', 'March 03, 2021', 'March 04, 2021', 'March 05, 2021', 'March 06, 2021'],
+                'March 30, 2021': ['March 28, 2021', 'March 29, 2021', 'March 30, 2021', 'March 31, 2021', 'April 01, 2021', 'April 02, 2021', 'April 03, 2021'],
+
+            }
+
+            for date in TestDates:
+                self.assertEqual(getThisWeekForQuery(date), TestDates[date])
+
+            """ TEST FOR INVALID ARGUMENTS """
+            self.assertRaises(ValueError, getThisWeekForQuery, 'Not a date')
+
+    # ENSURE THAT isValidDate RETURNS THE CORRECT BOOLEAN
+    def test_isValidDate(self):
+        with app.app_context():
+            TestDates = {
+                'March 22, 2021': True,
+                'March 22 2021': False,
+                'March 45ab, 2021': False,
+                'March 22, 20ssf': False,
+                'SDfsdf, 22, 2021': False
+            }
+
+            for date in TestDates:
+                self.assertEqual(isValidDate(date), TestDates[date])
 
 if __name__ == '__main__':
     unittest.main()
