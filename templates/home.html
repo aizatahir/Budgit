@@ -23,6 +23,7 @@
         background-color: orange;
         border: none;
         border-radius: 10px;
+        margin-right: 3%;
     }
     #deleteExpenseBtn {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
@@ -130,6 +131,31 @@
         transform: rotate(45deg);
         cursor: pointer;
     }
+    #scheduleExpenseBtn {
+        cursor: pointer;
+    }
+    #scheduleExpenseSaveEditBtn {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border-radius: 10px;
+    }
+    #scheduleExpenseNameInput, #scheduleExpensePriceInput, #customFrequencyInput {
+        margin-bottom: 2%;
+        border-radius: 5px;
+    }
+    #scheduleExpenseCalendarBtn {
+        cursor: pointer;
+        margin-left: 85%;
+    }
+    #frequencySelect {
+        margin-bottom: 2%;
+    }
+    #periodHeading, #frequencyHeading, #customFrequencyHeading {
+        font-weight: 600;
+        /*text-decoration: overline;*/
+    }
+    #customFrequencyHeading, #customFrequencyInput {
+        display: none;
+    }
     .table_data {
         font-weight: 600;
         font-size: 14px;
@@ -178,7 +204,9 @@
     .exceed-limit-container {
         display: flex;
     }
-
+    .period-container {
+        margin-bottom: 3%;
+    }
     th {
         width: 1%;
     }
@@ -340,7 +368,13 @@
                     <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense">
                     <br>
                     <div class="exceed-limit-container">
+                    <!-- ADD EXPENSE BTN -->
                         <button id="addExpenseBtn" class="btn btn-primary" type="button" disabled>Add Expense</button>
+                        <!-- SCHEDULE EXPENSE BTN -->
+                        <a href="#scheduleExpenseModal" class="edit" data-toggle="modal">
+                            <img id="scheduleExpenseBtn" title="Schedule Expense" height="40" width="40" src="{{ url_for('static', filename = 'clock.svg') }}">
+                        </a>
+
                         <div id="exceedLimitText"></div>
                     </div>
 
@@ -352,7 +386,7 @@
 
     <!-- ALERT MESSAGE   -->
     <div class="alert-container-above-table">
-        <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>
+<!--        <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>-->
     </div>
 
     <!-- EXPENSE TABLE CONTAINER -->
@@ -439,8 +473,6 @@
 </div>
 
 
-
-
 <!-- Edit EXPENSE MODAL -->
 <div id="editExpenseModal" class="modal fade">
     <div class="modal-dialog">
@@ -489,6 +521,80 @@
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" id="deleteExpenseCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="deleteExpenseBtn" class="btn btn-danger" type="button">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!--SCHEDULE EXPENSE MODAL -->
+<div id="scheduleExpenseModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="formName">
+                <!-- HEADER -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Schedule Expense</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- BODY -->
+                <div class="modal-body">
+                    <div class="form-group">
+                        <form id="scheduleExpenseForm">
+                            <!-- EXPENSE NAME -->
+                            <label class="inputLabel" for="modalInput">Expense Name</label>
+                            <input id="scheduleExpenseNameInput" class="form-control" name="expenseName" autocomplete="off">
+                            <!-- EXPENSE PRICE -->
+                            <label class="inputLabel" for="modalInput">Expense Price</label>
+                            <input id="scheduleExpensePriceInput" class="form-control" name="expensePrice" autocomplete="off">
+<!--                            <br>-->
+                            <!-- CALENDAR BTN -->
+                            <img id="scheduleExpenseCalendarBtn" src="{{ url_for('static', filename = 'calendar.svg') }}">
+                            <hr style="border-top: 2px solid lightgray">
+                            <!-- SCHEDULE INFO -->
+                            <div class="schedule-info-container">
+                                <div class="period-container">
+                                    <div id="periodHeading">Period</div>
+                                    <!-- WEEK RADIO BTN -->
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="weekRadioBtn" value="week" checked>
+                                        <label class="form-check-label" for="inlineRadio1">Week</label>
+                                    </div>
+                                    <!-- MONTH RADIO BTN -->
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="monthRadioBtn" value="month">
+                                        <label class="form-check-label" for="inlineRadio2">Month</label>
+                                    </div>
+                                    <!-- YEAR RADIO BTN -->
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="inlineRadioOptions" id="yearRadioBtn" value="year">
+                                        <label class="form-check-label" for="inlineRadio3">Year</label>
+                                    </div>
+                                </div>
+                                <hr>
+                                <!-- FREQUENCY -->
+                                <label id="frequencyHeading" for="frequencySelect">Frequency</label>
+                                <select id="frequencySelect" class="form-control">
+                                    <option value="every-week">Every Week</option>
+                                    <option value="2-weeks">Every 2 Weeks</option>
+                                    <option value="3-weeks">Every 3 Weeks</option>
+                                    <option value="custom-week">Custom</option>
+                                </select>
+                                <!-- CUSTOM FREQUENCY INPUT -->
+                                <label id="customFrequencyHeading" for="customFrequencyInput"></label>
+                                <input id="customFrequencyInput" class="form-control" type="number">
+
+
+                            </div>
+                        </form>
+                    </div>
+                    <p id="scheduleExpenseErrorMessage" class="text-warning"><small></small></p>
+                </div>
+                <!-- SAVE AND CANCEL BUTTON -->
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" id="scheduleExpenseCancelBtn" data-dismiss="modal" value="Cancel">
+                    <button id="scheduleExpenseSaveEditBtn" class="btn btn-primary" type="button" disabled>Add</button>
                 </div>
             </form>
         </div>
@@ -1082,11 +1188,79 @@
         // Remove alert
         setTimeout(()=>{alertDiv.remove()}, 3000)
     }
-    function removeAlert() {
-        alertBox.style.display = "none"
+
+    // SCHEDULE EXPENSE - periodHeading
+    document.querySelector('.period-container').addEventListener('click', (e) => {
+        if (e.target.className === 'form-check-input') {
+            // console.log(e.target.value)
+            updateFrequency(e.target.value)
+            removeCustomFrequency()
+        }
+    })
+    // SCHEDULE EXPENSE - frequency
+    document.querySelector('#frequencySelect').onchange = function() {
+        let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
+        let customFrequencyInput = document.querySelector('#customFrequencyInput')
+        switch (this.value) {
+            case 'custom-week':
+                customFrequencyHeading.textContent = 'Custom Week'
+                showCustomFrequency()
+                break
+            case 'custom-month':
+                customFrequencyHeading.textContent = 'Custom Month'
+                showCustomFrequency()
+                break
+            case 'custom-year':
+                customFrequencyHeading.textContent = 'Custom Year'
+                showCustomFrequency()
+                break
+            default:
+                removeCustomFrequency()
+        }
     }
+    // UPDATE FREQUENCY
+    function updateFrequency(period) {
+        let frequencySelect = document.querySelector('#frequencySelect')
+        switch (period) {
+            case 'week':
+                frequencySelect.innerHTML = `
+                <option value="every-week">Every Week</option>
+                <option value="2-weeks">Every 2 Weeks</option>
+                <option value="3-weeks">Every 3 Weeks</option>
+                <option value="custom-week">Custom</option>
+                `
+                break
+            case 'month':
+                frequencySelect.innerHTML = `
+                <option value="every-week">Every Months</option>
+                <option value="2-months">Every 2 Months</option>
+                <option value="3-months">Every 3 Months</option>
+                <option value="custom-month">Custom</option>
+                `
+                break
+            case 'year':
+                frequencySelect.innerHTML = `
+                <option value="every-week">Every Year</option>
+                <option value="2-years">Every 2 Years</option>
+                <option value="3-years">Every 3 Years</option>
+                <option value="custom-year">Custom</option>
+                `
+                break
+        }
 
+    }
+    // SHOW CUSTOM FREQUENCY
+    function showCustomFrequency() {
+        document.querySelector('#customFrequencyHeading').style.display = 'block'
+        document.querySelector('#customFrequencyInput').style.display = 'block'
 
+    }
+    // REMOVE CUSTOM FREQUENCY
+    function removeCustomFrequency() {
+        document.querySelector('#customFrequencyHeading').style.display = 'none'
+        document.querySelector('#customFrequencyInput').style.display = 'none'
+
+    }
     function parseUserExpense(userExpense) {
         if (userExpense === 'Not Set') {
             return null
