@@ -654,13 +654,13 @@ class Settings {
     /** PRIVATE METHODS **/
 
     // Get All Setting Keys
-    // static #getAllSettingKeys() {
-    //     let allKeys = []
-    //     for (let key in this.getUserSettings()) {
-    //         allKeys.push(key)
-    //     }
-    //     return allKeys
-    // }
+    static #getAllSettingKeys() {
+        let allKeys = []
+        for (let key in this.getUserSettings()) {
+            allKeys.push(key)
+        }
+        return allKeys
+    }
     // // Check if Setting Value is Valid
     // static #isValidSettingValue(settingToUpdate, newValue) {
     //     if (settingToUpdate === 'expenseTable-Time-Period') {
