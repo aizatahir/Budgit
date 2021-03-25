@@ -654,13 +654,13 @@ class Settings {
     /** PRIVATE METHODS **/
 
     // Get All Setting Keys
-    // static #getAllSettingKeys() {
-    //     let allKeys = []
-    //     for (let key in this.getUserSettings()) {
-    //         allKeys.push(key)
-    //     }
-    //     return allKeys
-    // }
+    static #getAllSettingKeys() {
+        let allKeys = []
+        for (let key in this.getUserSettings()) {
+            allKeys.push(key)
+        }
+        return allKeys
+    }
     // // Check if Setting Value is Valid
     // static #isValidSettingValue(settingToUpdate, newValue) {
     //     if (settingToUpdate === 'expenseTable-Time-Period') {
@@ -686,20 +686,20 @@ class Settings {
     // }
     //
     // // INITIALIZE USER SETTINGS
-    // static initializeUserSettings() {
-    //     if (!(localStorage.getItem('Budgit-userSettings'))) {
-    //         localStorage.setItem('Budgit-userSettings', JSON.stringify({
-    //             'expenseTable-Time-Period': 'this-day',
-    //             'expenseTable-SortBy': 'item_name',
-    //             'expenseTable-Order': 'asc',
-    //         }))
-    //     }
-    // }
+    static initializeUserSettings() {
+        if (!(localStorage.getItem('Budgit-userSettings'))) {
+            localStorage.setItem('Budgit-userSettings', JSON.stringify({
+                'expenseTable-Time-Period': 'this-day',
+                'expenseTable-SortBy': 'item_name',
+                'expenseTable-Order': 'asc',
+            }))
+        }
+    }
     // // GET USER SETTINGS
-    // static getUserSettings() {
-    //     this.initializeUserSettings()
-    //     return JSON.parse(localStorage.getItem('Budgit-userSettings'))
-    // }
+    static getUserSettings() {
+        this.initializeUserSettings()
+        return JSON.parse(localStorage.getItem('Budgit-userSettings'))
+    }
     // // UPDATE USER SETTINGS
     // static updateUserSettings(settingToUpdate, newValue) {
     //     // Invalid settingToUpdate
