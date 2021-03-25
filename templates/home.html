@@ -200,6 +200,7 @@
     }
     .expense-table-select {
         display: flex;
+        margin-bottom: 3%;
     }
     .exceed-limit-container {
         display: flex;
@@ -275,6 +276,15 @@
         body {
             background-size: 100% 100%;
         }
+    }
+    @media only screen and (max-width: 400px) {
+        #expenseTableHeading {
+            font-size: 25px;
+        }
+        .expense-table-select {
+            margin-bottom: 10%;
+        }
+
     }
     @media only screen and (max-width: 700px) {
         #expenseLimitText {
@@ -1063,7 +1073,7 @@
             let timePeriod = document.querySelector('#expenseTableSelectTimePeriod').value
             let sortBy = document.querySelector('#expenseTableSort').value
             let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
-            if (timePeriod.value === 'all-time') {
+            if (timePeriod === 'all-time') {
                 tableHeading = 'All Time Expenses'
             }
             else if (timePeriod === 'this-day') {
@@ -1342,11 +1352,7 @@
             'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
             'order': Settings.getUserSettings()['expenseTable-Order'],
         }
-        // Settings.updateUserSettings('expenseTable-SortBy', 'item_name')
-        // Settings.updateUserSettings('expenseTable-Order', 'desc')
-        //
 
-        console.log(userSettings)
 
         UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
         UI.updateExpenseTableHeadings(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
