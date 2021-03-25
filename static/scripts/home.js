@@ -720,178 +720,178 @@ class Settings {
 
 
 }
-//
-//
-// // DOM CONTENT LOADED
-// document.addEventListener('DOMContentLoaded', () => {
-//     Settings.initializeUserSettings()
-//     let userSettings = {
-//         'timePeriod': Settings.getUserSettings()['expenseTable-Time-Period'],
-//         'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
-//         'order': Settings.getUserSettings()['expenseTable-Order'],
-//     }
-//
-//
-//     UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
-//     UI.updateExpenseTableHeadings(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
-//     Expense.loadTotalUserExpenses()
-//     Expense.loadUserExpenseLimits()
-//     Expense.displayTotalExpense(userSettings['timePeriod'])
-//     Expense.displayExpenseLimit(userSettings['timePeriod'])
-// })
-//
-//
-// /** ON-CLICK EVENTS **/
-//
-// // Add Expense
-// document.querySelector('#addExpenseBtn').onclick = function() {Expense.addExpense()}
-// // Expense Table Buttons
-// document.querySelector('#mainTable').addEventListener('click', (e) =>{
-//     var itemID = e.target.dataset.item_id
-//     let sortBy = document.querySelector('#expenseTableSort').value
-//     let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
-//
-//     // EDIT BUTTON
-//     if (e.target.className === "material-icons" && e.target.title === "Edit") {
-//         Expense.showEditExpenseModal(itemID, sortBy, order)
-//     }
-//     // DELETE BUTTON
-//     else if (e.target.className === "material-icons" && e.target.title === "Delete") {
-//         Expense.showDeleteExpenseModal(itemID, sortBy, order)
-//     }
-//
-// })
-// // Set The Expense Limit
-// document.querySelector('#setLimitBtn').onclick = () => {
-//     let timePeriod = document.querySelector('#expenseLimitModalSelect').value
-//     let expenseLimitSetText = document.querySelector('#expenseLimitSetText')
-//     let expenseLimitInput = document.forms["limitForm"]["expenseLimit"]
-//
-//     Expense.setExpenseLimit(timePeriod, expenseLimitSetText, expenseLimitInput)
-// }
-// // Change Frequency Select Depending On The Time Period
-// document.querySelector('.time-period-container').onclick = (e) => {
-//     if (e.target.className === 'form-check-input') {
-//         document.querySelector('#customFrequencyInput').value = ''
-//         ScheduleExpense.updateFrequencySelect(e.target.value)
-//         ScheduleExpense.removeCustomFrequency()
-//     }
-// }
-//
-//
-// /** ON-CHANGE EVENTS **/
-//
-// // Expense Table Select -> Period
-// document.querySelector('#expenseTableSelectTimePeriod').onchange = () => {Expense.updateExpenseTableBasedOnPeriod()}
-// // Expense Table Select -> Sort
-// document.querySelector('#expenseTableSort').onchange = () => {Expense.sortExpenseTable()}
-// // Update Expense Limit Modal Heading
-// document.querySelector('#expenseLimitModalSelect').onchange = function() {
-//     let expenseLimitModalHeading = document.querySelector('#expenseLimitModalHeading')
-//     if (this.value === 'this-day') {
-//         expenseLimitModalHeading.textContent = "Set Expense Limit For Today"
-//     }
-//     else if (this.value === 'this-week') {
-//         expenseLimitModalHeading.textContent = "Set Expense Limit For This Week"
-//     }
-//     else if (this.value === 'this-month') {
-//         expenseLimitModalHeading.textContent = "Set Expense Limit For This Month"
-//     }
-//     else if (this.value === 'this-year') {
-//         expenseLimitModalHeading.textContent = "Set Expense Limit For This Year"
-//     }
-// }
-// // Total Expense Select
-// document.querySelector('#totalExpenseSelect').onchange = function() {
-//     var timePeriod = this.value
-//     Expense.displayTotalExpense(timePeriod)
-// }
-// // Expense Limit Select
-// document.querySelector('#expenseLimitSelect').onchange = function() {Expense.displayExpenseLimit(this.value)}
-// // Schedule Expense Frequency Select -> 'custom' Has Been Selected
-// document.querySelector('#frequencySelect').onchange = function() {
-//     let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
-//     let customFrequencyInput = document.querySelector('#customFrequencyInput')
-//     switch (this.value) {
-//         case 'custom-day':
-//             customFrequencyHeading.textContent = 'Custom Day'
-//             ScheduleExpense.showCustomFrequency()
-//             break
-//         case 'custom-week':
-//             customFrequencyHeading.textContent = 'Custom Week'
-//             ScheduleExpense.showCustomFrequency()
-//             break
-//         case 'custom-month':
-//             customFrequencyHeading.textContent = 'Custom Month'
-//             ScheduleExpense.showCustomFrequency()
-//             break
-//         case 'custom-year':
-//             customFrequencyHeading.textContent = 'Custom Year'
-//             ScheduleExpense.showCustomFrequency()
-//             break
-//         default:
-//             ScheduleExpense.removeCustomFrequency()
-//     }
-// }
-//
-//
-// /** ON-KEY UP EVENTS **/
-//
-// // Validate Set Expense Limit Input
-// document.querySelector('#limitForm').onkeyup = () => {
-//     let expenseLimit = document.forms["limitForm"]["expenseLimit"].value
-//     let setLimitBtn = document.getElementById("setLimitBtn")
-//
-//     if (expenseLimit === '' || isNaN(expenseLimit))
-//         setLimitBtn.disabled = true
-//     else
-//         setLimitBtn.disabled = false
-// }
-// // Validate Add Expense Form
-// document.querySelector('#addExpenseForm').onkeyup = () => {Expense.validateAddExpenseForm()}
-// // Check If Expense That Is About To Be Added Will Exceed a Limit
-// document.querySelector('#itemPrice').onkeyup = () => {Expense.expenseToBeAddedWillExceedLimit()}
-//
-//
-// /** ON-BLUR EVENTS **/
-//
-// // Custom Frequency Input
-// document.querySelector('#customFrequencyInput').onblur = function() {
-//     let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
-//     let headingToUse = ''
-//
-//     // Extract the first two words for the heading
-//     let arrayOfHeading = customFrequencyHeading.textContent.split(' ')
-//     for (let i = 0; i < 2; i++) {
-//         headingToUse += arrayOfHeading[i]
-//         headingToUse += ' '
-//     }
-//     headingToUse = headingToUse.trimEnd()
-//     let period = headingToUse.split(' ')[1]
-//
-//
-//     if (this.value !== '') {
-//         customFrequencyHeading.innerHTML = `${headingToUse} → <span style="font-weight: normal">Every ${this.value} ${period}s</span>`
-//     }
-//     else {
-//         customFrequencyHeading.textContent = headingToUse
-//     }
-// }
-//
-//
-// /**
-//  * Generates an object created from a <select> html element. The key is the value of a specific option in the select
-//  * and the value is the select itself
-//  * @param {Node} SelectNode Delimited sequence of names.
-//  * @return {Object}
-//  */
-// function generateSelectOptionsDict(SelectNode) {
-//     let allOptions = SelectNode.options
-//     let selectOptionsDict = {}
-//
-//     for (option of allOptions) {
-//         selectOptionsDict[option.value] = option
-//     }
-//     return selectOptionsDict
-//
-// }
+
+
+// DOM CONTENT LOADED
+document.addEventListener('DOMContentLoaded', () => {
+    Settings.initializeUserSettings()
+    let userSettings = {
+        'timePeriod': Settings.getUserSettings()['expenseTable-Time-Period'],
+        'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
+        'order': Settings.getUserSettings()['expenseTable-Order'],
+    }
+
+
+    UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
+    UI.updateExpenseTableHeadings(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
+    Expense.loadTotalUserExpenses()
+    Expense.loadUserExpenseLimits()
+    Expense.displayTotalExpense(userSettings['timePeriod'])
+    Expense.displayExpenseLimit(userSettings['timePeriod'])
+})
+
+
+/** ON-CLICK EVENTS **/
+
+// Add Expense
+document.querySelector('#addExpenseBtn').onclick = function() {Expense.addExpense()}
+// Expense Table Buttons
+document.querySelector('#mainTable').addEventListener('click', (e) =>{
+    var itemID = e.target.dataset.item_id
+    let sortBy = document.querySelector('#expenseTableSort').value
+    let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
+
+    // EDIT BUTTON
+    if (e.target.className === "material-icons" && e.target.title === "Edit") {
+        Expense.showEditExpenseModal(itemID, sortBy, order)
+    }
+    // DELETE BUTTON
+    else if (e.target.className === "material-icons" && e.target.title === "Delete") {
+        Expense.showDeleteExpenseModal(itemID, sortBy, order)
+    }
+
+})
+// Set The Expense Limit
+document.querySelector('#setLimitBtn').onclick = () => {
+    let timePeriod = document.querySelector('#expenseLimitModalSelect').value
+    let expenseLimitSetText = document.querySelector('#expenseLimitSetText')
+    let expenseLimitInput = document.forms["limitForm"]["expenseLimit"]
+
+    Expense.setExpenseLimit(timePeriod, expenseLimitSetText, expenseLimitInput)
+}
+// Change Frequency Select Depending On The Time Period
+document.querySelector('.time-period-container').onclick = (e) => {
+    if (e.target.className === 'form-check-input') {
+        document.querySelector('#customFrequencyInput').value = ''
+        ScheduleExpense.updateFrequencySelect(e.target.value)
+        ScheduleExpense.removeCustomFrequency()
+    }
+}
+
+
+/** ON-CHANGE EVENTS **/
+
+// Expense Table Select -> Period
+document.querySelector('#expenseTableSelectTimePeriod').onchange = () => {Expense.updateExpenseTableBasedOnPeriod()}
+// Expense Table Select -> Sort
+document.querySelector('#expenseTableSort').onchange = () => {Expense.sortExpenseTable()}
+// Update Expense Limit Modal Heading
+document.querySelector('#expenseLimitModalSelect').onchange = function() {
+    let expenseLimitModalHeading = document.querySelector('#expenseLimitModalHeading')
+    if (this.value === 'this-day') {
+        expenseLimitModalHeading.textContent = "Set Expense Limit For Today"
+    }
+    else if (this.value === 'this-week') {
+        expenseLimitModalHeading.textContent = "Set Expense Limit For This Week"
+    }
+    else if (this.value === 'this-month') {
+        expenseLimitModalHeading.textContent = "Set Expense Limit For This Month"
+    }
+    else if (this.value === 'this-year') {
+        expenseLimitModalHeading.textContent = "Set Expense Limit For This Year"
+    }
+}
+// Total Expense Select
+document.querySelector('#totalExpenseSelect').onchange = function() {
+    var timePeriod = this.value
+    Expense.displayTotalExpense(timePeriod)
+}
+// Expense Limit Select
+document.querySelector('#expenseLimitSelect').onchange = function() {Expense.displayExpenseLimit(this.value)}
+// Schedule Expense Frequency Select -> 'custom' Has Been Selected
+document.querySelector('#frequencySelect').onchange = function() {
+    let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
+    let customFrequencyInput = document.querySelector('#customFrequencyInput')
+    switch (this.value) {
+        case 'custom-day':
+            customFrequencyHeading.textContent = 'Custom Day'
+            ScheduleExpense.showCustomFrequency()
+            break
+        case 'custom-week':
+            customFrequencyHeading.textContent = 'Custom Week'
+            ScheduleExpense.showCustomFrequency()
+            break
+        case 'custom-month':
+            customFrequencyHeading.textContent = 'Custom Month'
+            ScheduleExpense.showCustomFrequency()
+            break
+        case 'custom-year':
+            customFrequencyHeading.textContent = 'Custom Year'
+            ScheduleExpense.showCustomFrequency()
+            break
+        default:
+            ScheduleExpense.removeCustomFrequency()
+    }
+}
+
+
+/** ON-KEY UP EVENTS **/
+
+// Validate Set Expense Limit Input
+document.querySelector('#limitForm').onkeyup = () => {
+    let expenseLimit = document.forms["limitForm"]["expenseLimit"].value
+    let setLimitBtn = document.getElementById("setLimitBtn")
+
+    if (expenseLimit === '' || isNaN(expenseLimit))
+        setLimitBtn.disabled = true
+    else
+        setLimitBtn.disabled = false
+}
+// Validate Add Expense Form
+document.querySelector('#addExpenseForm').onkeyup = () => {Expense.validateAddExpenseForm()}
+// Check If Expense That Is About To Be Added Will Exceed a Limit
+document.querySelector('#itemPrice').onkeyup = () => {Expense.expenseToBeAddedWillExceedLimit()}
+
+
+/** ON-BLUR EVENTS **/
+
+// Custom Frequency Input
+document.querySelector('#customFrequencyInput').onblur = function() {
+    let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
+    let headingToUse = ''
+
+    // Extract the first two words for the heading
+    let arrayOfHeading = customFrequencyHeading.textContent.split(' ')
+    for (let i = 0; i < 2; i++) {
+        headingToUse += arrayOfHeading[i]
+        headingToUse += ' '
+    }
+    headingToUse = headingToUse.trimEnd()
+    let period = headingToUse.split(' ')[1]
+
+
+    if (this.value !== '') {
+        customFrequencyHeading.innerHTML = `${headingToUse} → <span style="font-weight: normal">Every ${this.value} ${period}s</span>`
+    }
+    else {
+        customFrequencyHeading.textContent = headingToUse
+    }
+}
+
+
+/**
+ * Generates an object created from a <select> html element. The key is the value of a specific option in the select
+ * and the value is the select itself
+ * @param {Node} SelectNode Delimited sequence of names.
+ * @return {Object}
+ */
+function generateSelectOptionsDict(SelectNode) {
+    let allOptions = SelectNode.options
+    let selectOptionsDict = {}
+
+    for (option of allOptions) {
+        selectOptionsDict[option.value] = option
+    }
+    return selectOptionsDict
+
+}
