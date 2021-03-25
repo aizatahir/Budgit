@@ -654,7 +654,7 @@ class Settings {
     /** PRIVATE METHODS **/
 
     // Get All Setting Keys
-    static #getAllSettingKeys() {
+    static getAllSettingKeys() {
         // let allKeys = []
         // for (let key in this.getUserSettings()) {
         //     allKeys.push(key)
