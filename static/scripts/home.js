@@ -650,77 +650,77 @@ class ScheduleExpense {
 
 }
 // Settings Class
-// class Settings {
-//     /** PRIVATE METHODS **/
-//
-//     // Get All Setting Keys
-//     static #getAllSettingKeys() {
-//         let allKeys = []
-//         for (let key in this.getUserSettings()) {
-//             allKeys.push(key)
-//         }
-//         return allKeys
-//     }
-//     // Check if Setting Value is Valid
-//     static #isValidSettingValue(settingToUpdate, newValue) {
-//         if (settingToUpdate === 'expenseTable-Time-Period') {
-//             let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
-//             if (!(allValidTimePeriods).includes(newValue)) {
-//                 return false
-//             }
-//         }
-//         if (settingToUpdate === 'expenseTable-SortBy') {
-//             let allValidSortBy = ['item_name', 'item_price']
-//             if (!(allValidSortBy.includes(newValue))) {
-//                 return false
-//             }
-//         }
-//         if (settingToUpdate === 'expenseTable-Order') {
-//             let allValidOrders = ['asc', 'desc']
-//             if (!(allValidOrders.includes(newValue))) {
-//                 return false
-//             }
-//         }
-//
-//         return true
-//     }
-//
-//     // INITIALIZE USER SETTINGS
-//     static initializeUserSettings() {
-//         if (!(localStorage.getItem('Budgit-userSettings'))) {
-//             localStorage.setItem('Budgit-userSettings', JSON.stringify({
-//                 'expenseTable-Time-Period': 'this-day',
-//                 'expenseTable-SortBy': 'item_name',
-//                 'expenseTable-Order': 'asc',
-//             }))
-//         }
-//     }
-//     // GET USER SETTINGS
-//     static getUserSettings() {
-//         this.initializeUserSettings()
-//         return JSON.parse(localStorage.getItem('Budgit-userSettings'))
-//     }
-//     // UPDATE USER SETTINGS
-//     static updateUserSettings(settingToUpdate, newValue) {
-//         // Invalid settingToUpdate
-//         if (!(this.#getAllSettingKeys().includes(settingToUpdate))) {
-//             throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${settingToUpdate}' is not a valid setting to update.`
-//         }
-//         // Invalid neValue
-//         if (!(this.#isValidSettingValue(settingToUpdate, newValue))) {
-//             throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${newValue}' is not a valid setting for ${settingToUpdate}.`
-//
-//         }
-//         // Get the settings from storage
-//         let S = this.getUserSettings()
-//         // Update the setting
-//         S[settingToUpdate] = newValue
-//         // Push the new settings back to storage
-//         localStorage.setItem('Budgit-userSettings', JSON.stringify(S))
-//     }
-//
-//
-// }
+class Settings {
+    /** PRIVATE METHODS **/
+
+    // // Get All Setting Keys
+    // static #getAllSettingKeys() {
+    //     let allKeys = []
+    //     for (let key in this.getUserSettings()) {
+    //         allKeys.push(key)
+    //     }
+    //     return allKeys
+    // }
+    // // Check if Setting Value is Valid
+    // static #isValidSettingValue(settingToUpdate, newValue) {
+    //     if (settingToUpdate === 'expenseTable-Time-Period') {
+    //         let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
+    //         if (!(allValidTimePeriods).includes(newValue)) {
+    //             return false
+    //         }
+    //     }
+    //     if (settingToUpdate === 'expenseTable-SortBy') {
+    //         let allValidSortBy = ['item_name', 'item_price']
+    //         if (!(allValidSortBy.includes(newValue))) {
+    //             return false
+    //         }
+    //     }
+    //     if (settingToUpdate === 'expenseTable-Order') {
+    //         let allValidOrders = ['asc', 'desc']
+    //         if (!(allValidOrders.includes(newValue))) {
+    //             return false
+    //         }
+    //     }
+    //
+    //     return true
+    // }
+    //
+    // // INITIALIZE USER SETTINGS
+    // static initializeUserSettings() {
+    //     if (!(localStorage.getItem('Budgit-userSettings'))) {
+    //         localStorage.setItem('Budgit-userSettings', JSON.stringify({
+    //             'expenseTable-Time-Period': 'this-day',
+    //             'expenseTable-SortBy': 'item_name',
+    //             'expenseTable-Order': 'asc',
+    //         }))
+    //     }
+    // }
+    // // GET USER SETTINGS
+    // static getUserSettings() {
+    //     this.initializeUserSettings()
+    //     return JSON.parse(localStorage.getItem('Budgit-userSettings'))
+    // }
+    // // UPDATE USER SETTINGS
+    // static updateUserSettings(settingToUpdate, newValue) {
+    //     // Invalid settingToUpdate
+    //     if (!(this.#getAllSettingKeys().includes(settingToUpdate))) {
+    //         throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${settingToUpdate}' is not a valid setting to update.`
+    //     }
+    //     // Invalid neValue
+    //     if (!(this.#isValidSettingValue(settingToUpdate, newValue))) {
+    //         throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${newValue}' is not a valid setting for ${settingToUpdate}.`
+    //
+    //     }
+    //     // Get the settings from storage
+    //     let S = this.getUserSettings()
+    //     // Update the setting
+    //     S[settingToUpdate] = newValue
+    //     // Push the new settings back to storage
+    //     localStorage.setItem('Budgit-userSettings', JSON.stringify(S))
+    // }
+
+
+}
 //
 //
 // // DOM CONTENT LOADED
