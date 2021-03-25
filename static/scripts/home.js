@@ -1,4 +1,3 @@
-alert('hey')
 // UI Class
 class UI {
     // showAlert
