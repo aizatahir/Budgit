@@ -696,10 +696,10 @@ class Settings {
         }
     }
     // // GET USER SETTINGS
-    // static getUserSettings() {
-    //     this.initializeUserSettings()
-    //     return JSON.parse(localStorage.getItem('Budgit-userSettings'))
-    // }
+    static getUserSettings() {
+        this.initializeUserSettings()
+        return JSON.parse(localStorage.getItem('Budgit-userSettings'))
+    }
     // // UPDATE USER SETTINGS
     // static updateUserSettings(settingToUpdate, newValue) {
     //     // Invalid settingToUpdate
