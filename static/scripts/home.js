@@ -661,30 +661,29 @@ class Settings {
         }
         return allKeys
     }
-    // // Check if Setting Value is Valid
-    // static #isValidSettingValue(settingToUpdate, newValue) {
-    //     if (settingToUpdate === 'expenseTable-Time-Period') {
-    //         let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
-    //         if (!(allValidTimePeriods).includes(newValue)) {
-    //             return false
-    //         }
-    //     }
-    //     if (settingToUpdate === 'expenseTable-SortBy') {
-    //         let allValidSortBy = ['item_name', 'item_price']
-    //         if (!(allValidSortBy.includes(newValue))) {
-    //             return false
-    //         }
-    //     }
-    //     if (settingToUpdate === 'expenseTable-Order') {
-    //         let allValidOrders = ['asc', 'desc']
-    //         if (!(allValidOrders.includes(newValue))) {
-    //             return false
-    //         }
-    //     }
-    //
-    //     return true
-    // }
-    //
+    // Check if Setting Value is Valid
+    static isValidSettingValue(settingToUpdate, newValue) {
+        if (settingToUpdate === 'expenseTable-Time-Period') {
+            let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
+            if (!(allValidTimePeriods).includes(newValue)) {
+                return false
+            }
+        }
+        if (settingToUpdate === 'expenseTable-SortBy') {
+            let allValidSortBy = ['item_name', 'item_price']
+            if (!(allValidSortBy.includes(newValue))) {
+                return false
+            }
+        }
+        if (settingToUpdate === 'expenseTable-Order') {
+            let allValidOrders = ['asc', 'desc']
+            if (!(allValidOrders.includes(newValue))) {
+                return false
+            }
+        }
+
+        return true
+    }
     // // INITIALIZE USER SETTINGS
     static initializeUserSettings() {
         if (!(localStorage.getItem('Budgit-userSettings'))) {
@@ -700,24 +699,24 @@ class Settings {
         this.initializeUserSettings()
         return JSON.parse(localStorage.getItem('Budgit-userSettings'))
     }
-    // // UPDATE USER SETTINGS
-    // static updateUserSettings(settingToUpdate, newValue) {
-    //     // Invalid settingToUpdate
-    //     if (!(this.#getAllSettingKeys().includes(settingToUpdate))) {
-    //         throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${settingToUpdate}' is not a valid setting to update.`
-    //     }
-    //     // Invalid neValue
-    //     if (!(this.#isValidSettingValue(settingToUpdate, newValue))) {
-    //         throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${newValue}' is not a valid setting for ${settingToUpdate}.`
-    //
-    //     }
-    //     // Get the settings from storage
-    //     let S = this.getUserSettings()
-    //     // Update the setting
-    //     S[settingToUpdate] = newValue
-    //     // Push the new settings back to storage
-    //     localStorage.setItem('Budgit-userSettings', JSON.stringify(S))
-    // }
+    // UPDATE USER SETTINGS
+    static updateUserSettings(settingToUpdate, newValue) {
+        // Invalid settingToUpdate
+        if (!(this.getAllSettingKeys().includes(settingToUpdate))) {
+            throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${settingToUpdate}' is not a valid setting to update.`
+        }
+        // Invalid neValue
+        if (!(this.isValidSettingValue(settingToUpdate, newValue))) {
+            throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${newValue}' is not a valid setting for ${settingToUpdate}.`
+
+        }
+        // Get the settings from storage
+        let S = this.getUserSettings()
+        // Update the setting
+        S[settingToUpdate] = newValue
+        // Push the new settings back to storage
+        localStorage.setItem('Budgit-userSettings', JSON.stringify(S))
+    }
 
 
 }
