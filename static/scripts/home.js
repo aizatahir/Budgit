@@ -655,11 +655,11 @@ class Settings {
 
     // Get All Setting Keys
     static getAllSettingKeys() {
-        // let allKeys = []
-        // for (let key in this.getUserSettings()) {
-        //     allKeys.push(key)
-        // }
-        // return allKeys
+        let allKeys = []
+        for (let key in this.getUserSettings()) {
+            allKeys.push(key)
+        }
+        return allKeys
     }
     // // Check if Setting Value is Valid
     // static #isValidSettingValue(settingToUpdate, newValue) {
