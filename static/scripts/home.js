@@ -340,19 +340,21 @@ class Expense {
     }
     // EXPENSE TO BE ADDED WILL EXCEED LIMIT
     static expenseToBeAddedWillExceedLimit() {
-        var expensePriceField = document.forms["addExpenseForm"]["expensePrice"].value
+        let expensePriceField = document.forms["addExpenseForm"]["expensePrice"].value
+        let addExpenseContainer = document.querySelector('.add-expense-container')
+        let exceedLimitContainer = document.querySelector('.exceed-limit-container')
 
-        var dayLimit = Expense.getUserExpenseLimit('this-day')
-        var weekLimit = Expense.getUserExpenseLimit('this-week')
-        var monthLimit = Expense.getUserExpenseLimit('this-month')
-        var yearLimit = Expense.getUserExpenseLimit('this-year')
+        let dayLimit = Expense.getUserExpenseLimit('this-day')
+        let weekLimit = Expense.getUserExpenseLimit('this-week')
+        let monthLimit = Expense.getUserExpenseLimit('this-month')
+        let yearLimit = Expense.getUserExpenseLimit('this-year')
 
-        var totalDay = parseFloat(Expense.getTotalUserExpenses('this-day'))
-        var totalWeek = parseFloat(Expense.getTotalUserExpenses('this-week'))
-        var totalMonth = parseFloat(Expense.getTotalUserExpenses('this-month'))
-        var totalYear = parseFloat(Expense.getTotalUserExpenses('this-year'))
+        let totalDay = parseFloat(Expense.getTotalUserExpenses('this-day'))
+        let totalWeek = parseFloat(Expense.getTotalUserExpenses('this-week'))
+        let totalMonth = parseFloat(Expense.getTotalUserExpenses('this-month'))
+        let totalYear = parseFloat(Expense.getTotalUserExpenses('this-year'))
 
-        var exceedLimitText = document.getElementById('exceedLimitText')
+        let exceedLimitText = document.getElementById('exceedLimitText')
 
         // CHECK IF THE EXPENSE THAT IS ABOUT TO BE ADDED WILL EXCEED THE EXPENSE LIMIT SET
         let over = false
@@ -376,8 +378,15 @@ class Expense {
             exceedLimitText.style.color = "red"
             exceedLimitText.textContent = "This expense will go over your limit for the year"
         }
+        if (over === true && screen.width <= 400) {
+            addExpenseContainer.style.height = '380px'
+            exceedLimitContainer.style.height = '45px'
+
+        }
         if (over === false) {
             exceedLimitText.textContent = ""
+            addExpenseContainer.style.height = ''
+            exceedLimitContainer.style.height = ''
         }
 
     }
