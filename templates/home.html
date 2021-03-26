@@ -211,7 +211,16 @@
     th {
         width: 1%;
     }
-
+    
+    @media only screen and (max-width: 1100px) {
+        .add-expense-container {
+            height: 330px;
+        }
+        .exceed-limit-container {
+            height: 45px;
+        }
+        
+    }
     @media only screen and (max-width: 950px) {
         #logoutBtn {
             left: 3%;
@@ -235,6 +244,9 @@
             margin-left: 2%;
             width: 90%;
         }
+        #exceedLimitText {
+            font-size: 17px;
+        }
     }
     @media only screen and (max-width: 768px) {
         .container-1 {
@@ -257,6 +269,7 @@
         }
     }
     @media only screen and (max-width: 375px) {
+
         body {
             background-size: 100% 90%;
         }
@@ -276,6 +289,10 @@
         body {
             background-size: 100% 100%;
         }
+        /*.add-expense-container {*/
+        /*    height: 1950px;*/
+        /*    !*border: 10px solid red;*!*/
+        /*}*/
     }
     @media only screen and (max-width: 400px) {
         #expenseTableHeading {
@@ -283,6 +300,18 @@
         }
         .expense-table-select {
             margin-bottom: 10%;
+        }
+        .add-expense-container {
+            height: 355px;
+        }
+        .exceed-limit-container {
+            height: 45px;
+        }
+
+    }
+    @media only screen and (max-width: 480px) {
+        .exceed-limit-container {
+            height: 45px;
         }
 
     }
@@ -1000,15 +1029,15 @@
                 exceedLimitText.style.color = "red"
                 exceedLimitText.textContent = "This expense will go over your limit for the year"
             }
-            if (over === true && screen.width <= 400) {
-                addExpenseContainer.style.height = '380px'
-                exceedLimitContainer.style.height = '45px'
-
-            }
+            // if (over === true && screen.width <= 400) {
+            //     addExpenseContainer.style.height = '380px'
+            //     exceedLimitContainer.style.height = '45px'
+            //
+            // }
             if (over === false) {
                 exceedLimitText.textContent = ""
-                addExpenseContainer.style.height = ''
-                exceedLimitContainer.style.height = ''
+                // addExpenseContainer.style.height = ''
+                // exceedLimitContainer.style.height = ''
             }
 
         }
