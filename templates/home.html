@@ -156,8 +156,24 @@
     #customFrequencyHeading, #customFrequencyInput {
         display: none;
     }
+    #mainTable {
+        /*display: block;*/
+        max-height: 400px;
+        /*min-width: 100%;*/
+        margin: 0 auto;
+        /* Make table scrollable */
+        overflow-x: auto;
+    }
+    .table_header {
+        position: relative;
+        width: 1%;
+    }
     .table_data {
         font-weight: 600;
+        font-size: 14px;
+    }
+    #averageExpenseHeading {
+        font-weight: bold;
         font-size: 14px;
     }
     .container-1 {
@@ -208,9 +224,23 @@
     .time-period-container {
         margin-bottom: 3%;
     }
-    th {
-        width: 1%;
+
+    /* MAKE HEADERS FIXED  */
+    #mainTable thead tr th {
+        position: sticky;
+        top: 0px;
+        background-color: #212529;
+        color: #fff;
     }
+    .table_header {
+        z-index: 1;
+    }
+    th {
+        /*color: green;*/
+        color: purple;
+    }
+
+
     
     @media only screen and (max-width: 1100px) {
         .add-expense-container {
@@ -230,8 +260,9 @@
         #mainTable {
             /* MAKE TABLE SCROLLABLE */
             display: block;
-            max-width: -moz-fit-content;
+            /*max-width: -moz-fit-content;*/
             max-width: fit-content;
+            max-height: 500px;
             margin: 0 auto;
             overflow-x: auto;
             white-space: nowrap;
@@ -247,6 +278,10 @@
         #exceedLimitText {
             font-size: 17px;
         }
+        .table_header {
+            font-size: 13px;
+        }
+
     }
     @media only screen and (max-width: 768px) {
         .container-1 {
@@ -399,11 +434,11 @@
             <form id="addExpenseForm">
                 <div class="form-group">
                     <!-- ITEM NAME -->
-                    <label class="inputLabel" for="expenseName">Item Name</label>
+                    <label class="inputLabel" for="expenseName">Expense Name</label>
                     <input class="form-control" name="expenseName" placeholder="Enter The Name of The Expense" autocomplete="off">
                     <br>
                     <!-- ITEM PRICE -->
-                    <label class="inputLabel" for="expensePrice">Item Price</label>
+                    <label class="inputLabel" for="expensePrice">Expense Price</label>
                     <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense" autocomplete="off">
                     <br>
                     <div class="exceed-limit-container">
@@ -457,11 +492,11 @@
         <table id="mainTable" class="table table-striped" style="width: 90%; margin: auto;" >
             <thead class="table-dark">
             <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Actions</th>
+                <th class="table_header">Name</th>
+                <th class="table_header">Price</th>
+                <th class="table_header">Date</th>
+                <th class="table_header">Time</th>
+                <th class="table_header">Actions</th>
             </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -715,113 +750,33 @@
 
                 // CREATE TABLE DATA
                 var tableBody = document.getElementById('tableBody')
-
-                for (let i = 0; i < data.length; i ++) {
-                    let tr = document.createElement('tr')
-
-                    // NAME DATA
-                    let tdName = document.createElement('td')
-                    tdName.className = "table_data"
-                    tdName.height = "65px"
-                    // tdName.width = "10px"
-                    let itemNameText = data[i]['item_name']
-                    tdName.textContent = itemNameText
-
-                    // PRICE DATA
-                    let tdPrice = document.createElement('td')
-                    tdPrice.className = "table_data"
-                    let itemPriceText = '$' + data[i]['item_price']
-                    tdPrice.textContent = itemPriceText
-
-                    // DATE DATA
-                    let tdDate = document.createElement('td')
-                    tdDate.className = "table_data"
-                    let itemDateText = data[i]['date']
-                    tdDate.textContent = itemDateText
-
-                    // TIME DATA
-                    let tdTime = document.createElement('td')
-                    tdTime.className = "table_data"
-                    let itemTimeText = data[i]['time']
-                    tdTime.textContent = itemTimeText
-
-                    // ACTIONS BUTTON
-                    let tdButton  = document.createElement('td')
-
-                    // EDIT BUTTON
-                    let editBtn = document.createElement('a')
-                    editBtn.href = "#editExpenseModal"
-                    editBtn.className = "edit"
-                    editBtn.dataset.toggle="modal"
-                    // ICON
-                    let editIcon = document.createElement('i')
-                    editIcon.className = "material-icons"
-                    editIcon.dataset.toggle = "tooltip"
-                    editIcon.dataset.item_id = data[i]['id']
-                    editIcon.title = "Edit"
-                    editIcon.innerHTML = "&#xE254;"
-
-                    editBtn.appendChild(editIcon)
-                    tdButton.appendChild(editBtn)
-
-                    // DELETE BTN
-                    let deleteBtn = document.createElement('a')
-                    deleteBtn.href = "#deleteExpenseModal"
-                    deleteBtn.className = "delete"
-                    deleteBtn.dataset.toggle = "modal"
-                    // ICON
-                    let deleteIcon = document.createElement('i')
-                    deleteIcon.className = "material-icons"
-                    deleteIcon.dataset.toggle = "tooltip"
-                    deleteIcon.dataset.item_id = data[i]['id']
-                    deleteIcon.title = "Delete"
-                    deleteIcon.innerHTML = "&#xE872;"
-
-                    deleteBtn.appendChild(deleteIcon)
-                    tdButton.appendChild(deleteBtn)
-
-
-                    tr.appendChild(tdName)
-                    tr.appendChild(tdPrice)
-                    tr.appendChild(tdDate)
-                    tr.appendChild(tdTime)
-                    tr.appendChild(tdButton)
-
-                    tableBody.appendChild(tr)
-
+                for (let i = 0; i < data.length; i++) {
+                    tableBody.innerHTML += `
+                    <tr>
+                        <td class="table_data" height="65px">${data[i]['item_name']}</td>
+                        <td class="table_data">${'$' + data[i]['item_price']}</td>
+                        <td class="table_data">${data[i]['date']}</td>
+                        <td class="table_data">${data[i]['time']}</td>
+                        <td>
+                            <a href="#editExpenseModal" class="edit" data-toggle="modal">
+                                <i class="material-icons" data-toggle="tooltip" data-item_id=${data[i]['id']} title="Edit"></i>
+                            </a>
+                            <a href="#deleteExpenseModal" class="delete" data-toggle="modal">
+                                <i class="material-icons" data-toggle="tooltip" data-item_id=${data[i]['id']} title="Delete"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    `
                 }
 
-                // LAST ROW
-                let extraTr = document.createElement('tr')
-                extraTr.className = "table-active"
-
-                let averageExpenseTdHeading = document.createElement('td')
-                averageExpenseTdHeading.id = "averageExpenseHeading"
-                averageExpenseTdHeading.style.fontWeight = "bold"
-                averageExpenseTdHeading.textContent = "Average Expense"
-
-                // EMPLY TD SLOTS
-                // let emptyTd1 = document.createElement('td')
-                // let emptyTd2 = document.createElement('td')
-
-                // AVERAGE EXPENSE
-                let averageExpenseTd = document.createElement('td')
-                averageExpenseTd.className = "table_data"
-                if (data.length !== 0)
-                    averageExpenseTd.textContent = "$" + Expense.computeAverageExpense(data).toFixed(2)
-                else
-                    averageExpenseTd.textContent = ""
-
-                extraTr.appendChild(averageExpenseTdHeading)
-                // extraTr.appendChild(emptyTd1)
-                // extraTr.appendChild(emptyTd2)
-                extraTr.appendChild(averageExpenseTd)
-
-                tableBody.appendChild(extraTr)
-
+                tableBody.innerHTML += `
+                <tr class="table-active">
+                    <td id="averageExpenseHeading">Average Expense</td>
+                    <td class="table_data">${'$' + Expense.computeAverageExpense(data).toFixed(2)}</td>
+                </tr>
+                `
             }
             request.send(200);
-
         }
         // UPDATE EXPENSE TABLE HEADINGS
         static updateExpenseTableHeadings(timePeriod, sortBy, order) {
@@ -1029,15 +984,9 @@
                 exceedLimitText.style.color = "red"
                 exceedLimitText.textContent = "This expense will go over your limit for the year"
             }
-            // if (over === true && screen.width <= 400) {
-            //     addExpenseContainer.style.height = '380px'
-            //     exceedLimitContainer.style.height = '45px'
-            //
-            // }
+
             if (over === false) {
                 exceedLimitText.textContent = ""
-                // addExpenseContainer.style.height = ''
-                // exceedLimitContainer.style.height = ''
             }
 
         }
