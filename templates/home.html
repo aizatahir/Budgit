@@ -1344,8 +1344,8 @@
         UI.updateExpenseTableHeadings(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
         Expense.loadTotalUserExpenses()
         Expense.loadUserExpenseLimits()
-        Expense.displayTotalExpense(userSettings['timePeriod'])
-        Expense.displayExpenseLimit(userSettings['timePeriod'])
+        Expense.displayTotalExpense('this-day')
+        Expense.displayExpenseLimit('this-day')
     })
 
 
