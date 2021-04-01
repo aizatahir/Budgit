@@ -661,9 +661,9 @@
                         <!-- FREQUENCY -->
                         <label id="frequencyHeading" for="frequencySelect">Frequency</label>
                         <select id="frequencySelect" class="form-control">
-                            <option value="every-day">Every Day</option>
-                            <option value="2-days">Every 2 Days</option>
-                            <option value="3-days">Every 3 Days</option>
+                            <option value="every-1-day">Every Day</option>
+                            <option value="every-2-days">Every 2 Days</option>
+                            <option value="every-3-days">Every 3 Days</option>
                             <option value="custom-day">Custom</option>
                         </select>
                         <!-- CUSTOM FREQUENCY INPUT -->
@@ -1214,33 +1214,33 @@
             switch (period) {
                 case 'day':
                     frequencySelect.innerHTML = `
-                <option value="every-day">Every Day</option>
-                <option value="2-days">Every 2 Days</option>
-                <option value="3-days">Every 3 Days</option>
+                <option value="every-1-day">Every Day</option>
+                <option value="every-2-days">Every 2 Days</option>
+                <option value="every-3-days">Every 3 Days</option>
                 <option value="custom-day">Custom</option>
                 `
                     break
                 case 'week':
                     frequencySelect.innerHTML = `
-                <option value="every-week">Every Week</option>
-                <option value="2-weeks">Every 2 Weeks</option>
-                <option value="3-weeks">Every 3 Weeks</option>
+                <option value="every-1-week">Every Week</option>
+                <option value="every-2-weeks">Every 2 Weeks</option>
+                <option value="every-3-weeks">Every 3 Weeks</option>
                 <option value="custom-week">Custom</option>
                 `
                     break
                 case 'month':
                     frequencySelect.innerHTML = `
-                <option value="every-week">Every Month</option>
-                <option value="2-months">Every 2 Months</option>
-                <option value="3-months">Every 3 Months</option>
+                <option value="every-1-month">Every Month</option>
+                <option value="every-2-months">Every 2 Months</option>
+                <option value="every-3-months">Every 3 Months</option>
                 <option value="custom-month">Custom</option>
                 `
                     break
                 case 'year':
                     frequencySelect.innerHTML = `
-                <option value="every-week">Every Year</option>
-                <option value="2-years">Every 2 Years</option>
-                <option value="3-years">Every 3 Years</option>
+                <option value="every-1-year">Every Year</option>
+                <option value="every-2-years">Every 2 Years</option>
+                <option value="every-3-years">Every 3 Years</option>
                 <option value="custom-year">Custom</option>
                 `
                     break
@@ -1341,10 +1341,27 @@
         }
         // ADD SCHEDULE EXPENSE
         static addScheduleExpense() {
+            let frequencySelect = document.querySelector('#frequencySelect')
             let expenseNameField = document.querySelector('#scheduleExpenseNameInput')
             let expensePriceField = document.querySelector('#scheduleExpensePriceInput')
             let expenseStartDateField = document.querySelector('#scheduleExpenseStartDateInput')
+            let startDate = expenseStartDateField.value.replace('/','-').replace('/','-')
+            let frequency
+            // Check if a custom frequency was selected
+            if (['custom-day','custom-week','custom-month','custom-year'].includes(frequencySelect.value)) {
+                frequency = document.querySelector('#customFrequencyInput').dataset.value
+            }
+            else {
+                frequency = frequencySelect.value
+            }
 
+            const request = new XMLHttpRequest()
+            request.open('POST', `/scheduleExpense/${expenseNameField.value}/${expensePriceField.value}/${startDate}/${frequency}`)
+            request.send()
+            // console.log(expenseNameField.value)
+            // console.log(expensePriceField.value)
+            // console.log(expenseStartDateField.value)
+            // console.log(frequency)
 
         }
 
@@ -1488,14 +1505,16 @@
         let expenseNameField = document.querySelector('#scheduleExpenseNameInput')
         let expensePriceField = document.querySelector('#scheduleExpensePriceInput')
         let expenseStartDateField = document.querySelector('#scheduleExpenseStartDateInput')
+        // Add Schedule Expense
+        ScheduleExpense.addScheduleExpense()
+        // Clear fields
         expenseNameField.value = ''
         expensePriceField.value = ''
         expenseStartDateField.value = ''
+        // Remove Custom Frequency
+        ScheduleExpense.removeCustomFrequency()
         // Clear select box
         frequencySelect.options[0].selected = true
-        ScheduleExpense.removeCustomFrequency()
-        // Add Schedule Expense
-        ScheduleExpense.addScheduleExpense()
         // Disable Btn
         scheduleBtn.disabled = true
     }
@@ -1585,6 +1604,7 @@
     document.querySelector('#customFrequencyInput').onblur = function() {
         ScheduleExpense.validateCustomFrequencyInput()
         let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
+        let customFrequencyInput = document.querySelector('#customFrequencyInput')
         let headingToUse = ''
 
         // Extract the first two words for the heading
@@ -1594,11 +1614,18 @@
             headingToUse += ' '
         }
         headingToUse = headingToUse.trimEnd()
-        let period = headingToUse.split(' ')[1]
+        let timePeriod = headingToUse.split(' ')[1]
 
 
         if (this.value !== '') {
-            customFrequencyHeading.innerHTML = `${headingToUse} → <span style="font-weight: normal">Every ${this.value} ${period}s</span>`
+            // Make Time Period Singular or Plural
+            if (this.value === '1')
+                timePeriod = timePeriod.replace('s', '')
+            else
+                timePeriod += 's'
+
+            customFrequencyHeading.innerHTML = `${headingToUse} → <span style="font-weight: normal">Every ${this.value} ${timePeriod}</span>`
+            customFrequencyInput.dataset.value = `every-${this.value}-${timePeriod.toLowerCase()}`
         }
         else {
             customFrequencyHeading.textContent = headingToUse

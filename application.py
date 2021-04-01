@@ -248,7 +248,7 @@ def addExpense(expenseData):
         return 'Expense Added, Spending Limit Not Exceeded'
         # return redirect(f"/home/{session['user_id']}")
     else:
-        if autoSendEmail == 'enabled':
+        if autoSendEmail == 'enabled' and autoSendEmail != None:
             # SEND EMAIL TO USER INFORMING THEM THAT THEY WENT OVER THEIR SPENDING LIMIT
             limitsWentOver = userWentOverSpendingLimit()
             userEmailAddress = User.query.get(session['user_id']).email
@@ -267,6 +267,32 @@ def addExpense(expenseData):
         else:
             return 'Expense Added, Spending Limit Exceeded'
             # return redirect(f"/home/{session['user_id']}")
+
+# ADD SCHEDULE EXPENSE
+@app.route("/scheduleExpense/<string:expenseName>/<string:expensePrice>/<string:startDate>/<string:frequency>", methods=["POST", "GET"])
+@login_required
+def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
+    now = datetime.now(EST()).date()
+    now = now.strftime("%B %d, %Y")
+    # print(expenseName)
+    # print(expensePrice)
+    # print(startDate)
+    # print(frequency)
+    # CONVERT DATE FROM mm-dd-yyyy TO 'now' FORMAT
+    startDate = convertStartDate(startDate, 'mm-dd-yyyy', 'now-format')
+    # EXPENSE IS TO BE ADDED TODAY
+    if startDate == now:
+        expenseData = {
+            'expenseName': expenseName,
+            'expensePrice': expensePrice,
+            'auto-send-email': None
+        }
+        addExpense(json.dumps(expenseData))
+
+    SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate, next_due=startDate, frequency=frequency, user_id=session['user_id'])
+    SE.addScheduledExpense()
+
+    return 'Expense Successfully Scheduled'
 
 
 # USER WENT OVER SPENDING LIMIT
@@ -515,6 +541,24 @@ def test():
 
 
 
+def convertStartDate(startDate, currentFormat, newFormat):
+    SupportedFormats = ['mm-dd-yyyy', 'dd-mm-yyyy', 'mm/dd/yyyy', 'dd/mm/yyyy', 'now-format']
+    if currentFormat not in SupportedFormats:
+        raise ValueError(f'{currentFormat} is not supported as currentFormat')
+    if newFormat not in SupportedFormats:
+        raise ValueError(f'{newFormat} is not supported as newFormat')
+
+    monthLookup = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August', 9: 'Septmeber',
+                   10: 'October', 11: 'November', 12: 'December'}
+    if currentFormat == 'mm-dd-yyyy':
+        if newFormat == 'now-format':
+            try:
+                day, month, year = int(startDate.split('-')[1]), monthLookup[int(startDate.split('-')[0])], int(startDate.split('-')[2])
+            except ValueError:
+                raise ValueError('startDate was not formatted correctly')
+
+            newFormat = f'{month} {day}, {year}'
+            return newFormat
 
 
 def getThisWeekForQuery(now):

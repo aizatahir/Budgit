@@ -1,9 +1,13 @@
 import os
+from dotenv import load_dotenv
 
 from flask import Flask, render_template, request
 from models import *
 
-
+# Check for environment variable
+load_dotenv()
+if not os.getenv("DATABASE_URL"):
+    raise RuntimeError("DATABASE_URL is not set")
 
 
 

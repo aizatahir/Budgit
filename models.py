@@ -7,6 +7,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import and_
 
 
+
+
 db = SQLAlchemy()
 
 class User(db.Model):
@@ -47,6 +49,21 @@ class Expense(db.Model):
     def addExpense(self):
         e = Expense(item_name=self.item_name, item_price=self.item_price, date=self.date, time=self.time, user_id=self.user_id)
         db.session.add(e)
+        db.session.commit()
+
+class ScheduledExpense(db.Model):
+    __tablename__ = 'scheduled_expenses'
+    id = db.Column(db.Integer, primary_key=True)
+    expense_name = db.Column(db.String, nullable=False)
+    expense_price = db.Column(db.Float, nullable=False)
+    start_date = db.Column(db.String, nullable=False)
+    next_due = db.Column(db.String, nullable=False)
+    frequency = db.Column(db.String, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def addScheduledExpense(self):
+        SE = ScheduledExpense(expense_name=self.expense_name, expense_price=self.expense_price, start_date=self.start_date, next_due=self.next_due, frequency=self.frequency, user_id=self.user_id)
+        db.session.add(SE)
         db.session.commit()
 
 class ExpenseLimit(db.Model):
