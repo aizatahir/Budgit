@@ -47,17 +47,19 @@ db.init_app(app)
 
 # ENABLE SESSION
 Session(app)
-# session = {}
+scheduleExpenseSession = {}
 
-class EST(tzinfo):
-    def utcoffset(self, dt):
-        return timedelta(hours = -5)
+from Classes import EST
+# class EST(tzinfo):
+#     def utcoffset(self, dt):
+#         return timedelta(hours = -5)
+#
+#     def tzname(self, dt):
+#         return "EST"
+#
+#     def dst(self, dt):
+#         return timedelta(0)
 
-    def tzname(self, dt):
-        return "EST"
-
-    def dst(self, dt):
-        return timedelta(0)
 
 # INDEX
 @app.route("/")
@@ -80,6 +82,7 @@ if app.config['TESTING'] == False:
         return wrap
 else:
     session = {}
+
     def login_required(f):
         @wraps(f)
         def wrap(*args, **kwargs):
@@ -241,8 +244,9 @@ def addExpense(expenseData):
 
     time = getCurrentTime()
 
-    expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"])
+    expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"] if 'user_id' in session else scheduleExpenseSession['user_id'])
     expense.addExpense()
+
     # CHECK IF EXPENSE WENT OVER SPENDING LIMIT
     if not userWentOverSpendingLimit():
         return 'Expense Added, Spending Limit Not Exceeded'
@@ -548,7 +552,7 @@ def convertStartDate(startDate, currentFormat, newFormat):
     if newFormat not in SupportedFormats:
         raise ValueError(f'{newFormat} is not supported as newFormat')
 
-    monthLookup = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August', 9: 'Septmeber',
+    monthLookup = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August', 9: 'September',
                    10: 'October', 11: 'November', 12: 'December'}
     if currentFormat == 'mm-dd-yyyy':
         if newFormat == 'now-format':
@@ -704,18 +708,28 @@ def getCurrentYear(now):
     year = now.split()[2]
     return int(year)
 
-def getMonthIndex(now):
-    if not isValidDate(now):
-        raise ValueError(f"date is invalid")
+def getMonthIndex(now=None, specificMonth=None):
+    if specificMonth == None:
+        if not isValidDate(now):
+            raise ValueError(f"date is invalid")
 
-    currentMonth = now.split()[0]
-    months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
-              "November", "December"]
+        currentMonth = now.split()[0]
+        months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                  "November", "December"]
 
-    for i, month in enumerate(months, 1):
-        if month == currentMonth:
-            return i
-    return None
+        for i, month in enumerate(months, 1):
+            if month == currentMonth:
+                return i
+        return None
+    else:
+        months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                  "November", "December"]
+
+        for i, month in enumerate(months, 1):
+            if month == specificMonth:
+                return i
+        return None
+
 
 def isValidDate(date):
     if len(date.split()) != 3:

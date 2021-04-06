@@ -1,10 +1,13 @@
 import hashlib
+import datetime
+from Classes import datetime, EST, Date
+from Methods import getThisWeekForQuery
 # from datetime import date, datetime
 # current_date = date.today()
 # now = current_date.strftime("%B %d, %Y")
 
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 
 
 
@@ -46,10 +49,38 @@ class Expense(db.Model):
     time = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
+    now = datetime.now(EST()).date()
+    now = now.strftime("%B %d, %Y")
+    now = Date(now)
+
+
     def addExpense(self):
         e = Expense(item_name=self.item_name, item_price=self.item_price, date=self.date, time=self.time, user_id=self.user_id)
         db.session.add(e)
         db.session.commit()
+
+    def getTotalUserExpense(self, period):
+        if period == 'all-time':
+            expenseQuery = db.session.query(func.sum(Expense.item_price)).filter_by(user_id=self.user_id).first()[0]
+            return expenseQuery if expenseQuery != None else 0.0
+        elif period == 'this-day':
+            expenseQuery = db.session.query(func.sum(Expense.item_price)).filter_by(date=str(Expense.now), user_id=self.user_id).first()[0]
+            return expenseQuery if expenseQuery != None else 0.0
+        elif period == 'this-week':
+            thisWeek = getThisWeekForQuery(str(Expense.now))
+            expenseQuery = db.session.query(func.sum(Expense.item_price)).filter(and_(Expense.user_id == self.user_id, Expense.date.in_(thisWeek))).first()[0]
+            return expenseQuery if expenseQuery != None else 0.0
+        elif period == 'this-month':
+            thisMonth, thisYear = Expense.now.month, str(Expense.now.year)
+            expenseQuery = db.session.query(func.sum(Expense.item_price)).filter(and_(Expense.user_id == self.user_id, Expense.date.like(f"%{thisMonth}%"), Expense.date.like(f"%{thisYear}%"))).first()[0]
+            return expenseQuery if expenseQuery != None else 0.0
+        elif period == 'this-year':
+            thisYear = str(Expense.now.year)
+            expenseQuery = db.session.query(func.sum(Expense.item_price)).filter(and_(Expense.user_id == self.user_id, Expense.date.like(f"%{thisYear}%"))).first()[0]
+            return expenseQuery if expenseQuery != None else 0.0
+
+
+
 
 class ScheduledExpense(db.Model):
     __tablename__ = 'scheduled_expenses'
