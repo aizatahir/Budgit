@@ -159,6 +159,9 @@
     #customFrequencyHeading, #customFrequencyInput {
         display: none;
     }
+    #scheduleExpenseDateSelect {
+        margin-bottom: 5%;
+    }
     #mainTable {
         /*display: block;*/
         max-height: 400px;
@@ -624,7 +627,11 @@
                         <input id="scheduleExpensePriceInput" class="form-control" name="expensePrice" autocomplete="off">
                         <!-- START DATE -->
                         <label class="inputLabel" for="scheduleExpenseStartDateInput">Start Date</label>
-                        <input id="scheduleExpenseStartDateInput" class="form-control" name="expenseStartDate" placeholder="MM/DD/YYYY" autocomplete="off">
+                        <select class="form-control" id="scheduleExpenseDateSelect">
+                            <option value="#">Today</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <input id="scheduleExpenseStartDateInput" class="form-control" name="expenseStartDate" placeholder="MM/DD/YYYY" autocomplete="off" style="display: none">
                     </form>
 
                     <!-- ERROR MESSAGE -->
@@ -668,7 +675,7 @@
                         </select>
                         <!-- CUSTOM FREQUENCY INPUT -->
                         <label id="customFrequencyHeading" for="customFrequencyInput"></label>
-                        <input id="customFrequencyInput" class="form-control" type="number" min="1" max="100">
+                        <input id="customFrequencyInput" class="form-control" type="number" min="1" max="1000">
                         <!-- ERROR MESSAGE -->
                         <p class="text-danger error-message"><small id="customFrequencyErrorMessage"></small></p>
                     </div>
@@ -735,6 +742,10 @@
         }
         // populateTable
         static populateTable(timePeriod, sortBy, order) {
+            // console.log('called')
+            // console.log(timePeriod)
+            // console.log(sortBy)
+            // console.log(order)
             // Clear the table
             this.removeAllChildNodes(document.getElementById('tableBody'))
 
@@ -1264,6 +1275,7 @@
             let expenseNameField = document.querySelector('#scheduleExpenseNameInput')
             let expensePriceField = document.querySelector('#scheduleExpensePriceInput')
             let expenseStartDateField = document.querySelector('#scheduleExpenseStartDateInput')
+            let scheduleExpenseDateSelect = document.querySelector('#scheduleExpenseDateSelect')
             let errorMessage = document.querySelector('#scheduleExpenseErrorMessage')
             let scheduleBtn = document.querySelector('#scheduleExpenseSaveBtn')
 
@@ -1300,18 +1312,24 @@
             }
 
             // Validate expenseStartDateField
-            if (expenseStartDateField.value !== '') {
-                if (!(isValidDate(expenseStartDateField.value))) {
-                    validDate = false
-                    errorMessage.textContent = 'Invalid Start Date'
-                    expenseStartDateField.style.borderColor = 'red'
-                }
-                else {
-                    validDate = true
-                    errorMessage.textContent = ''
-                    expenseStartDateField.style.borderColor = ''
+            if (scheduleExpenseDateSelect.selectedIndex !== 0) {   // 'Today' was selected
+                if (expenseStartDateField.value !== '') {
+                    if (!(isValidDate(expenseStartDateField.value))) {
+                        validDate = false
+                        errorMessage.textContent = 'Invalid Start Date'
+                        expenseStartDateField.style.borderColor = 'red'
+                    }
+                    else {
+                        validDate = true
+                        errorMessage.textContent = ''
+                        expenseStartDateField.style.borderColor = ''
+                    }
                 }
             }
+            else {
+                validDate = true
+            }
+
 
             // Check If All Fields Are Valid
             if (validName && validPrice && validDate)
@@ -1326,16 +1344,22 @@
             let errorMessage = document.querySelector('#customFrequencyErrorMessage')
             let scheduleBtn = document.querySelector('#scheduleExpenseSaveBtn')
 
-            if (isNaN(customFrequencyField.value) || parseInt(customFrequencyField.value) <= 0) {
-                errorMessage.textContent = 'Frequency Must Be a Positive Integer'
-                customFrequencyField.style.borderColor = 'red'
-                scheduleBtn.disabled = true
+            if (customFrequencyField.value !== '') {
+                if (isNaN(customFrequencyField.value) || parseInt(customFrequencyField.value) <= 0 || parseInt(customFrequencyField.value) > 1000) {
+                    errorMessage.textContent = 'Frequency Must Be a Positive Integer Less Than 1000'
+                    customFrequencyField.style.borderColor = 'red'
+                    scheduleBtn.disabled = true
+                }
+                else {
+                    errorMessage.textContent = ''
+                    customFrequencyField.style.borderColor = ''
+                    scheduleBtn.disabled = false
+                }
             }
             else {
-                errorMessage.textContent = ''
-                customFrequencyField.style.borderColor = ''
-                scheduleBtn.disabled = false
+                scheduleBtn.disabled = true
             }
+
 
 
         }
@@ -1344,8 +1368,15 @@
             let frequencySelect = document.querySelector('#frequencySelect')
             let expenseNameField = document.querySelector('#scheduleExpenseNameInput')
             let expensePriceField = document.querySelector('#scheduleExpensePriceInput')
+            let scheduleExpenseDateSelect = document.querySelector('#scheduleExpenseDateSelect')
             let expenseStartDateField = document.querySelector('#scheduleExpenseStartDateInput')
-            let startDate = expenseStartDateField.value.replace('/','-').replace('/','-')
+
+            let startDate
+            if (scheduleExpenseDateSelect.selectedIndex !== 0)
+                startDate = expenseStartDateField.value.replace('/','-').replace('/','-') // 'Other' was selected
+            else
+                startDate = scheduleExpenseDateSelect.options[0].value.replace('/','-').replace('/','-')  // 'Today' was selected
+
             let frequency
             // Check if a custom frequency was selected
             if (['custom-day','custom-week','custom-month','custom-year'].includes(frequencySelect.value)) {
@@ -1358,10 +1389,24 @@
             const request = new XMLHttpRequest()
             request.open('POST', `/scheduleExpense/${expenseNameField.value}/${expensePriceField.value}/${startDate}/${frequency}`)
             request.send()
-            // console.log(expenseNameField.value)
-            // console.log(expensePriceField.value)
-            // console.log(expenseStartDateField.value)
-            // console.log(frequency)
+
+
+
+            if (startDate.replace('-', '/').replace('-', '/') === getCurrentDate('mm/dd/yyyy')) {
+                /*
+                The Expense was scheduled for today.
+                The setTimeout function was used because the table doesnt get re-populated without it for some reason
+                */
+                setTimeout(() => {
+                    let userSettings = {
+                        'timePeriod': Settings.getUserSettings()['expenseTable-Time-Period'],
+                        'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
+                        'order': Settings.getUserSettings()['expenseTable-Order'],
+                    }
+                    UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
+                }, 2000)
+
+            }
 
         }
 
@@ -1449,7 +1494,6 @@
             'order': Settings.getUserSettings()['expenseTable-Order'],
         }
 
-
         UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
         UI.updateExpenseTableHeadings(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
         Expense.loadTotalUserExpenses()
@@ -1495,6 +1539,13 @@
             ScheduleExpense.removeCustomFrequency()
         }
     }
+    // Schedule Expense Pop Up
+    document.querySelector('#scheduleExpenseBtn').addEventListener('click', () => {
+        // Add today's date to the 'Today' option
+        let scheduleExpenseDateSelect = document.querySelector('#scheduleExpenseDateSelect')
+
+        scheduleExpenseDateSelect.options[0].value = getCurrentDate('mm/dd/yyyy')
+    })
     // Add Schedule Expense
     document.querySelector('#scheduleExpenseSaveBtn').onclick = () => {
         let frequencySelect = document.querySelector('#frequencySelect')
@@ -1517,6 +1568,12 @@
         frequencySelect.options[0].selected = true
         // Disable Btn
         scheduleBtn.disabled = true
+        // Show Alert
+        UI.scrollToTop()
+        UI.showAlert('Schedule Expense Added', 'success', 'top')
+
+
+
     }
 
 
@@ -1574,6 +1631,18 @@
                 ScheduleExpense.removeCustomFrequency()
         }
     }
+    // Schedule Expense Start Date Select
+    document.querySelector('#scheduleExpenseDateSelect').onchange = function () {
+        let scheduleExpenseStartDateInput = document.querySelector('#scheduleExpenseStartDateInput')
+
+        if (this.value === 'other') {
+            scheduleExpenseStartDateInput.style.display = 'block'
+        }
+        else {
+            scheduleExpenseStartDateInput.style.display = 'none'
+        }
+        ScheduleExpense.validateAddScheduleExpenseForm()
+    }
 
 
     /** ON-KEY UP EVENTS **/
@@ -1605,6 +1674,7 @@
         ScheduleExpense.validateCustomFrequencyInput()
         let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
         let customFrequencyInput = document.querySelector('#customFrequencyInput')
+        let scheduleExpenseSaveBtn = document.querySelector('#scheduleExpenseSaveBtn')
         let headingToUse = ''
 
         // Extract the first two words for the heading
@@ -1628,6 +1698,7 @@
             customFrequencyInput.dataset.value = `every-${this.value}-${timePeriod.toLowerCase()}`
         }
         else {
+            scheduleExpenseSaveBtn.disabled = true
             customFrequencyHeading.textContent = headingToUse
         }
     }
@@ -1647,6 +1718,17 @@
             selectOptionsDict[option.value] = option
         }
         return selectOptionsDict
+    }
+
+    function getCurrentDate(format) {
+        let d = new Date()
+        let dateString
+        switch (format) {
+            case 'mm/dd/yyyy':
+                dateString = `${d.getMonth()+1}/${d.getDate()}/${d.getFullYear()}`
+                break
+        }
+        return dateString
     }
 
     function isValidDate(date) {

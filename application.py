@@ -50,16 +50,7 @@ Session(app)
 scheduleExpenseSession = {}
 
 from Classes import EST
-# class EST(tzinfo):
-#     def utcoffset(self, dt):
-#         return timedelta(hours = -5)
-#
-#     def tzname(self, dt):
-#         return "EST"
-#
-#     def dst(self, dt):
-#         return timedelta(0)
-
+from Methods import getIntegerDayForNow
 
 # INDEX
 @app.route("/")
@@ -284,6 +275,9 @@ def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
     # print(frequency)
     # CONVERT DATE FROM mm-dd-yyyy TO 'now' FORMAT
     startDate = convertStartDate(startDate, 'mm-dd-yyyy', 'now-format')
+    now = getIntegerDayForNow(now)
+    print(f'startDate: {startDate}')
+    print(f'now: {now}')
     # EXPENSE IS TO BE ADDED TODAY
     if startDate == now:
         expenseData = {

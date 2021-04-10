@@ -132,6 +132,20 @@ def getCurrentTime():
     time = f"{hour}:{minute}"
     return time
 
+def getIntegerDayForNow(now):
+    """
+    THIS IS A METHOD THAT PARSES THE DATE BY CONVERTING THE SINGLE DIGIT DAYS TO AN INTEGER. EXAMPLE: 'May 03, 2021' GETS RETURNED AS 'May 3, 2021'
+    """
+    if not isValidDate(now):
+        raise ValueError("date is invalid")
+    month = now.split()[0]
+    day = f"{int(now.split()[1].replace(',', ''))}"
+    year = now.split()[2]
+
+    return f'{month} {day}, {year}'
+
+
+
 def getCurrentDay(now):
     if not isValidDate(now):
         raise ValueError(f"date is invalid")
