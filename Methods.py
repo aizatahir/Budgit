@@ -3,6 +3,8 @@ from calendar import monthrange
 from datetime import date, timedelta, tzinfo, datetime
 from math import inf
 
+from Classes import Date
+
 def getThisWeekForQuery(now):
     """ THIS FUNCTION RETURNS AN ARRAY OF ALL THE DATES IN THE CURRENT WEEK """
 
@@ -208,3 +210,40 @@ def isValidDate(date):
         return False
 
     return True
+
+
+def getMostRecentDate(listOfDates: list):
+    mostRecentDay = 1
+    mostRecentMonth = 1
+    mostRecentYear = 1
+    # FILTER YEAR
+    for date in listOfDates:
+        date = Date(date)
+        if date.year > mostRecentYear:
+            mostRecentYear = date.year
+    # FILTER MONTH
+    for date in listOfDates:
+        date = Date(date)
+        if date.year == mostRecentYear:
+            if date.getMonthIndex(specificMonth=date.month) > mostRecentMonth:
+                mostRecentMonth = date.getMonthIndex(specificMonth=date.month)
+    # FILTER DAY
+    for date in listOfDates:
+        date = Date(date)
+        if (date.year == mostRecentYear) and (date.month == Date.monthLookup[mostRecentMonth]) and (date.day > mostRecentDay):
+            mostRecentDay = date.day
+
+    # CONVERT MOST RECENT MONTH FROM INDEX FORM TO THE NAME OF THE MONTH
+    mostRecentMonth = Date.monthLookup[mostRecentMonth]
+
+    return Date(f"{mostRecentMonth} {mostRecentDay}, {mostRecentYear}")
+
+
+
+
+def main():
+    Dates = ['January 20, 2021', 'March 02, 2021', 'June 20, 2021']
+    print(getMostRecentDate(Dates))
+
+
+main()

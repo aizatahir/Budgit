@@ -47,15 +47,11 @@ db.init_app(app)
 
 # ENABLE SESSION
 Session(app)
-scheduleExpenseSession = {}
 
 from Classes import EST
-from Methods import getIntegerDayForNow
+from Methods import getIntegerDayForNow, getMostRecentDate
 
-# INDEX
-@app.route("/")
-def index():
-    return render_template("index.html")
+
 
 
 # LOGIN REQUIRED
@@ -79,6 +75,12 @@ else:
         def wrap(*args, **kwargs):
             return f(*args, **kwargs)
         return wrap
+
+
+# INDEX
+@app.route("/")
+def index():
+    return render_template("index.html")
 
 @app.route('/test2', methods=['GET'])
 def newTest():
@@ -235,7 +237,7 @@ def addExpense(expenseData):
 
     time = getCurrentTime()
 
-    expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"] if 'user_id' in session else scheduleExpenseSession['user_id'])
+    expense = Expense(item_name=expenseName, item_price=expensePrice, date=date, time=time, user_id=session["user_id"])
     expense.addExpense()
 
     # CHECK IF EXPENSE WENT OVER SPENDING LIMIT
@@ -276,8 +278,6 @@ def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
     # CONVERT DATE FROM mm-dd-yyyy TO 'now' FORMAT
     startDate = convertStartDate(startDate, 'mm-dd-yyyy', 'now-format')
     now = getIntegerDayForNow(now)
-    print(f'startDate: {startDate}')
-    print(f'now: {now}')
     # EXPENSE IS TO BE ADDED TODAY
     if startDate == now:
         expenseData = {
@@ -412,6 +412,37 @@ def getExpenses(period, sortBy, order):
         })
 
     return jsonify(userExpenses)
+
+# GET SCHEDULE EXPENSES
+@app.route("/getUserScheduleExpenses", methods=['GET'])
+@login_required
+def getUserScheduleExpenses():
+    userScheduleExpenses = ScheduledExpense.query.filter_by(user_id=session['user_id']).all()
+
+    allUserScheduleExpenses = []
+
+    for schedule_expense in userScheduleExpenses:
+        # GET LAST DUE
+        # print(expense.expense_name)
+        expenseDates = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.item_name == schedule_expense.expense_name)).all()
+        # print(f"expenseDates: {expenseDates}")
+        if expenseDates != []:
+            allExpenseDates = [expense.date for expense in expenseDates]
+            lastDue = str(getMostRecentDate(allExpenseDates))
+        else:
+            lastDue = 'Never'
+
+        allUserScheduleExpenses.append({
+            'id': schedule_expense.id,
+            'expense_name': schedule_expense.expense_name,
+            'expense_price': schedule_expense.expense_price,
+            'last_due': lastDue,
+            'next_due': schedule_expense.next_due,
+            'frequency': schedule_expense.frequency,
+            'user_id': schedule_expense.user_id
+        })
+
+    return jsonify(allUserScheduleExpenses)
 
 # GET TOTAL EXPENSE
 @app.route("/getTotalExpense/<string:period>", methods=["GET"])

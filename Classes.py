@@ -1,7 +1,7 @@
 import datetime
 from calendar import monthrange
 from datetime import date, timedelta, tzinfo, datetime
-from Methods import getMonthIndex
+# from Methods import getMonthIndex
 
 
 
@@ -28,6 +28,56 @@ class Date:
             now = datetime.now(EST()).date()
             self.now = now.strftime("%B %d, %Y")
 
+    # TODO - FIX
+    def isValidDate(self, date):
+        if len(date.split()) != 3:
+            return False
+        if ',' not in date:
+            return False
+        # CHECK DAY
+        try:
+            day = date.split()[1]
+            day = int(day.replace(',', ''))
+        except:
+            return False
+        # CHECK MONTH
+        try:
+            currentMonth = date.split()[0]
+        except:
+            return False
+        if currentMonth not in ["January", "February", "March", "April", "May", "June", "July", "August", "September",
+                                "October", "November", "December"]:
+            return False
+        # CHECK YEAR
+        try:
+            year = int(date.split()[2])
+        except:
+            return False
+
+        return True
+
+
+    def getMonthIndex(self, now=None, specificMonth=None):
+        if specificMonth == None:
+            # if not self.isValidDate(now):
+            #     raise ValueError(f"date is invalid")
+
+            currentMonth = now.split()[0]
+            months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                      "November", "December"]
+
+            for i, month in enumerate(months, 1):
+                if month == currentMonth:
+                    return i
+            return None
+        else:
+            months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October",
+                      "November", "December"]
+
+            for i, month in enumerate(months, 1):
+                if month == specificMonth:
+                    return i
+            return None
 
     # ADD TIME
     def addTime(self, timePeriod, amount):
@@ -42,7 +92,7 @@ class Date:
             """
             if (self.day + amount) > NDIM:
                 self.day = (self.day + amount) - NDIM
-                self.month = self.addMonth(1)
+                self.month = self.addMonth(1, updateYear=False)
                 NDIM = self.getNumDaysInMonth()
                 numMonthsAdded += 1
                 while (self.day) > NDIM:
@@ -68,16 +118,27 @@ class Date:
     # GET NUM DAYS IN MONTH
     def getNumDaysInMonth(self) -> int:
         """ RETURNS THE NUMBER OF DAYS IN THE MONTH """
-        NDIM = monthrange(self.year, getMonthIndex(specificMonth=self.month))
+        NDIM = monthrange(self.year, self.getMonthIndex(specificMonth=self.month))
         return NDIM[1]
 
     # ADD MONTH
-    def addMonth(self, amount: int) -> str:
-        """ FUNCTIONALITY FOR INCREMENTING MONTH  """
-        monthIndex = getMonthIndex(specificMonth=self.month)
-        monthIndex += amount
-        monthIndex = monthIndex % 12 if monthIndex != 12 else 12
-        return Date.monthLookup[monthIndex]
+    def addMonth(self, amount: int, updateYear=True) -> str:
+        """ FUNCTIONALITY FOR INCREMENTING MONTH """
+        if updateYear:
+            monthIndex = self.getMonthIndex(self.month)
+            monthIndex += amount
+            offset = 0
+            while monthIndex > 12:
+                offset += 1
+                monthIndex -= 12
+
+            self.year += offset
+            return Date.monthLookup[monthIndex]
+        else:
+            monthIndex = self.getMonthIndex(self.month)
+            monthIndex += amount
+            monthIndex = monthIndex % 12 if monthIndex != 12 else 12
+            return Date.monthLookup[monthIndex]
 
 
     def __str__(self):
@@ -100,3 +161,9 @@ class Date:
             return (self.day == Date(other).day) and (self.month == Date(other).month) and (self.year == Date(other).year)
 
 
+
+
+def Test():
+    pass
+
+Test()

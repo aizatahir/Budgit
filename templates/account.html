@@ -41,7 +41,7 @@
         height: 80px;
         width: 80px;
     }
-    #changePassBtn {
+    #changePassBtn, #viewScheduleExpenses {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
     #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #autoSendEmailsBtn {
@@ -67,6 +67,26 @@
         font-family: 'Times New Roman', Times, serif;
         /* margin-right: 60%; */
     }
+    #scheduleExpenseTable {
+        /*display: block;*/
+        max-height: 400px;
+        /*min-width: 100%;*/
+        margin: 0 auto;
+        /* Make table scrollable */
+        overflow-x: auto;
+    }
+    .table_header {
+        position: relative;
+        width: 1%;
+    }
+    .table_data {
+        font-weight: 600;
+        font-size: 14px;
+    }
+    .edit-input {
+        font-weight: 600;
+        font-size: 14px;
+    }
     img {
         max-width: 100%;
         height: auto;
@@ -74,6 +94,8 @@
     a {
         color: orange;
     }
+
+
     
     @media only screen and (max-width: 950px) {
         #logoutBtn {
@@ -81,9 +103,28 @@
         }
 
     }
+
     @media only screen and (max-width: 770px) {
         .acc-container {
             width: 85%;
+        }
+    }
+    @media only screen and (max-width: 1000px) {
+        #scheduleExpenseTable {
+            /* MAKE TABLE SCROLLABLE */
+            display: block;
+            /*max-width: -moz-fit-content;*/
+            max-width: fit-content;
+            max-height: 500px;
+            margin: 0 auto;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .edit-expense-name-input, .edit-expense-price-input {
+            width: 80px;
+        }
+        .edit-expense-frequency {
+            width: 130px;
         }
     }
     @media only screen and (max-width: 660px) {
@@ -174,6 +215,11 @@
             <a href="#updatePasswordModal" class="edit" data-toggle="modal">
                 <button id="changePassBtn" class="btn btn-light">Update Password</button>
             </a>
+            <!-- VIEW SCHEDULE EXPENSES -->
+            <a href="#scheduleExpenseModal" data-toggle="modal">
+                <button id="viewScheduleExpenses" class="btn btn-light">View Schedule Expenses</button>
+            </a>
+
         </div>
     </div>
 </div>
@@ -287,8 +333,6 @@
 	</div>
 </div>
 
-
-
 <!-- UPDATE PASSWORD MODAL -->
 <div id="updatePasswordModal" class="modal fade">
     <div class="modal-dialog">
@@ -325,15 +369,136 @@
     </div>
 </div>
 
+<!-- VIEW SCHEDULE EXPENSE MODAL -->
+<div id="scheduleExpenseModal" class="modal fade">
+    <div class="modal-dialog modal-xl">
+        <div id="scheduleExpenseModalTable">
+            <div class="modal-content">
+                <!-- HEADER -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Schedule Expenses</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <!-- BODY -->
+                <div class="modal-body">
+                    <div style="text-align: center;">
+                        <table id="scheduleExpenseTable" class="table table" style="width:100%; margin: auto">
+                            <thead class="thead-dark">
+                            <tr>
+                                <th class="table_header">Name</th>
+                                <th class="table_header">Price</th>
+                                <th class="table_header">Last Due</th>
+                                <th class="table_header">Next Due</th>
+                                <th class="table_header">Frequency</th>
+                                <th class="table_header">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="scheduleExpenseTableBody">
+<!--                                <tr>-->
+<!--                                    <td class="table_data" height="65px">Car Payment</td>-->
+<!--                                    <td class="table_data">$1400</td>-->
+<!--                                    <td class="table_data">March 20, 2021</td>-->
+<!--                                    <td class="table_data">April 20, 2021</td>-->
+<!--                                    <td class="table_data">Every Month</td>-->
+<!--                                    <td>-->
+<!--                                        <a href="#editExpenseModal" class="edit" data-toggle="modal">-->
+<!--                                            <i class="material-icons" data-toggle="tooltip" data-item_id="53" title="Edit"></i>-->
+<!--                                        </a>-->
+<!--                                        <a href="#deleteExpenseModal" class="delete" data-toggle="modal">-->
+<!--                                            <i class="material-icons" data-toggle="tooltip" data-item_id="53" title="Delete"></i>-->
+<!--                                        </a>-->
+<!--                                    </td>-->
+<!--                                </tr>-->
+<!--                                <tr class="table-active">-->
+<!--                                    <td style="font-weight: bold;">Extra-Column</td>-->
+<!--                                    <td></td>-->
+<!--                                    <td class="table_data">Table-Data</td>-->
+<!--                                </tr>-->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- SAVE AND CANCEL BUTTON -->
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
+                    <button id="saveEditBtn" class="btn btn-primary" type="button" disabled>Save</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 
 {% endblock %}
 
 {% block script %}
 <script>
+    // UI CLASS
+    class UI {
+        static populateScheduleExpenseTable() {
+            let tableBody = document.querySelector('#scheduleExpenseTableBody')
+
+            const request = new XMLHttpRequest()
+            request.open('GET', `/getUserScheduleExpenses`)
+            request.onload = () => {
+                const data = JSON.parse(request.responseText)
+                for (let expense of data) {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td class="table_data" data-info="expense_name" height="65px">${expense['expense_name']}</td>
+                            <td class="table_data" data-info="expense_price">$${expense['expense_price']}</td>
+                            <td class="table_data" data-info="last_due">${expense['last_due']}</td>
+                            <td class="table_data" data-info="next_due">${expense['next_due']}</td>
+                            <td class="table_data" data-info="frequency">${expense['frequency']}</td>
+                            <td>
+                                <a href="#" class="edit" data-toggle="modal">
+                                    <i class="material-icons" data-toggle="tooltip" data-expense_id=${expense['id']} title="Edit"></i>
+                                </a>
+                                <a href="#deleteExpenseModal" class="delete" data-toggle="modal">
+                                    <i class="material-icons" data-toggle="tooltip" data-expense_id=${expense['id']} title="Delete" style="color: #e20e0e"></i>
+                                </a>
+                            </td>
+                        </tr>
+
+                    `
+
+                }
+            }
+            request.send()
+
+        }
+    }
+
+    // SCHEDULE EXPENSE CLASS
+    class ScheduleExpense {
+        static editScheduleExpense(expenseRow) {
+            for (let item of expenseRow.children) {
+                let className
+                switch (item.dataset.info) {
+                    case 'expense_name':
+                        className = 'edit-expense-name-input'
+                        break
+                    case 'expense_price':
+                        className = 'edit-expense-price-input'
+                        break
+                    case 'frequency':
+                        className = 'edit-expense-frequency'
+
+                }
+                if (item.dataset.info === 'expense_name' || item.dataset.info === 'expense_price' || item.dataset.info === 'frequency') {
+                    item.innerHTML = `<input class="form-control edit-input ${className}" value=${item.textContent}>`
+                }
+            }
+
+        }
+
+    }
     var alertBox = document.getElementById('alertMessage')
 
     document.addEventListener('DOMContentLoaded', () => {
+        UI.populateScheduleExpenseTable()
         populateFields()
         loadSettings()
     })
@@ -651,6 +816,24 @@
         showAlert(`Auto Send Email ${capitalize(newSettingValue)}`)
 
     }
+
+
+    /* ONCLICK EVENTS */
+
+    // Schedule Expense Table
+    document.querySelector('#scheduleExpenseTableBody').addEventListener('click', (e) => {
+        console.log(e.target)
+        switch (e.target.parentElement.className) {
+            case 'edit':
+                let expenseRow =  e.target.parentElement.parentElement.parentElement
+                ScheduleExpense.editScheduleExpense(expenseRow)
+                break
+            case 'delete':
+                break
+
+        }
+    })
+
 
     // CAPITALIZE
     function capitalize(s) {
