@@ -293,6 +293,7 @@ def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
     return 'Expense Successfully Scheduled'
 
 
+
 # USER WENT OVER SPENDING LIMIT
 def userWentOverSpendingLimit():
     exceededLimits = {}
@@ -350,6 +351,23 @@ def editExpense(item_id, newExpenseName, newExpensePrice):
     else:
         return 'No Changes Made'
 
+# EDIT SCHEDULE EXPENSE
+@app.route("/editScheduleExpense/<string:newExpenseInfo>", methods=["POST"])
+@login_required
+def editScheduleExpense(newExpenseInfo):
+    newExpenseInfo = json.loads(newExpenseInfo)
+
+    for expense in newExpenseInfo:
+        scheduleExpenseToEdit = ScheduledExpense.query.get(expense['id'])
+
+        scheduleExpenseToEdit.expense_name = expense['newName']
+        scheduleExpenseToEdit.expense_price = expense['newPrice']
+        scheduleExpenseToEdit.frequency = expense['newFrequency']
+
+        db.session.commit()
+
+
+    return 'done'
 
 # DELETE EXPENSE
 @app.route("/deleteExpense/<expense_id>", methods=["POST"])

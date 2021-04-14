@@ -68,12 +68,20 @@
         /* margin-right: 60%; */
     }
     #scheduleExpenseTable {
-        /*display: block;*/
         max-height: 400px;
-        /*min-width: 100%;*/
         margin: 0 auto;
         /* Make table scrollable */
         overflow-x: auto;
+    }
+    /* MAKE HEADERS FIXED  */
+    #scheduleExpenseTable thead tr th {
+        position: sticky;
+        top: 0;
+        background-color: #212529;
+        color: #fff;
+    }
+    .table_header {
+        z-index: 1;
     }
     .table_header {
         position: relative;
@@ -86,6 +94,13 @@
     .edit-input {
         font-weight: 600;
         font-size: 14px;
+    }
+    .error-message {
+        /*font-family: "Times New Roman",serif;*/
+        font-weight: 600;
+        color: #E20E0E;
+        position: absolute;
+        right: 83%;
     }
     img {
         max-width: 100%;
@@ -409,6 +424,7 @@
 <!--                                        </a>-->
 <!--                                    </td>-->
 <!--                                </tr>-->
+
 <!--                                <tr class="table-active">-->
 <!--                                    <td style="font-weight: bold;">Extra-Column</td>-->
 <!--                                    <td></td>-->
@@ -421,7 +437,8 @@
                 <!-- SAVE AND CANCEL BUTTON -->
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
-                    <button id="saveEditBtn" class="btn btn-primary" type="button" disabled>Save</button>
+                    <button id="saveScheduleExpenseBtn" class="btn btn-primary" type="button">Save</button>
+                    <div id="scheduleExpenseModalErrorMessage" class="error-message"></div>
                 </div>
             </div>
 
@@ -485,17 +502,103 @@
                         break
                     case 'frequency':
                         className = 'edit-expense-frequency'
+                        break
 
                 }
                 if (item.dataset.info === 'expense_name' || item.dataset.info === 'expense_price' || item.dataset.info === 'frequency') {
-                    item.innerHTML = `<input class="form-control edit-input ${className}" value=${item.textContent}>`
+                    // console.log(item)
+                    if (item.dataset.info === 'expense_name')
+                        item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpenseName(this.value, this)">`
+                    else if (item.dataset.info === 'expense_price')
+                        item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpensePrice(this.value, this)">`
+                    else if (item.dataset.info === 'frequency')
+                        item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpenseFrequency(this.value, this)">`
                 }
             }
 
         }
+        // VALIDATE NEW EXPENSE NAME
+        static validateNewExpenseName(newExpenseName, expenseNameInput) {
+            let saveBtn = document.querySelector('#saveScheduleExpenseBtn')
+            if (newExpenseName === '') {
+                expenseNameInput.style.borderColor = 'red'
+                saveBtn.disabled = true
+            }
+            else {
+                expenseNameInput.style.borderColor = ''
+                saveBtn.disabled = false
+            }
 
+        }
+        // VALIDATE NEW EXPENSE PRICE
+        static validateNewExpensePrice(newExpensePrice, expensePriceInput) {
+            let saveBtn = document.querySelector('#saveScheduleExpenseBtn')
+            newExpensePrice = newExpensePrice.replace('$', '')
+            if (isNaN(newExpensePrice) || newExpensePrice === '') {
+                expensePriceInput.style.borderColor = 'red'
+                this.showErrorMessage('Invalid Expense Price')
+                saveBtn.disabled = true
+            }
+            else {
+                expensePriceInput.style.borderColor = ''
+                this.removeErrorMessage()
+                saveBtn.disabled = false
+            }
+
+
+        }
+        // VALIDATE NEW EXPENSE FREQUENCY
+        static validateNewExpenseFrequency(newExpenseFrequency, expenseFrequencyInput) {
+            let saveBtn = document.querySelector('#saveScheduleExpenseBtn')
+            newExpenseFrequency = newExpenseFrequency.split('-')
+            let frequency = newExpenseFrequency[0]
+            let amount = newExpenseFrequency[1]
+            let timePeriod = newExpenseFrequency[2]
+
+            if (frequency !== 'every' || (isNaN(amount) || parseInt(amount) <= 0) || !(['day','days', 'week','weeks', 'month','months', 'year','years'].includes(timePeriod))) {
+                this.showErrorMessage('Invalid Frequency')
+                expenseFrequencyInput.style.borderColor = 'red'
+                saveBtn.disabled = true
+            }
+            else {
+                this.removeErrorMessage()
+                expenseFrequencyInput.style.borderColor = ''
+                saveBtn.disabled = false
+            }
+
+
+        }
+        // SHOW ERROR MESSAGE
+        static showErrorMessage(message) {
+            let errorMessage = document.querySelector('#scheduleExpenseModalErrorMessage')
+            errorMessage.textContent = message
+        }
+        // REMOVE ERROR MESSAGE
+        static removeErrorMessage() {
+            let errorMessage = document.querySelector('#scheduleExpenseModalErrorMessage')
+            errorMessage.textContent = ''
+
+        }
     }
     var alertBox = document.getElementById('alertMessage')
+
+    // EXPENSE TABLE ROW
+    class ExpenseTableRow {
+        constructor(row) {
+            for (let element of row.children) {
+                switch (element.dataset.info) {
+                    case 'expense_name':
+                        this.expense_name = element.firstElementChild.value
+                        break
+                    case 'expense_price':
+                        this.expense_price = element.firstElementChild.value.replace('$', '')
+                        break
+                    case 'frequency':
+                        this.frequency = element.firstElementChild.value
+                }
+            }
+        }
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
         UI.populateScheduleExpenseTable()
@@ -821,19 +924,51 @@
     /* ONCLICK EVENTS */
 
     // Schedule Expense Table
+    let allChangedExpenseRows = []
+    let updateScheduleExpenses = []
     document.querySelector('#scheduleExpenseTableBody').addEventListener('click', (e) => {
-        console.log(e.target)
         switch (e.target.parentElement.className) {
             case 'edit':
                 let expenseRow =  e.target.parentElement.parentElement.parentElement
                 ScheduleExpense.editScheduleExpense(expenseRow)
+                allChangedExpenseRows.push(expenseRow)
                 break
             case 'delete':
                 break
-
         }
     })
+    // Schedule Expense Save Btn
+    document.querySelector('#saveScheduleExpenseBtn').addEventListener('click', () => {
+        for (let row of allChangedExpenseRows) {
+            let expense_id = row.lastElementChild.firstElementChild.firstElementChild.dataset.expense_id
 
+            row = new ExpenseTableRow(row)
+            updateScheduleExpenses.push({'id': expense_id, 'newName': row.expense_name, 'newPrice': row.expense_price, 'newFrequency': row.frequency})
+        }
+        for (let row of allChangedExpenseRows) {
+            for (let item of row.children) {
+                if (item.dataset.info === 'expense_name' || item.dataset.info === 'expense_price' || item.dataset.info === 'frequency') {
+                    item.innerHTML = item.firstElementChild.value
+                }
+            }
+        }
+        const request = new XMLHttpRequest()
+        request.open('POST', `/editScheduleExpense/${JSON.stringify(updateScheduleExpenses)}`)
+        request.onload = () => {
+            allChangedExpenseRows = []
+            updateScheduleExpenses = []
+        }
+        request.send()
+
+
+
+    })
+
+    /* ONKEY-UP EVENTS */
+
+    function test() {
+        console.log('test')
+    }
 
     // CAPITALIZE
     function capitalize(s) {
