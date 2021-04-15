@@ -271,15 +271,13 @@ def addExpense(expenseData):
 def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
-    # print(expenseName)
-    # print(expensePrice)
-    # print(startDate)
-    # print(frequency)
+
     # CONVERT DATE FROM mm-dd-yyyy TO 'now' FORMAT
     startDate = convertStartDate(startDate, 'mm-dd-yyyy', 'now-format')
     now = getIntegerDayForNow(now)
     # EXPENSE IS TO BE ADDED TODAY
     if startDate == now:
+        now = Date(now)
         expenseData = {
             'expenseName': expenseName,
             'expensePrice': expensePrice,
@@ -287,8 +285,13 @@ def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
         }
         addExpense(json.dumps(expenseData))
 
-    SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate, next_due=startDate, frequency=frequency, user_id=session['user_id'])
-    SE.addScheduledExpense()
+        nextDue = str(now.addTime('day', 1))
+        SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate, next_due=nextDue, frequency=frequency, user_id=session['user_id'])
+        SE.addScheduledExpense()
+
+    else:
+        SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate, next_due=startDate, frequency=frequency, user_id=session['user_id'])
+        SE.addScheduledExpense()
 
     return 'Expense Successfully Scheduled'
 
@@ -379,6 +382,17 @@ def deleteExpense(expense_id):
     db.session.delete(userExpense)
     db.session.commit()
     return 'Expense Successfully Deleted'
+
+
+# DELETE SCHEDULE EXPENSE
+@app.route("/deleteScheduleExpense/<string:schedule_expense_id>", methods=["POST"])
+@login_required
+def deleteScheduleExpense(schedule_expense_id):
+    scheduleExpenseToDelete = ScheduledExpense.query.get(int(schedule_expense_id))
+    db.session.delete(scheduleExpenseToDelete)
+    db.session.commit()
+
+    return 'done'
 
 # GET EXPENSES
 @app.route("/getExpenses/<string:period>/<sortBy>/<string:order>", methods=["GET"])

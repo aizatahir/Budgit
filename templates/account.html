@@ -118,7 +118,6 @@
         }
 
     }
-
     @media only screen and (max-width: 770px) {
         .acc-container {
             width: 85%;
@@ -437,7 +436,7 @@
                 <!-- SAVE AND CANCEL BUTTON -->
                 <div class="modal-footer">
                     <input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
-                    <button id="saveScheduleExpenseBtn" class="btn btn-primary" type="button">Save</button>
+                    <button id="saveScheduleExpenseBtn" class="btn btn-primary" type="button" disabled>Save</button>
                     <div id="scheduleExpenseModalErrorMessage" class="error-message"></div>
                 </div>
             </div>
@@ -446,6 +445,27 @@
     </div>
 </div>
 
+<!-- Delete Schedule Expense MODAL -->
+<div id="deleteScheduleExpenseModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form>
+                <div class="modal-header">
+                    <h4 class="modal-title">Delete Schedule Expense</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this expense?</p>
+                    <p class="text-warning"><small>This action cannot be undone.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <input type="button" class="btn btn-default" id="deleteScheduleExpenseCancelBtn" data-dismiss="modal" value="Cancel">
+                    <button id="deleteScheduleExpenseBtn" class="btn btn-danger" type="button">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 
 {% endblock %}
@@ -454,8 +474,11 @@
 <script>
     // UI CLASS
     class UI {
+        // POPULATE TABLE
         static populateScheduleExpenseTable() {
             let tableBody = document.querySelector('#scheduleExpenseTableBody')
+
+            this.removeAllChildNodes(tableBody)
 
             const request = new XMLHttpRequest()
             request.open('GET', `/getUserScheduleExpenses`)
@@ -473,7 +496,7 @@
                                 <a href="#" class="edit" data-toggle="modal">
                                     <i class="material-icons" data-toggle="tooltip" data-expense_id=${expense['id']} title="Edit"></i>
                                 </a>
-                                <a href="#deleteExpenseModal" class="delete" data-toggle="modal">
+                                <a href="#deleteScheduleExpenseModal" class="delete" data-toggle="modal">
                                     <i class="material-icons" data-toggle="tooltip" data-expense_id=${expense['id']} title="Delete" style="color: #e20e0e"></i>
                                 </a>
                             </td>
@@ -486,11 +509,19 @@
             request.send()
 
         }
+
+        // REMOVE ALL CHILD NODES
+        static removeAllChildNodes(parent) {
+            while (parent.firstChild) {
+                parent.removeChild(parent.firstChild)
+            }
+        }
     }
 
     // SCHEDULE EXPENSE CLASS
     class ScheduleExpense {
         static editScheduleExpense(expenseRow) {
+            expenseRow.dataset.edit_mode = true
             for (let item of expenseRow.children) {
                 let className
                 switch (item.dataset.info) {
@@ -555,7 +586,9 @@
             let amount = newExpenseFrequency[1]
             let timePeriod = newExpenseFrequency[2]
 
-            if (frequency !== 'every' || (isNaN(amount) || parseInt(amount) <= 0) || !(['day','days', 'week','weeks', 'month','months', 'year','years'].includes(timePeriod))) {
+            console.log(amount)
+
+            if (frequency !== 'every' || (isNaN(amount) || parseInt(amount) <= 0 || amount === '') || !(['day','days', 'week','weeks', 'month','months', 'year','years'].includes(timePeriod))) {
                 this.showErrorMessage('Invalid Frequency')
                 expenseFrequencyInput.style.borderColor = 'red'
                 saveBtn.disabled = true
@@ -927,13 +960,16 @@
     let allChangedExpenseRows = []
     let updateScheduleExpenses = []
     document.querySelector('#scheduleExpenseTableBody').addEventListener('click', (e) => {
+        let expenseRow
         switch (e.target.parentElement.className) {
             case 'edit':
-                let expenseRow =  e.target.parentElement.parentElement.parentElement
+                expenseRow =  e.target.parentElement.parentElement.parentElement
                 ScheduleExpense.editScheduleExpense(expenseRow)
                 allChangedExpenseRows.push(expenseRow)
                 break
             case 'delete':
+                document.querySelector('#deleteScheduleExpenseBtn').dataset.expense_id = e.target.dataset.expense_id
+
                 break
         }
     })
@@ -961,6 +997,20 @@
         request.send()
 
 
+
+    })
+
+    // DELETE SCHEDULE EXPENSE
+    document.querySelector('#deleteScheduleExpenseBtn').addEventListener('click', (e) => {
+        let expense_id = e.target.dataset.expense_id
+        let cancelBtn = document.querySelector('#deleteScheduleExpenseCancelBtn')
+        const request = new XMLHttpRequest()
+        request.open('POST', `/deleteScheduleExpense/${expense_id}`)
+        request.onload = () => {
+            cancelBtn.click()
+            UI.populateScheduleExpenseTable()
+        }
+        request.send()
 
     })
 
