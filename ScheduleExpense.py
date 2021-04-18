@@ -17,7 +17,7 @@ from Classes import Date
 def ScheduledTask():
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
-    now = Date(now)
+    # now = Date(now)
 
     with app.app_context():
         allScheduledExpenses = ScheduledExpense.query.all()
@@ -73,6 +73,8 @@ def getUpdatedNextDueDate(currentDate, frequency):
 
 def Test():
     pass
+    # ScheduledTask()
+    # pass
 
 
 if __name__ == '__main__':

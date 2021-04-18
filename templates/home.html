@@ -484,7 +484,6 @@
                 <option value="item_name" data-order="desc">By Name(Desc)</option>
                 <option value="item_price" data-order="asc">By Price(Asc)</option>
                 <option value="item_price" data-order="desc">By Price(Desc)</option>
-<!--                <option value="date">By Date</option>-->
             </select>
         </div>
         <!-- EXPENSE TABLE -->
@@ -1449,8 +1448,8 @@
         }
         // // INITIALIZE USER SETTINGS
         static initializeUserSettings() {
-            if (!(localStorage.getItem('Budgit-userSettings'))) {
-                localStorage.setItem('Budgit-userSettings', JSON.stringify({
+            if (!(localStorage.getItem('Budgit-userSettings-home'))) {
+                localStorage.setItem('Budgit-userSettings-home', JSON.stringify({
                     'expenseTable-Time-Period': 'this-day',
                     'expenseTable-SortBy': 'item_name',
                     'expenseTable-Order': 'asc',
@@ -1460,7 +1459,7 @@
         // // GET USER SETTINGS
         static getUserSettings() {
             this.initializeUserSettings()
-            return JSON.parse(localStorage.getItem('Budgit-userSettings'))
+            return JSON.parse(localStorage.getItem('Budgit-userSettings-home'))
         }
         // UPDATE USER SETTINGS
         static updateUserSettings(settingToUpdate, newValue) {
@@ -1478,7 +1477,7 @@
             // Update the setting
             S[settingToUpdate] = newValue
             // Push the new settings back to storage
-            localStorage.setItem('Budgit-userSettings', JSON.stringify(S))
+            localStorage.setItem('Budgit-userSettings-home', JSON.stringify(S))
         }
 
 

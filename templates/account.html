@@ -80,6 +80,12 @@
         background-color: #212529;
         color: #fff;
     }
+    #scheduleExpenseTableSort {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: 600;
+        width: 160px;
+        margin-bottom: 10px;
+    }
     .table_header {
         z-index: 1;
     }
@@ -102,6 +108,16 @@
         position: absolute;
         right: 83%;
     }
+    .schedule-expense-table-header-date_to_show-select {
+        font-weight: 700;
+        background-color: #212529;
+        color: white;
+        border: none;
+        width: 88%;
+        height: 30px;
+        /*margin: 0;*/
+        /*padding: 0;*/
+    }
     img {
         max-width: 100%;
         height: auto;
@@ -111,7 +127,12 @@
     }
 
 
-    
+    @media only screen and (max-width: 1200px) {
+        .schedule-expense-table-header-date_to_show-select {
+            width: 130px;
+        }
+
+    }
     @media only screen and (max-width: 950px) {
         #logoutBtn {
             left: 3%;
@@ -395,13 +416,24 @@
                 </div>
                 <!-- BODY -->
                 <div class="modal-body">
+                    <select id="scheduleExpenseTableSort" class="form-control">
+                        <option value="expense_name" data-order="asc">By Name(Asc)</option>
+                        <option value="expense_name" data-order="desc">By Name(Desc)</option>
+                        <option value="expense_price" data-order="asc">By Price(Asc)</option>
+                        <option value="expense_price" data-order="desc">By Price(Desc)</option>
+                    </select>
                     <div style="text-align: center;">
                         <table id="scheduleExpenseTable" class="table table" style="width:100%; margin: auto">
                             <thead class="thead-dark">
                             <tr>
                                 <th class="table_header">Name</th>
                                 <th class="table_header">Price</th>
-                                <th class="table_header">Last Due</th>
+                                <th class="table_header">
+                                    <select class="form-control schedule-expense-table-header-date_to_show-select">
+                                        <option value="last_due">Last Due</option>
+                                        <option value="start_date">Start Date</option>
+                                    </select>
+                                </th>
                                 <th class="table_header">Next Due</th>
                                 <th class="table_header">Frequency</th>
                                 <th class="table_header">Actions</th>
@@ -435,7 +467,7 @@
                 </div>
                 <!-- SAVE AND CANCEL BUTTON -->
                 <div class="modal-footer">
-                    <input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
+                    <input type="button" class="btn btn-default" id="scheduleExpenseModalCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="saveScheduleExpenseBtn" class="btn btn-primary" type="button" disabled>Save</button>
                     <div id="scheduleExpenseModalErrorMessage" class="error-message"></div>
                 </div>
@@ -475,21 +507,33 @@
     // UI CLASS
     class UI {
         // POPULATE TABLE
-        static populateScheduleExpenseTable() {
+        static populateScheduleExpenseTable(sortBy, order, dateHeaderToShow) {
             let tableBody = document.querySelector('#scheduleExpenseTableBody')
 
             this.removeAllChildNodes(tableBody)
 
             const request = new XMLHttpRequest()
-            request.open('GET', `/getUserScheduleExpenses`)
+            request.open('GET', `/getUserScheduleExpenses/${sortBy}/${order}`)
             request.onload = () => {
                 const data = JSON.parse(request.responseText)
+                let dateTableHeaderSelect = document.querySelector('.schedule-expense-table-header-date_to_show-select')
+
                 for (let expense of data) {
+                    let dateTableData
+                    if (dateHeaderToShow === 'last_due') {
+                        dateTableData = `<td class="table_data" data-info="last_due">${expense['last_due']}</td>`
+                        dateTableHeaderSelect.options[0].selected = true
+
+                    }
+                    else if (dateHeaderToShow === 'start_date') {
+                        dateTableData = `<td class="table_data" data-info="last_due">${expense['start_date']}</td>`
+                        dateTableHeaderSelect.options[1].selected = true
+                    }
                     tableBody.innerHTML += `
                         <tr>
                             <td class="table_data" data-info="expense_name" height="65px">${expense['expense_name']}</td>
                             <td class="table_data" data-info="expense_price">$${expense['expense_price']}</td>
-                            <td class="table_data" data-info="last_due">${expense['last_due']}</td>
+                            ${dateTableData}
                             <td class="table_data" data-info="next_due">${expense['next_due']}</td>
                             <td class="table_data" data-info="frequency">${expense['frequency']}</td>
                             <td>
@@ -508,6 +552,38 @@
             }
             request.send()
 
+        }
+
+        // CONVERT INPUT FIELDS TO TEXT
+        static convertInputFieldsToText(allChangedExpenseRows) {
+            for (let row of allChangedExpenseRows) {
+                for (let item of row.children) {
+                    if (item.dataset.info === 'expense_name' || item.dataset.info === 'expense_price' || item.dataset.info === 'frequency') {
+                        item.innerHTML = item.firstElementChild.value
+                    }
+                }
+            }
+
+        }
+
+        static updateScheduleExpenseTableSelect(sortBy, order) {
+            let scheduleExpenseTableSort = document.querySelector('#scheduleExpenseTableSort')
+
+            switch (sortBy) {
+                case 'expense_name':
+                    if (order === 'asc')
+                        scheduleExpenseTableSort.options[0].selected = true
+                    else
+                        scheduleExpenseTableSort.options[1].selected = true
+                    break
+                case 'expense_price':
+                    if (order === 'asc')
+                        scheduleExpenseTableSort.options[2].selected = true
+                    else
+                        scheduleExpenseTableSort.options[3].selected = true
+                    break
+
+            }
         }
 
         // REMOVE ALL CHILD NODES
@@ -613,7 +689,81 @@
 
         }
     }
-    var alertBox = document.getElementById('alertMessage')
+
+    // SETTINGS Class
+    class Settings {
+
+        // Get All Setting Keys
+        static getAllSettingKeys() {
+            let allKeys = []
+            for (let key in this.getUserSettings()) {
+                allKeys.push(key)
+            }
+            return allKeys
+        }
+        // Check if Setting Value is Valid
+        static isValidSettingValue(settingToUpdate, newValue) {
+            if (settingToUpdate === 'scheduleExpenseTable-Time-Period') {
+                let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
+                if (!(allValidTimePeriods).includes(newValue)) {
+                    return false
+                }
+            }
+            else if (settingToUpdate === 'scheduleExpenseTable-SortBy') {
+                let allValidSortBy = ['expense_name', 'expense_price']
+                if (!(allValidSortBy.includes(newValue))) {
+                    return false
+                }
+            }
+            else if (settingToUpdate === 'scheduleExpenseTable-Order') {
+                let allValidOrders = ['asc', 'desc']
+                if (!(allValidOrders.includes(newValue))) {
+                    return false
+                }
+            }
+            else if (settingToUpdate === 'scheduleExpenseTable-DateToShow') {
+                let allValidDatesToShow = ['last_due', 'start_date']
+                if (!(allValidDatesToShow.includes(newValue))) {
+                    return false
+                }
+            }
+            return true
+        }
+        // INITIALIZE USER SETTINGS
+        static initializeUserSettings() {
+            if (!(localStorage.getItem('Budgit-userSettings-account'))) {
+                localStorage.setItem('Budgit-userSettings-account', JSON.stringify({
+                    'scheduleExpenseTable-Time-Period': 'this-day',
+                    'scheduleExpenseTable-SortBy': 'expense_name',
+                    'scheduleExpenseTable-Order': 'asc',
+                    'scheduleExpenseTable-DateToShow': 'last_due',
+                }))
+            }
+        }
+        // GET USER SETTINGS
+        static getUserSettings() {
+            this.initializeUserSettings()
+            return JSON.parse(localStorage.getItem('Budgit-userSettings-account'))
+        }
+        // UPDATE USER SETTINGS
+        static updateUserSettings(settingToUpdate, newValue) {
+            // Invalid settingToUpdate
+            if (!(this.getAllSettingKeys().includes(settingToUpdate))) {
+                throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${settingToUpdate}' is not a valid setting to update.`
+            }
+            // Invalid newValue
+            if (!(this.isValidSettingValue(settingToUpdate, newValue))) {
+                throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${newValue}' is not a valid setting for ${settingToUpdate}.`
+
+            }
+            // Get the settings from storage
+            let S = this.getUserSettings()
+            // Update the setting
+            S[settingToUpdate] = newValue
+            // Push the new settings back to storage
+            localStorage.setItem('Budgit-userSettings-account', JSON.stringify(S))
+        }
+    }
 
     // EXPENSE TABLE ROW
     class ExpenseTableRow {
@@ -634,10 +784,18 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        UI.populateScheduleExpenseTable()
+        let userSettings = {
+            'sortBy': Settings.getUserSettings()['scheduleExpenseTable-SortBy'],
+            'order': Settings.getUserSettings()['scheduleExpenseTable-Order'],
+            'dateToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow']
+        }
+        UI.populateScheduleExpenseTable(userSettings['sortBy'], userSettings['order'], userSettings['dateToShow'])
+        UI.updateScheduleExpenseTableSelect(userSettings['sortBy'], userSettings['order'])
         populateFields()
         loadSettings()
     })
+
+    var alertBox = document.getElementById('alertMessage')
     // POPULATE FIELDS
     function populateFields() {
         const request = new XMLHttpRequest()
@@ -974,20 +1132,17 @@
         }
     })
     // Schedule Expense Save Btn
-    document.querySelector('#saveScheduleExpenseBtn').addEventListener('click', () => {
+    document.querySelector('#saveScheduleExpenseBtn').addEventListener('click', function() {
         for (let row of allChangedExpenseRows) {
             let expense_id = row.lastElementChild.firstElementChild.firstElementChild.dataset.expense_id
 
             row = new ExpenseTableRow(row)
             updateScheduleExpenses.push({'id': expense_id, 'newName': row.expense_name, 'newPrice': row.expense_price, 'newFrequency': row.frequency})
         }
-        for (let row of allChangedExpenseRows) {
-            for (let item of row.children) {
-                if (item.dataset.info === 'expense_name' || item.dataset.info === 'expense_price' || item.dataset.info === 'frequency') {
-                    item.innerHTML = item.firstElementChild.value
-                }
-            }
-        }
+        UI.convertInputFieldsToText(allChangedExpenseRows)
+        // Disable Btn
+        this.disabled = true
+
         const request = new XMLHttpRequest()
         request.open('POST', `/editScheduleExpense/${JSON.stringify(updateScheduleExpenses)}`)
         request.onload = () => {
@@ -995,9 +1150,11 @@
             updateScheduleExpenses = []
         }
         request.send()
-
-
-
+    })
+    // Schedule Expense Cancel Btn
+    document.querySelector('#scheduleExpenseModalCancelBtn').addEventListener('click', function() {
+        UI.convertInputFieldsToText(allChangedExpenseRows)
+        allChangedExpenseRows = []
     })
 
     // DELETE SCHEDULE EXPENSE
@@ -1014,11 +1171,28 @@
 
     })
 
-    /* ONKEY-UP EVENTS */
+    /* ON-CHANGE EVENTS */
 
-    function test() {
-        console.log('test')
-    }
+    // Table-Date-Header Select
+    document.querySelector('.schedule-expense-table-header-date_to_show-select').addEventListener('change', function () {
+        let sortBy = document.querySelector('#scheduleExpenseTableSort').value
+        let order = document.querySelector('#scheduleExpenseTableSort').selectedOptions[0].dataset.order
+
+        UI.populateScheduleExpenseTable(sortBy, order, this.value)
+        Settings.updateUserSettings('scheduleExpenseTable-DateToShow', this.value)
+        this.blur()
+    })
+    // Schedule Expense Table - Sort
+    document.querySelector('#scheduleExpenseTableSort').addEventListener('change', function() {
+        let sortBy = this.value
+        let order = this.options[this.selectedIndex].dataset.order
+        let dateToShow = document.querySelector('.schedule-expense-table-header-date_to_show-select').value
+
+        UI.populateScheduleExpenseTable(sortBy, order, dateToShow)
+        Settings.updateUserSettings('scheduleExpenseTable-SortBy', sortBy)
+        Settings.updateUserSettings('scheduleExpenseTable-Order', order)
+
+    })
 
     // CAPITALIZE
     function capitalize(s) {

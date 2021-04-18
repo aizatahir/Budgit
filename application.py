@@ -446,18 +446,23 @@ def getExpenses(period, sortBy, order):
     return jsonify(userExpenses)
 
 # GET SCHEDULE EXPENSES
-@app.route("/getUserScheduleExpenses", methods=['GET'])
+@app.route("/getUserScheduleExpenses/<string:sortBy>/<string:order>", methods=['GET'])
 @login_required
-def getUserScheduleExpenses():
-    userScheduleExpenses = ScheduledExpense.query.filter_by(user_id=session['user_id']).all()
+def getUserScheduleExpenses(sortBy, order):
+    if order == 'asc':
+        # expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter_by(user_id=session['user_id']).all()
+
+        userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy)).filter_by(user_id=session['user_id']).all()
+        # userScheduleExpenses = ScheduledExpense.query.filter_by(user_id=session['user_id']).all()
+    else:
+        userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy).desc()).filter_by(user_id=session['user_id']).all()
 
     allUserScheduleExpenses = []
 
     for schedule_expense in userScheduleExpenses:
-        # GET LAST DUE
-        # print(expense.expense_name)
         expenseDates = Expense.query.filter(and_(Expense.user_id == session['user_id'], Expense.item_name == schedule_expense.expense_name)).all()
-        # print(f"expenseDates: {expenseDates}")
+
+        # GET LAST DUE
         if expenseDates != []:
             allExpenseDates = [expense.date for expense in expenseDates]
             lastDue = str(getMostRecentDate(allExpenseDates))
@@ -468,6 +473,7 @@ def getUserScheduleExpenses():
             'id': schedule_expense.id,
             'expense_name': schedule_expense.expense_name,
             'expense_price': schedule_expense.expense_price,
+            'start_date': schedule_expense.start_date,
             'last_due': lastDue,
             'next_due': schedule_expense.next_due,
             'frequency': schedule_expense.frequency,
