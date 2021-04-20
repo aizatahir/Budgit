@@ -8,17 +8,22 @@
         font-weight: bold;
         margin-bottom: 20px;
     }
+    #mainHeading {
+        margin-right: 15%;
+    }
     #alertMessage {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-weight: bold;
     }
     #logoutBtn {
-        position: relative;
+        float: left;
+        /*position: relative;*/
         background-color: white;
         color: black;
         border: none;
         margin-top: 5px;
-        left: 94%;
+        margin-left: 3%;
+        /*left: 94%;*/
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         border-radius: 5px;
    }
@@ -191,6 +196,11 @@
             left: 83%;
         }
     }
+    @media only screen and (min-width: 500px) {
+        /*#logoutBtn {*/
+        /*    margin-left: 3%;*/
+        /*}*/
+    }
    
 </style>
 {% endblock %}
@@ -205,9 +215,9 @@
 <div id="alertMessage" class="alert alert-primary" style="display: none;" role="alert"></div>
 
 <div class="container-1">
-    <center>
+    <div style="text-align: center;">
         <div id="mainHeading">Account</div>
-    </center>
+    </div>
     <div class="acc-container">
         <div id="pp-image-container">
 <!--            <img src="{{ url_for('static', filename = 'profile_pic2.png') }}">-->

@@ -63,21 +63,25 @@
         border: none;
         border-radius: 10px;
     }
-    #logoutBtn, #accountBtn {
-        position: relative;
+    #logoutBtn {
+        float: left;
+        /*position: absolute;*/
         background-color: white;
         color: black;
         border: none;
         margin-top: 5px;
-        left: 94%;
+        /*left: 94%;*/
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         border-radius: 5px;
     }
     #accountBtn {
-        position: absolute;
-        margin-top: 0;
-        top: 1%;
-        left: 86%;
+        float: right;
+        background-color: white;
+        color: black;
+        border: none;
+        margin-top: 5px;
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        border-radius: 5px;
     }
     .alert-container-above-table, .alert-container-top {
         width: 100%;
@@ -253,7 +257,7 @@
         .exceed-limit-container {
             height: 45px;
         }
-        
+
     }
     @media only screen and (max-width: 950px) {
         #logoutBtn {
@@ -347,9 +351,18 @@
         }
 
     }
-    @media only screen and (max-width: 480px) {
+    @media only screen and (max-width: 490px) {
+        .expense-tracker-container {
+            width: 98%;
+        }
         .exceed-limit-container {
             height: 45px;
+        }
+        .add-expense-container {
+            width: 98%;
+        }
+        .expense-table-container {
+            width: 98%;
         }
 
     }
@@ -357,6 +370,15 @@
         #expenseLimitText {
             font-size: 20px;
         }
+    }
+    @media only screen and (min-width: 500px) {
+        #accountBtn {
+            margin-right: 3%;
+        }
+        #logoutBtn {
+            margin-left: 3%;
+        }
+
     }
 
 </style>
