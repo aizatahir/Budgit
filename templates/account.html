@@ -49,15 +49,15 @@
     #changePassBtn, #viewScheduleExpenses {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
-    #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #autoSendEmailsBtn {
+    #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded {
         position: absolute;
         left: 73%;
     }
-    #autoSendEmailsSelect {
+    #autoSendEmail_ExpenseExceedLimitSelect, #autoSendEmail_ScheduleExpenseSelect {
         margin: auto;
         width: 70%;
     }
-    #sendEmailModalHeader, #sendEmailModalFooter {
+    #autoSendEmail_ExpenseExceedLimitModalHeader, #autoSendEmail_ScheduleExpenseAddedModalHeader, #autoSendEmail_ExpenseExceedLimitModalFooter, #autoSendEmail_ScheduleExpenseAddedModalFooter {
         border-color: white;
     }
     #passwordErrorMessage, #editEmailErrorMessage, #phoneNumberErrorMessage {
@@ -173,7 +173,7 @@
         }
     }
     @media only screen and (max-width: 420px) {
-        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #autoSendEmailsBtn {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded {
             left: 80%;
         }
     }
@@ -192,7 +192,7 @@
         }
     }
     @media only screen and (max-width: 360px) {
-        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #autoSendEmailsBtn {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded {
             left: 83%;
         }
     }
@@ -248,10 +248,17 @@
                 </a>
             </div>
             <hr>
-            <!-- AUTO SEND EMAILS -->
-            <div class="field-item">Send Email After Expense Limit Reached: <span id="autoSendEmailField" class="userInfo"></span>
-                <a href="#autoSendEmailsModal" id="autoSendEmailsBtn" class="edit" data-toggle="modal">
-                    <i class="material-icons" data-toggle="tooltip" data-item_id="28" title="Edit"></i>
+            <!-- AUTO SEND EMAILS -> EXCEED_EXPENSE_LIMIT -->
+            <div class="field-item">Send Email After Expense Limit Reached: <span id="autoSendEmail_ExpenseExceedLimitField" class="userInfo"></span>
+                <a href="#autoSendEmail_ExpenseExceedLimitModal" id="changeAutoSendEmailBtn_ExpenseExceedLimit" class="edit" data-toggle="modal">
+                    <i class="material-icons" data-toggle="tooltip" title="Edit"></i>
+                </a>
+            </div>
+            <hr>
+            <!-- AUTO SEND EMAILS -> SCHEDULE_EXPENSE_ADDED -->
+            <div class="field-item">Send Email After Schedule Expense Added: <span id="autoSendEmail_ScheduleExpenseAddedField" class="userInfo"></span>
+                <a href="#autoSendEmail_ScheduleExpenseModal" id="changeAutoSendEmailBtn_ScheduleExpenseAdded" class="edit" data-toggle="modal">
+                    <i class="material-icons" data-toggle="tooltip" title="Edit"></i>
                 </a>
             </div>
             <hr>
@@ -353,29 +360,54 @@
     </div>
 </div>
 
-<!-- AUTO SEND EMAILS MODAL -->
-<div id="autoSendEmailsModal" class="modal fade">
+<!-- AUTO SEND EMAILS MODAL -> Expense_Limit_Exceeded -->
+<div id="autoSendEmail_ExpenseExceedLimitModal" class="modal fade">
 	<div class="modal-dialog">
 		<div class="modal-content">
             <!-- AUTO SEND EMAILS -->
-            <div id="sendEmailModalHeader" class="modal-header">						
-                <h4 class="modal-title">Auto Send Emails</h4>
+            <div id="autoSendEmail_ExpenseExceedLimitModalHeader" class="modal-header">
+                <h4 class="modal-title">Auto Send Email After Expense Limit Exceeded</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
             <!-- NEW OPTION -->
-            <select id="autoSendEmailsSelect" class="form-control">
-                <option id="ASMenabled" value="enabled">Enabled</option>
-                <option id="ASMdisabled" value="disabled">Disabled</option>
+            <select id="autoSendEmail_ExpenseExceedLimitSelect" class="form-control">
+                <option id="autoSendEmail_EL-enabled" value="enabled">Enabled</option>
+                <option id="autoSendEmail_EL-disabled" value="disabled">Disabled</option>
             </select>
            
             <!-- SAVE AND CANCEL BUTTON -->
-            <div id="sendEmailModalFooter" class="modal-footer">
-                <input id="cancelAutoSendEmailBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
-                <button id="saveAutoSendEmailBtn" class="btn btn-primary" type="button" disabled>Save</button>
+            <div id="autoSendEmail_ExpenseExceedLimitModalFooter" class="modal-footer">
+                <input id="autoSendEmail_ExpenseExceedLimitCancelBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <button id="autoSendEmail_ExpenseExceedLimitSaveBtn" class="btn btn-primary" type="button" disabled>Save</button>
             </div>
 		
 		</div>
 	</div>
+</div>
+
+<!-- AUTO SEND EMAILS MODAL -> ScheduleExpense_Added -->
+<div id="autoSendEmail_ScheduleExpenseModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- AUTO SEND EMAILS -->
+            <div id="autoSendEmail_ScheduleExpenseAddedModalHeader" class="modal-header">
+                <h4 class="modal-title">Auto Send Email After Schedule Expense Added</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <!-- NEW OPTION -->
+            <select id="autoSendEmail_ScheduleExpenseSelect" class="form-control">
+                <option id="autoSendEmail_SE-enabled" value="enabled">Enabled</option>
+                <option id="autoSendEmail_SE-disabled" value="disabled">Disabled</option>
+            </select>
+
+            <!-- SAVE AND CANCEL BUTTON -->
+            <div id="autoSendEmail_ScheduleExpenseAddedModalFooter" class="modal-footer">
+                <input id="autoSendEmail_ScheduleExpenseCancelBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <button id="autoSendEmail_ScheduleExpenseAddedSaveBtn" class="btn btn-primary" type="button" disabled>Save</button>
+            </div>
+
+        </div>
+    </div>
 </div>
 
 <!-- UPDATE PASSWORD MODAL -->
@@ -737,6 +769,12 @@
                     return false
                 }
             }
+            else if (settingToUpdate === 'auto-send-email(schedule_expense_added)' || 'auto-send-email(exceed_spending_limit)') {
+                let allValidOptions = ['enabled', 'disabled']
+                if (!(allValidOptions.includes(newValue))) {
+                    return false
+                }
+            }
             return true
         }
         // INITIALIZE USER SETTINGS
@@ -747,6 +785,8 @@
                     'scheduleExpenseTable-SortBy': 'expense_name',
                     'scheduleExpenseTable-Order': 'asc',
                     'scheduleExpenseTable-DateToShow': 'last_due',
+                    'auto-send-email(exceed_spending_limit)': 'enabled',
+                    'auto-send-email(schedule_expense_added)': 'enabled',
                 }))
             }
         }
@@ -797,17 +837,27 @@
         let userSettings = {
             'sortBy': Settings.getUserSettings()['scheduleExpenseTable-SortBy'],
             'order': Settings.getUserSettings()['scheduleExpenseTable-Order'],
-            'dateToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow']
+            'dateToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow'],
+            'autoSendExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(exceed_spending_limit)'],
+            'autoSendScheduleExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(schedule_expense_added)'],
         }
         UI.populateScheduleExpenseTable(userSettings['sortBy'], userSettings['order'], userSettings['dateToShow'])
         UI.updateScheduleExpenseTableSelect(userSettings['sortBy'], userSettings['order'])
         populateFields()
-        loadSettings()
+
     })
 
     var alertBox = document.getElementById('alertMessage')
     // POPULATE FIELDS
     function populateFields() {
+        let userSettings = {
+            'sortBy': Settings.getUserSettings()['scheduleExpenseTable-SortBy'],
+            'order': Settings.getUserSettings()['scheduleExpenseTable-Order'],
+            'dateToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow'],
+            'autoSendExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(exceed_spending_limit)'],
+            'autoSendScheduleExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(schedule_expense_added)'],
+        }
+
         const request = new XMLHttpRequest()
         request.open('GET', '/getUserInfo')
         request.onload = () => {
@@ -835,25 +885,31 @@
             else {
                 phoneNumberField.textContent = userPhoneNumber
             }
+
+            // POPULATE AUTO SEND EMAIL FIELD -> Expense_Limit_Exceeded
+            document.querySelector('#autoSendEmail_ExpenseExceedLimitField').textContent = capitalize(userSettings.autoSendExpenseAddedEmail)
+            // Set the default select option in the modal box
+            if (userSettings.autoSendExpenseAddedEmail === 'enabled') {
+                document.querySelector('#autoSendEmail_EL-enabled').selected = true
+            }
+            if (userSettings.autoSendExpenseAddedEmail === 'disabled') {
+                document.querySelector('#autoSendEmail_EL-disabled').selected = true
+            }
+
+            // POPULATE AUTO SEND EMAIL FIELD -> Schedule_Expense_Added
+            document.querySelector('#autoSendEmail_ScheduleExpenseAddedField').textContent = capitalize(userSettings.autoSendScheduleExpenseAddedEmail)
+            // Set the default select option in the modal box
+            if (userSettings.autoSendScheduleExpenseAddedEmail === 'enabled') {
+                document.querySelector('#autoSendEmail_SE-enabled').selected = true
+            }
+            if (userSettings.autoSendScheduleExpenseAddedEmail === 'disabled') {
+                document.querySelector('#autoSendEmail_SE-disabled').selected = true
+            }
+
         }
         request.send()
-    }
-    // LOAD SETTINGS
-    function loadSettings() {
-        // LOAD AUTO SEND EMAILS
-        if (!(localStorage.getItem('auto-send-email'))) {
-            localStorage.setItem('auto-send-email', 'enabled')
-        }
-        document.querySelector('#autoSendEmailField').textContent = capitalize(localStorage.getItem('auto-send-email'))
-        // Set the default select option in the modal box
-        if (localStorage.getItem('auto-send-email') === 'enabled') {
-            document.querySelector('#ASMenabled').selected = true
-        }
-        if (localStorage.getItem('auto-send-email') === 'disabled') {
-            document.querySelector('#ASMdisabled').selected = true
-        }
-    }
 
+    }
 
     //                               VALIDATE MODAL FORMS                         //
     // USERNAME FORM
@@ -948,16 +1004,28 @@
        
 
     }
-    // AUTO SEND EMAIL SELECT
-    document.querySelector('#autoSendEmailsSelect').onchange = function() {
-        let currentSetting = localStorage.getItem('auto-send-email')
-        let saveAutoSendEmailBtn = document.querySelector('#saveAutoSendEmailBtn')
+    // AUTO SEND EMAIL SELECT -> Expense_Limit_Exceeded
+    document.querySelector('#autoSendEmail_ExpenseExceedLimitSelect').onchange = function() {
+        let currentSetting = Settings.getUserSettings()['auto-send-email(exceed_spending_limit)']
+        let saveBtn = document.querySelector('#autoSendEmail_ExpenseExceedLimitSaveBtn')
 
         if (this.value !== currentSetting) {
-            saveAutoSendEmailBtn.disabled = false
+            saveBtn.disabled = false
         }
         else {
-            saveAutoSendEmailBtn.disabled = true
+            saveBtn.disabled = true
+        }
+    }
+    // AUTO SEND EMAIL SELECT -> Schedule_Expense_Added
+    document.querySelector('#autoSendEmail_ScheduleExpenseSelect').onchange = function() {
+        let currentSetting = Settings.getUserSettings()['auto-send-email(schedule_expense_added)']
+        let saveBtn = document.querySelector('#autoSendEmail_ScheduleExpenseAddedSaveBtn')
+
+        if (this.value !== currentSetting) {
+            saveBtn.disabled = false
+        }
+        else {
+            saveBtn.disabled = true
         }
     }
 
@@ -1110,16 +1178,25 @@
         }
         request.send()
     }
-    // UPDATE AUTO SEND EMAILS
-    document.querySelector('#saveAutoSendEmailBtn').onclick = () => {
-        let newSettingValue = document.querySelector('#autoSendEmailsSelect').value
-        localStorage.setItem('auto-send-email', newSettingValue)
-        document.querySelector('#autoSendEmailField').textContent = capitalize(newSettingValue)
-        document.querySelector('#cancelAutoSendEmailBtn').click()
+    // UPDATE AUTO SEND EMAILS -> Expense_Limit_Exceeded
+    document.querySelector('#autoSendEmail_ExpenseExceedLimitSaveBtn').onclick = () => {
+        let newSettingValue = document.querySelector('#autoSendEmail_ExpenseExceedLimitSelect').value
+        Settings.updateUserSettings('auto-send-email(exceed_spending_limit)', newSettingValue)
+        document.querySelector('#autoSendEmail_ExpenseExceedLimitField').textContent = capitalize(newSettingValue)
+        document.querySelector('#autoSendEmail_ExpenseExceedLimitCancelBtn').click()
         scrollToTop()
-        showAlert(`Auto Send Email ${capitalize(newSettingValue)}`)
-
+        showAlert(`Exceed Limit Emails ${capitalize(newSettingValue)}`)
     }
+    // UPDATE AUTO SEND EMAILS -> Schedule Expense Added
+    document.querySelector('#autoSendEmail_ScheduleExpenseAddedSaveBtn').onclick = () => {
+        let newSettingValue = document.querySelector('#autoSendEmail_ScheduleExpenseSelect').value
+        Settings.updateUserSettings('auto-send-email(schedule_expense_added)', newSettingValue)
+        document.querySelector('#autoSendEmail_ScheduleExpenseAddedField').textContent = capitalize(newSettingValue)
+        document.querySelector('#autoSendEmail_ScheduleExpenseCancelBtn').click()
+        scrollToTop()
+        showAlert(`Schedule Expense Added Emails ${capitalize(newSettingValue)}`)
+    }
+
 
 
     /* ONCLICK EVENTS */

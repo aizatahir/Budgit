@@ -898,11 +898,13 @@
             let expensePrice =  document.forms["addExpenseForm"]["expensePrice"]
             let exceedLimitText = document.querySelector('#exceedLimitText')
 
+            let userAccountSettings = JSON.parse(localStorage.getItem('Budgit-userSettings-account'))
+
             let addExpenseBtn = document.querySelector('#addExpenseBtn')
             let expenseData = {
                 'expenseName': expenseName.value,
                 'expensePrice': expensePrice.value,
-                'auto-send-email': localStorage.getItem('auto-send-email')
+                'auto-send-email': userAccountSettings['auto-send-email(exceed_spending_limit)'],
             }
 
             let sortBy = document.querySelector('#expenseTableSort').value
