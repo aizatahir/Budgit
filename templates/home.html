@@ -1032,6 +1032,10 @@
         // DISPLAY TOTAL EXPENSE
         static displayTotalExpense(period) {
             let totalExpenseLabel = document.getElementById('totalExpenseLabel')
+            let totalExpenseSelect = document.querySelector('#totalExpenseSelect')
+
+            totalExpenseSelect = generateSelectOptionsDict(totalExpenseSelect)
+            totalExpenseSelect[period].selected = true
 
             // Initialize new request
             const request = new XMLHttpRequest()
@@ -1043,12 +1047,16 @@
                 totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
             }
             request.send()
+            Settings.updateUserSettings('totalExpense-TimePeriod', period)
         }
         // DISPLAY EXPENSE LIMIT
         static displayExpenseLimit(period) {
+            let expenseLimitSelect = document.querySelector('#expenseLimitSelect')
+            expenseLimitSelect = generateSelectOptionsDict(expenseLimitSelect)
+            expenseLimitSelect[period].selected = true
+
             const request = new XMLHttpRequest()
             request.open('GET', `/getExpenseLimit/${period}`)
-
             request.onload = () => {
                 const data = parseFloat(request.responseText)
                 if (isNaN(data)) {
@@ -1057,9 +1065,9 @@
                 else {
                     document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: $${data.toFixed(2)}`
                 }
-
             }
             request.send()
+            Settings.updateUserSettings('expenseLimit-TimePeriod', period)
         }
         // GET USER EXPENSE LIMIT
         static getUserExpenseLimit(period) {
@@ -1449,40 +1457,94 @@
         }
         // Check if Setting Value is Valid
         static isValidSettingValue(settingToUpdate, newValue) {
-            if (settingToUpdate === 'expenseTable-Time-Period') {
-                let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
-                if (!(allValidTimePeriods).includes(newValue)) {
-                    return false
-                }
-            }
-            if (settingToUpdate === 'expenseTable-SortBy') {
-                let allValidSortBy = ['item_name', 'item_price']
-                if (!(allValidSortBy.includes(newValue))) {
-                    return false
-                }
-            }
-            if (settingToUpdate === 'expenseTable-Order') {
-                let allValidOrders = ['asc', 'desc']
-                if (!(allValidOrders.includes(newValue))) {
-                    return false
-                }
+
+            let allValidTimePeriods
+            switch (settingToUpdate) {
+                case 'expenseTable-Time-Period':
+                    allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
+                    if (!(allValidTimePeriods).includes(newValue)) {
+                        return false
+                    }
+                    break
+                case 'expenseTable-SortBy':
+                    let allValidSortBy = ['item_name', 'item_price']
+                    if (!(allValidSortBy.includes(newValue))) {
+                        return false
+                    }
+                    break
+                case 'expenseTable-Order':
+                    let allValidOrders = ['asc', 'desc']
+                    if (!(allValidOrders.includes(newValue))) {
+                        return false
+                    }
+                    break
+                case 'expenseLimit-TimePeriod':
+                    allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year']
+                    if (!(allValidTimePeriods.includes(newValue))) {
+                        return false
+                    }
+                    break
+                case 'totalExpense-TimePeriod':
+                    allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
+                    if (!(allValidTimePeriods.includes(newValue))) {
+                        return false
+                    }
+                    break
             }
 
+            // if (settingToUpdate === 'expenseTable-Time-Period') {
+            //     let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
+            //     if (!(allValidTimePeriods).includes(newValue)) {
+            //         return false
+            //     }
+            // }
+            // if (settingToUpdate === 'expenseTable-SortBy') {
+            //     let allValidSortBy = ['item_name', 'item_price']
+            //     if (!(allValidSortBy.includes(newValue))) {
+            //         return false
+            //     }
+            // }
+            // if (settingToUpdate === 'expenseTable-Order') {
+            //     let allValidOrders = ['asc', 'desc']
+            //     if (!(allValidOrders.includes(newValue))) {
+            //         return false
+            //     }
+            // }
+            // if (settingToUpdate === 'expenseLimit-TimePeriod') {
+            //     let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year']
+            //     if (!(allValidTimePeriods.includes(newValue))) {
+            //         return false
+            //     }
+            // }
+            // if (settingToUpdate === 'totalExpense-TimePeriod') {
+            //     let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
+            //     if (!(allValidTimePeriods.includes(newValue))) {
+            //         return false
+            //     }
+            // }
             return true
+
         }
         // // INITIALIZE USER SETTINGS
         static initializeUserSettings() {
-            if (!(localStorage.getItem('Budgit-userSettings-home'))) {
-                localStorage.setItem('Budgit-userSettings-home', JSON.stringify({
-                    'expenseTable-Time-Period': 'this-day',
-                    'expenseTable-SortBy': 'item_name',
-                    'expenseTable-Order': 'asc',
-                }))
+            const request = new XMLHttpRequest()
+            request.open('GET', '/initializeUserHomeSettings')
+            request.onload = () => {
+                const homeSettings = JSON.parse(request.responseText)
+
+                UI.populateTable(homeSettings['expenseTable-Time-Period'], homeSettings['expenseTable-SortBy'] , homeSettings['expenseTable-Order'])
+                UI.updateExpenseTableHeadings(homeSettings['expenseTable-Time-Period'], homeSettings['expenseTable-SortBy'] , homeSettings['expenseTable-Order'])
+
+                Expense.displayTotalExpense(homeSettings['totalExpense-TimePeriod'])
+                Expense.displayExpenseLimit(homeSettings['expenseLimit-TimePeriod'])
+
+                localStorage.setItem('Budgit-userSettings-home', JSON.stringify(homeSettings))
             }
+            request.send()
+
         }
         // // GET USER SETTINGS
         static getUserSettings() {
-            this.initializeUserSettings()
             return JSON.parse(localStorage.getItem('Budgit-userSettings-home'))
         }
         // UPDATE USER SETTINGS
@@ -1491,7 +1553,7 @@
             if (!(this.getAllSettingKeys().includes(settingToUpdate))) {
                 throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${settingToUpdate}' is not a valid setting to update.`
             }
-            // Invalid neValue
+            // Invalid newValue
             if (!(this.isValidSettingValue(settingToUpdate, newValue))) {
                 throw `Exception: updateUserSetting(${settingToUpdate}, ${newValue}). '${newValue}' is not a valid setting for ${settingToUpdate}.`
 
@@ -1502,6 +1564,12 @@
             S[settingToUpdate] = newValue
             // Push the new settings back to storage
             localStorage.setItem('Budgit-userSettings-home', JSON.stringify(S))
+            // Push the new settings to the database
+            const request = new XMLHttpRequest()
+            request.open('POST', `/updateUserHomeSettings/${JSON.stringify(S)}`)
+            request.send()
+
+
         }
 
 
@@ -1511,18 +1579,34 @@
     // DOM CONTENT LOADED
     document.addEventListener('DOMContentLoaded', () => {
         Settings.initializeUserSettings()
-        let userSettings = {
-            'timePeriod': Settings.getUserSettings()['expenseTable-Time-Period'],
-            'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
-            'order': Settings.getUserSettings()['expenseTable-Order'],
+        let userSettings
+
+        try {
+            userSettings = {
+                'timePeriod': Settings.getUserSettings()['expenseTable-Time-Period'],
+                'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
+                'order': Settings.getUserSettings()['expenseTable-Order'],
+            }
+        }
+        catch (e) {
+            if (e.name === 'TypeError') {
+                userSettings = {
+                    'timePeriod': 'this-day',
+                    'sortBy': 'item_name',
+                    'order': 'asc',
+                }
+            }
+            else {
+                throw `${e}`
+            }
         }
 
-        UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
-        UI.updateExpenseTableHeadings(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
         Expense.loadTotalUserExpenses()
         Expense.loadUserExpenseLimits()
-        Expense.displayTotalExpense('this-day')
-        Expense.displayExpenseLimit('this-day')
+
+
+        // Expense.displayTotalExpense('this-day')
+        // Expense.displayExpenseLimit('this-day')
     })
 
 
@@ -1623,10 +1707,7 @@
         }
     }
     // Total Expense Select
-    document.querySelector('#totalExpenseSelect').onchange = function() {
-        var timePeriod = this.value
-        Expense.displayTotalExpense(timePeriod)
-    }
+    document.querySelector('#totalExpenseSelect').onchange = function() {Expense.displayTotalExpense(this.value)}
     // Expense Limit Select
     document.querySelector('#expenseLimitSelect').onchange = function() {Expense.displayExpenseLimit(this.value)}
     // Schedule Expense Frequency Select -> 'custom' Has Been Selected
@@ -1770,6 +1851,16 @@
             return false
         else
             return true
+    }
+
+    function testSettings() {
+        // const request = new XMLHttpRequest()
+        // request.open('GET', '/initializeUserHomeSettings')
+        // request.onload = () => {
+        //     const homeSettings = JSON.parse(request.responseText)
+        //
+        // }
+        // request.send()
     }
 </script>
 

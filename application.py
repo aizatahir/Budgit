@@ -578,6 +578,35 @@ def account():
     return render_template("account.html")
 
 
+# HOME SETTINGS
+@app.route('/initializeUserHomeSettings', methods=['GET'])
+@login_required
+def initializeUserHomeSettings():
+    HS = HomeSettings(user_id=session['user_id'])
+    HS.createDefaultUserSettings()
+    defaultSettings = HS.getHomeSettings()
+
+    defaultSettingsJSON = {
+        'expenseTable-Time-Period': defaultSettings.expense_table_time_period,
+        'expenseTable-SortBy': defaultSettings.expense_table_sort_by,
+        'expenseTable-Order': defaultSettings.expense_table_order,
+        'totalExpense-TimePeriod': defaultSettings.total_expense_time_period,
+        'expenseLimit-TimePeriod': defaultSettings.expense_limit_time_period,
+    }
+
+    return jsonify(defaultSettingsJSON)
+
+@app.route('/updateUserHomeSettings/<string:newSettings>', methods=['POST'])
+def updateUserHomeSettings(newSettings):
+    newSettings = json.loads(newSettings)
+
+    # print(newSettings)
+    userHomeSettings = HomeSettings.query.filter_by(user_id=session['user_id']).first()
+    userHomeSettings.updateHomeSettings(newSettings)
+
+    return 'Done'
+
+
 # SEND EMAIL
 def sendEmail(To, Subject, Message):
     msg = EmailMessage()

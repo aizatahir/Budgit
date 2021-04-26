@@ -132,3 +132,33 @@ class ExpenseLimit(db.Model):
             userLimits.year = limit
             db.session.commit()
             return
+
+class HomeSettings(db.Model):
+    __tablename__ = 'home_settings'
+    id = db.Column(db.Integer, primary_key=True)
+    expense_table_time_period = db.Column(db.String, default='this-day')
+    expense_table_sort_by = db.Column(db.String, default='item_name')
+    expense_table_order = db.Column(db.String, default='asc')
+    total_expense_time_period = db.Column(db.String, default='this-day')
+    expense_limit_time_period = db.Column(db.String, default='this-day')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+
+    def createDefaultUserSettings(self):
+        HS = HomeSettings(user_id=self.user_id)
+        # CHECK IF SETTING HAS ALREADY BEEN CREATED
+        checkHS = HomeSettings.query.filter_by(user_id=self.user_id).all()
+        if checkHS == []:
+            db.session.add(HS)
+            db.session.commit()
+
+    def getHomeSettings(self):
+        HS = HomeSettings.query.filter_by(user_id=self.user_id).first()
+        return HS
+
+    def updateHomeSettings(self, newSettings):
+        self.expense_table_time_period = newSettings['expenseTable-Time-Period']
+        self.expense_table_sort_by = newSettings['expenseTable-SortBy']
+        self.expense_table_order = newSettings['expenseTable-Order']
+        self.expense_limit_time_period = newSettings['expenseLimit-TimePeriod']
+        self.total_expense_time_period = newSettings['totalExpense-TimePeriod']
+        db.session.commit()
