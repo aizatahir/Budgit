@@ -1535,10 +1535,12 @@
                 UI.populateTable(homeSettings['expenseTable-Time-Period'], homeSettings['expenseTable-SortBy'] , homeSettings['expenseTable-Order'])
                 UI.updateExpenseTableHeadings(homeSettings['expenseTable-Time-Period'], homeSettings['expenseTable-SortBy'] , homeSettings['expenseTable-Order'])
 
+                localStorage.setItem('Budgit-userSettings-home', JSON.stringify(homeSettings))
+
                 Expense.displayTotalExpense(homeSettings['totalExpense-TimePeriod'])
                 Expense.displayExpenseLimit(homeSettings['expenseLimit-TimePeriod'])
 
-                localStorage.setItem('Budgit-userSettings-home', JSON.stringify(homeSettings))
+
             }
             request.send()
 
@@ -1579,34 +1581,10 @@
     // DOM CONTENT LOADED
     document.addEventListener('DOMContentLoaded', () => {
         Settings.initializeUserSettings()
-        let userSettings
-
-        try {
-            userSettings = {
-                'timePeriod': Settings.getUserSettings()['expenseTable-Time-Period'],
-                'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
-                'order': Settings.getUserSettings()['expenseTable-Order'],
-            }
-        }
-        catch (e) {
-            if (e.name === 'TypeError') {
-                userSettings = {
-                    'timePeriod': 'this-day',
-                    'sortBy': 'item_name',
-                    'order': 'asc',
-                }
-            }
-            else {
-                throw `${e}`
-            }
-        }
 
         Expense.loadTotalUserExpenses()
         Expense.loadUserExpenseLimits()
 
-
-        // Expense.displayTotalExpense('this-day')
-        // Expense.displayExpenseLimit('this-day')
     })
 
 
