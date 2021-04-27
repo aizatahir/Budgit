@@ -806,6 +806,7 @@
 
                 localStorage.setItem('Budgit-userSettings-account', JSON.stringify(accountSettings))
 
+                populateFields()
                 UI.populateScheduleExpenseTable(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'], accountSettings['scheduleExpenseTable-DateToShow'])
                 UI.updateScheduleExpenseTableSelect(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'])
             }
@@ -871,7 +872,6 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         Settings.initializeUserAccountSettings()
-        populateFields()
 
     })
 
