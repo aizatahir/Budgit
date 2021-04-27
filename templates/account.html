@@ -94,6 +94,13 @@
     .table_header {
         z-index: 1;
     }
+    .selectClass {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-weight: 600;
+        width: 160px;
+        margin-bottom: 10px;
+
+    }
     .table_header {
         position: relative;
         width: 1%;
@@ -122,6 +129,9 @@
         height: 30px;
         /*margin: 0;*/
         /*padding: 0;*/
+    }
+    .schedule-expense-table-selects-container {
+        display: flex;
     }
     img {
         max-width: 100%;
@@ -458,12 +468,22 @@
                 </div>
                 <!-- BODY -->
                 <div class="modal-body">
-                    <select id="scheduleExpenseTableSort" class="form-control">
-                        <option value="expense_name" data-order="asc">By Name(Asc)</option>
-                        <option value="expense_name" data-order="desc">By Name(Desc)</option>
-                        <option value="expense_price" data-order="asc">By Price(Asc)</option>
-                        <option value="expense_price" data-order="desc">By Price(Desc)</option>
-                    </select>
+                    <div class="schedule-expense-table-selects-container">
+                        <!-- SCHEDULE EXPENSE TABLE SORT -->
+                        <select id="scheduleExpenseTableSort" class="form-control">
+                            <option value="expense_name" data-order="asc">By Name(Asc)</option>
+                            <option value="expense_name" data-order="desc">By Name(Desc)</option>
+                            <option value="expense_price" data-order="asc">By Price(Asc)</option>
+                            <option value="expense_price" data-order="desc">By Price(Desc)</option>
+                        </select>
+
+<!--                        <select id="nextDueSortSelect" class="form-control selectClass">-->
+<!--                            <option>Today</option>-->
+<!--                        </select>-->
+
+                    </div>
+
+
                     <div style="text-align: center;">
                         <table id="scheduleExpenseTable" class="table table" style="width:100%; margin: auto">
                             <thead class="thead-dark">
@@ -745,7 +765,7 @@
         }
         // Check if Setting Value is Valid
         static isValidSettingValue(settingToUpdate, newValue) {
-            if (settingToUpdate === 'scheduleExpenseTable-Time-Period') {
+            if (settingToUpdate === 'scheduleExpenseTable-Next-DueTime-Period') {
                 let allValidTimePeriods = ['this-day', 'this-week', 'this-month', 'this-year', 'all-time']
                 if (!(allValidTimePeriods).includes(newValue)) {
                     return false
@@ -778,21 +798,33 @@
             return true
         }
         // INITIALIZE USER SETTINGS
-        static initializeUserSettings() {
-            if (!(localStorage.getItem('Budgit-userSettings-account'))) {
-                localStorage.setItem('Budgit-userSettings-account', JSON.stringify({
-                    'scheduleExpenseTable-Time-Period': 'this-day',
-                    'scheduleExpenseTable-SortBy': 'expense_name',
-                    'scheduleExpenseTable-Order': 'asc',
-                    'scheduleExpenseTable-DateToShow': 'last_due',
-                    'auto-send-email(exceed_spending_limit)': 'enabled',
-                    'auto-send-email(schedule_expense_added)': 'enabled',
-                }))
+        static initializeUserAccountSettings() {
+            const request = new XMLHttpRequest()
+            request.open('GET', '/initializeUserAccountSettings')
+            request.onload = () => {
+                const accountSettings = JSON.parse(request.responseText)
+
+                localStorage.setItem('Budgit-userSettings-account', JSON.stringify(accountSettings))
+
+                UI.populateScheduleExpenseTable(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'], accountSettings['scheduleExpenseTable-DateToShow'])
+                UI.updateScheduleExpenseTableSelect(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'])
             }
+            request.send()
+
+            //
+            // if (!(localStorage.getItem('Budgit-userSettings-account'))) {
+            //     localStorage.setItem('Budgit-userSettings-account', JSON.stringify({
+            //         'scheduleExpenseTable-Next-DueTime-Period': 'this-day',
+            //         'scheduleExpenseTable-SortBy': 'expense_name',
+            //         'scheduleExpenseTable-Order': 'asc',
+            //         'scheduleExpenseTable-DateToShow': 'last_due',
+            //         'auto-send-email(exceed_spending_limit)': 'enabled',
+            //         'auto-send-email(schedule_expense_added)': 'enabled',
+            //     }))
+            // }
         }
         // GET USER SETTINGS
         static getUserSettings() {
-            this.initializeUserSettings()
             return JSON.parse(localStorage.getItem('Budgit-userSettings-account'))
         }
         // UPDATE USER SETTINGS
@@ -812,6 +844,10 @@
             S[settingToUpdate] = newValue
             // Push the new settings back to storage
             localStorage.setItem('Budgit-userSettings-account', JSON.stringify(S))
+            // Push the new settings to the database
+            const request = new XMLHttpRequest()
+            request.open('POST', `/updateUserAccountSettings/${JSON.stringify(S)}`)
+            request.send()
         }
     }
 
@@ -834,15 +870,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        let userSettings = {
-            'sortBy': Settings.getUserSettings()['scheduleExpenseTable-SortBy'],
-            'order': Settings.getUserSettings()['scheduleExpenseTable-Order'],
-            'dateToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow'],
-            'autoSendExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(exceed_spending_limit)'],
-            'autoSendScheduleExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(schedule_expense_added)'],
-        }
-        UI.populateScheduleExpenseTable(userSettings['sortBy'], userSettings['order'], userSettings['dateToShow'])
-        UI.updateScheduleExpenseTableSelect(userSettings['sortBy'], userSettings['order'])
+        Settings.initializeUserAccountSettings()
         populateFields()
 
     })
@@ -1214,7 +1242,6 @@
                 break
             case 'delete':
                 document.querySelector('#deleteScheduleExpenseBtn').dataset.expense_id = e.target.dataset.expense_id
-
                 break
         }
     })
@@ -1248,11 +1275,20 @@
     document.querySelector('#deleteScheduleExpenseBtn').addEventListener('click', (e) => {
         let expense_id = e.target.dataset.expense_id
         let cancelBtn = document.querySelector('#deleteScheduleExpenseCancelBtn')
+
+
+        let userSettings = {
+            'sortBy': Settings.getUserSettings()['scheduleExpenseTable-SortBy'],
+            'order': Settings.getUserSettings()['scheduleExpenseTable-Order'],
+            'dateHeaderToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow']
+        }
+
+
         const request = new XMLHttpRequest()
         request.open('POST', `/deleteScheduleExpense/${expense_id}`)
         request.onload = () => {
             cancelBtn.click()
-            UI.populateScheduleExpenseTable()
+            UI.populateScheduleExpenseTable(userSettings['sortBy'], userSettings['order'], userSettings['dateHeaderToShow'])
         }
         request.send()
 
@@ -1280,6 +1316,20 @@
         Settings.updateUserSettings('scheduleExpenseTable-Order', order)
 
     })
+
+
+
+
+    function testSettings() {
+        const request = new XMLHttpRequest()
+        request.open('GET', '/initializeUserAccountSettings')
+        request.onload = () => {
+            const data = JSON.parse(request.responseText)
+            console.log(data)
+        }
+        request.send()
+    }
+
 
     // CAPITALIZE
     function capitalize(s) {

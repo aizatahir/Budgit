@@ -898,13 +898,10 @@
             let expensePrice =  document.forms["addExpenseForm"]["expensePrice"]
             let exceedLimitText = document.querySelector('#exceedLimitText')
 
-            let userAccountSettings = JSON.parse(localStorage.getItem('Budgit-userSettings-account'))
-
             let addExpenseBtn = document.querySelector('#addExpenseBtn')
             let expenseData = {
                 'expenseName': expenseName.value,
                 'expensePrice': expensePrice.value,
-                'auto-send-email': userAccountSettings['auto-send-email(exceed_spending_limit)'],
             }
 
             let sortBy = document.querySelector('#expenseTableSort').value
@@ -1525,7 +1522,7 @@
             return true
 
         }
-        // // INITIALIZE USER SETTINGS
+        // INITIALIZE USER SETTINGS
         static initializeUserSettings() {
             const request = new XMLHttpRequest()
             request.open('GET', '/initializeUserHomeSettings')
@@ -1634,6 +1631,8 @@
     // Add Schedule Expense
     document.querySelector('#scheduleExpenseSaveBtn').onclick = () => {
         let frequencySelect = document.querySelector('#frequencySelect')
+        let dateSelect = document.querySelector('#scheduleExpenseDateSelect')
+        let scheduleExpenseStartDateInput = document.querySelector('#scheduleExpenseStartDateInput')
         let scheduleBtn = document.querySelector('#scheduleExpenseSaveBtn')
         // Close Modal Box
         document.querySelector('#scheduleExpenseCancelBtn').click()
@@ -1649,8 +1648,11 @@
         expenseStartDateField.value = ''
         // Remove Custom Frequency
         ScheduleExpense.removeCustomFrequency()
-        // Clear select box
+        // Reset select boxes
         frequencySelect.options[0].selected = true
+        dateSelect.options[0].selected = true
+        // Hide custom date input
+        scheduleExpenseStartDateInput.style.display = 'none'
         // Disable Btn
         scheduleBtn.disabled = true
         // Show Alert

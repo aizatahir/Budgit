@@ -162,3 +162,55 @@ class HomeSettings(db.Model):
         self.expense_limit_time_period = newSettings['expenseLimit-TimePeriod']
         self.total_expense_time_period = newSettings['totalExpense-TimePeriod']
         db.session.commit()
+
+class AccountSettings(db.Model):
+    __tablename__ = 'account_settings'
+    id = db.Column(db.Integer, primary_key=True)
+    schedule_expense_table_next_due_time_period = db.Column(db.String, default='this-day')
+    schedule_expense_table_sort_by = db.Column(db.String, default='expense_name')
+    schedule_expense_table_order = db.Column(db.String, default='asc')
+    schedule_expense_table_date_to_show = db.Column(db.String, default='last_due')
+    auto_send_email__exceed_spending_limit = db.Column(db.String, default='enabled')
+    auto_send_email__schedule_expense_added = db.Column(db.String, default='enabled')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+
+    def createDefaultAccountSettings(self):
+        AS = AccountSettings(user_id=self.user_id)
+        # CHECK IF SETTING HAS ALREADY BEEN CREATED
+        checkAS = AccountSettings.query.filter_by(user_id=self.user_id).all()
+        if checkAS == []:
+            db.session.add(AS)
+            db.session.commit()
+
+    def initializeAccountSettingsWithValues(self):
+        AS = AccountSettings(schedule_expense_table_next_due_time_period=self.schedule_expense_table_next_due_time_period,
+                             schedule_expense_table_sort_by=self.schedule_expense_table_sort_by, schedule_expense_table_order=self.schedule_expense_table_order,
+                             schedule_expense_table_date_to_show=self.schedule_expense_table_date_to_show, auto_send_email__exceed_spending_limit=self.auto_send_email__exceed_spending_limit,
+                             auto_send_email__schedule_expense_added=self.auto_send_email__schedule_expense_added, user_id=self.user_id)
+
+        checkAS = AccountSettings.query.filter_by(user_id=self.user_id).all()
+        if checkAS == []:
+            db.session.add(AS)
+            db.session.commit()
+
+    def getAccountSettings(self):
+        AS = AccountSettings.query.filter_by(user_id=self.user_id).first()
+        return AS
+
+    def updateUserAccountSettings(self, newSettings):
+        self.schedule_expense_table_next_due_time_period = newSettings['scheduleExpenseTable-Next-DueTime-Period']
+        self.schedule_expense_table_sort_by = newSettings['scheduleExpenseTable-SortBy']
+        self.schedule_expense_table_order = newSettings['scheduleExpenseTable-Order']
+        self.schedule_expense_table_date_to_show = newSettings['scheduleExpenseTable-DateToShow']
+        self.auto_send_email__exceed_spending_limit = newSettings['auto-send-email(exceed_spending_limit)']
+        self.auto_send_email__schedule_expense_added = newSettings['auto-send-email(schedule_expense_added)']
+        db.session.commit()
+
+
+
+# 'scheduleExpenseTable-Next-DueTime-Period': 'this-day',
+# 'scheduleExpenseTable-SortBy': 'expense_name',
+# 'scheduleExpenseTable-Order': 'asc',
+# 'scheduleExpenseTable-DateToShow': 'last_due',
+# 'auto-send-email(exceed_spending_limit)': 'enabled',
+# 'auto-send-email(schedule_expense_added)': 'enabled',

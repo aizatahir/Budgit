@@ -226,9 +226,14 @@ def addExpense(expenseData):
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
+    userAccountSettings = AccountSettings.query.filter_by(user_id=session['user_id']).first()
+
     expenseName = expenseData['expenseName']
     expensePrice = expenseData['expensePrice']
-    autoSendEmail = expenseData['auto-send-email']
+    autoSendEmail = userAccountSettings.auto_send_email__exceed_spending_limit
+
+    # print(autoSendEmail)
+
 
     try:
         date = expenseData['expenseDate']
@@ -578,7 +583,7 @@ def account():
     return render_template("account.html")
 
 
-# HOME SETTINGS
+# SETTINGS
 @app.route('/initializeUserHomeSettings', methods=['GET'])
 @login_required
 def initializeUserHomeSettings():
@@ -596,15 +601,42 @@ def initializeUserHomeSettings():
 
     return jsonify(defaultSettingsJSON)
 
+@app.route('/initializeUserAccountSettings', methods=['GET'])
+@login_required
+def initializeUserAccountSettings():
+    AS = AccountSettings(user_id=session['user_id'])
+    AS.createDefaultAccountSettings()
+    defaultSettings = AS.getAccountSettings()
+
+    defaultSettingsJSON = {
+        'scheduleExpenseTable-Next-DueTime-Period': defaultSettings.schedule_expense_table_next_due_time_period,
+        'scheduleExpenseTable-SortBy': defaultSettings.schedule_expense_table_sort_by,
+        'scheduleExpenseTable-Order': defaultSettings.schedule_expense_table_order,
+        'scheduleExpenseTable-DateToShow': defaultSettings.schedule_expense_table_date_to_show,
+        'auto-send-email(exceed_spending_limit)': defaultSettings.auto_send_email__exceed_spending_limit,
+        'auto-send-email(schedule_expense_added)': defaultSettings.auto_send_email__schedule_expense_added,
+
+    }
+    return jsonify(defaultSettingsJSON)
+
 @app.route('/updateUserHomeSettings/<string:newSettings>', methods=['POST'])
 def updateUserHomeSettings(newSettings):
     newSettings = json.loads(newSettings)
 
-    # print(newSettings)
     userHomeSettings = HomeSettings.query.filter_by(user_id=session['user_id']).first()
     userHomeSettings.updateHomeSettings(newSettings)
 
     return 'Done'
+
+@app.route('/updateUserAccountSettings/<string:newSettings>', methods=['POST'])
+def updateUserAccountSettings(newSettings):
+    newSettings = json.loads(newSettings)
+
+    userAccountSettings = AccountSettings.query.filter_by(user_id=session['user_id']).first()
+    userAccountSettings.updateUserAccountSettings(newSettings)
+
+    return 'Done'
+
 
 
 # SEND EMAIL
@@ -633,7 +665,11 @@ def logout():
 
 @app.route("/test")
 def test():
-    return render_template("test.html")
+    # AS = AccountSettings(user_id=19, auto_send_email__exceed_spending_limit='disabled')
+    # AS.initializeAccountSettingsWithValues()
+
+    # AS.createDefaultAccountSettings()
+    return render_template('test.html')
 
 
 

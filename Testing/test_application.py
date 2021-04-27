@@ -28,6 +28,14 @@ class TestApplication(unittest.TestCase):
 
             user = User(id=idToUse, name='username', email='email', password=hash_password('password'), phone_number='phone_number')
             user.addUser()
+
+            # CREATE TEST USER ACCOUNT SETTINGS
+            testUserAS = AccountSettings(user_id=idToUse, auto_send_email__exceed_spending_limit='disabled', auto_send_email__schedule_expense_added='disabled')
+            testUserAS.initializeAccountSettingsWithValues()
+            # CREATE TEST USER HOME SETTINGS
+            testUserHS = HomeSettings(user_id=idToUse)
+            testUserHS.createDefaultUserSettings()
+            # ADD TEST ID TO SESSION
             session['user_id'] = idToUse
 
 
@@ -45,6 +53,14 @@ class TestApplication(unittest.TestCase):
             if testExpenseToRemove != None:
                 db.session.delete(testExpenseToRemove)
                 db.session.commit()
+            # REMOVE USER ACCOUNT SETTINGS
+            ASToRemove = AccountSettings.query.filter_by(user_id=session['user_id']).first()
+            db.session.delete(ASToRemove)
+            db.session.commit()
+            # REMOVE USER HOME SETTINGS
+            HSToRemove = HomeSettings.query.filter_by(user_id=session['user_id']).first()
+            db.session.delete(HSToRemove)
+            db.session.commit()
             # REMOVE USER
             userToRemove = User.query.get(session['user_id'])
             db.session.delete(userToRemove)

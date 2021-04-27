@@ -17,7 +17,6 @@ from Classes import Date
 def ScheduledTask():
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
-    # now = Date(now)
 
     with app.app_context():
         allScheduledExpenses = ScheduledExpense.query.all()
@@ -43,7 +42,10 @@ def ScheduledTask():
 
                 user = User.query.get(expense.user_id)
 
-                if user.email != None:
+                userAccountSettings = AccountSettings.query.filter_by(user_id=user.id).first()
+                autoSendEmail = userAccountSettings.auto_send_email__schedule_expense_added
+
+                if user.email != None and autoSendEmail == 'enabled':
                     message = f"Your Scheduled Expense: '{expense.expense_name}' Has Just Been Added.\n\n" \
                               f"Total Expense For Today: {totalExpenses['this-day']}\n" \
                               f"Total Expense For This Week: {totalExpenses['this-week']}\n" \
@@ -79,3 +81,4 @@ def Test():
 
 if __name__ == '__main__':
     manager.run()
+    # ScheduledTask()
