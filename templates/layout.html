@@ -25,7 +25,7 @@
 <style>
     #mainHeading {
         font-family: 'Times New Roman', Times, serif;
-        color: white;
+        /*color: white;*/
         font-size: 50px;
         font-weight: bold;
     }
@@ -44,8 +44,12 @@
     ::placeholder {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
+    .placeholder-style::-webkit-input-placeholder {
+        color: #5D7290
+    }
     body {
-        background-image: url("{{ url_for('static', filename = 'landingPage1.jpg') }}");
+        /*background-image: url("{{ url_for('static', filename = 'landingPage1.jpg') }}");*/
+        /*background-color: #0B0E11;*/
         background-attachment: fixed;
         background-size: 100% 100%;
         background-repeat: no-repeat;
@@ -59,6 +63,322 @@
     {% endblock %}
 
 </body>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', () => {
+        loadTheme()
+    })
+
+
+    function loadTheme() {
+        let body = document.querySelector('body')
+        let Colors = {
+            'body': '#0B0E11',
+            'container': '#151A21',
+            'selectBG': '#242C37',
+            'selectFG': '#5D7290',
+            'tableAccent': '#5D7290',
+            'inputBG': '#242C37',
+            'btnBG': '#151A21',
+            'font': '#D3D8DF',
+        }
+
+        let Theme = 'dark'
+
+        /* Headings */
+
+        // Home
+        let mainHeading = document.querySelector('#mainHeading')
+        let expenseInfoHeading = document.querySelector('#expenseInfo')
+        let addExpenseHeading = document.querySelector('#addExpenseHeading')
+        let expenseTableHeading = document.querySelector('#expenseTableHeading')
+        let expenseLimitModalHeading = document.querySelector('#expenseLimitModalHeading')
+        let editExpenseModalHeading = document.querySelector('#editExpenseModalHeading')
+        let deleteExpenseModalHeading = document.querySelector('#deleteExpenseModalHeading')
+        let allHomeHeadings = [expenseInfoHeading, addExpenseHeading, expenseTableHeading, expenseLimitModalHeading,
+                               editExpenseModalHeading, deleteExpenseModalHeading]
+        // Account
+        let welcomeHeading = document.querySelector('#welcomeHeading')
+        let scheduleExpenseModalHeading = document.querySelector('#scheduleExpenseModalHeading')
+        let allEditUserInfoHeadings = document.querySelectorAll('.edit-user-info-modal-heading')
+        let allAccountHeadings = [welcomeHeading, scheduleExpenseModalHeading]
+
+        /* Labels */
+
+        // Index
+        let userNameLabel = document.querySelector('#userNameLabel')
+        let userEmailLabel = document.querySelector('#userEmailLabel')
+        let userPasswordLabel = document.querySelector('#userPasswordLabel')
+        let userConfirmPasswordLabel = document.querySelector('#userConfirmPasswordLabel')
+        let allIndexLabels = [userNameLabel, userEmailLabel, userPasswordLabel, userConfirmPasswordLabel]
+        // Home
+        let expenseLimitLabel = document.querySelector('#expenseLimitLabel')
+        let totalExpenseLabel = document.querySelector('#totalExpenseLabel')
+        let expenseNameLabel = document.querySelector('#expenseNameLabel')
+        let expensePriceLabel = document.querySelector('#expensePriceLabel')
+        let expenseLimitPeriodModalLabel = document.querySelector('#expenseLimitPeriodModalLabel')
+        let setExpenseLimitModalLabel = document.querySelector('#setExpenseLimitLabel')
+        let editExpenseNewNameLabel = document.querySelector('#editExpenseNewNameLabel')
+        let editExpenseNewPriceLabel = document.querySelector('#editExpenseNewPriceLabel')
+
+        let allHomeLabels = [expenseLimitLabel, totalExpenseLabel, expenseNameLabel, expensePriceLabel, mainHeading,
+                            expenseLimitPeriodModalLabel, setExpenseLimitModalLabel, editExpenseNewNameLabel, editExpenseNewPriceLabel]
+        // Accounts
+        let allAccountFieldItems = document.querySelectorAll('.field-item')
+        let allAccountUserInfo = document.querySelectorAll('.userInfo')
+        let allInputLabels = document.querySelectorAll('.inputLabel')
+
+        /* Selects */
+
+        // Home
+        let expenseLimitSelect = document.querySelector('#expenseLimitSelect')
+        let totalExpenseSelect = document.querySelector('#totalExpenseSelect')
+        let expenseLimitModalSelect = document.querySelector('#expenseLimitModalSelect')
+        let expenseTableSelectTimePeriodSelect = document.querySelector('#expenseTableSelectTimePeriod')
+        let expenseTableSortSelect = document.querySelector('#expenseTableSort')
+        let allEditUserInfoSelect = document.querySelectorAll('.edit-user-info-select')
+        let allHomeSelects = [expenseLimitSelect, totalExpenseSelect, expenseTableSelectTimePeriodSelect, expenseTableSortSelect, expenseLimitModalSelect]
+        // Account
+        let scheduleExpenseTableSort = document.querySelector('#scheduleExpenseTableSort')
+        let allAccountSelects = [scheduleExpenseTableSort]
+
+        /* Inputs */
+
+        // Index
+        let userNameInput = document.querySelector('#userNameInput')
+        let userEmailInput = document.querySelector('#userEmailInput')
+        let userPasswordInput = document.querySelector('#userPassWordInput')
+        let confirmUserPasswordInput = document.querySelector('#userConfirmPasswordInput')
+        let allIndexInputs = [userNameInput, userEmailInput, userPasswordInput, confirmUserPasswordInput]
+
+        // Home
+        let expenseNameInput = document.querySelector('#expenseNameInput')
+        let expensePriceInput = document.querySelector('#expensePriceInput')
+        let setExpenseLimitInput = document.querySelector('#setExpenseLimitInput')
+        let editExpenseNewNameInput = document.querySelector('#editExpenseNewNameInput')
+        let editExpenseNewPriceInput = document.querySelector('#editExpenseNewPriceInput')
+        let allHomeInputs = [expenseNameInput, expensePriceInput, setExpenseLimitInput, editExpenseNewNameInput, editExpenseNewPriceInput]
+        // Account
+        let allEditUserInfoInputs = document.querySelectorAll('.edit-user-info-input')
+
+        /* Buttons */
+
+        // Home
+        let logoutBtn = document.querySelector('#logoutBtn')
+        let accountBtn = document.querySelector('#accountBtn')
+        let setExpenseLimitCancelBtn = document.querySelector('#setExpenseLimitCancelBtn')
+        let editExpenseCancelBtn = document.querySelector('#editExpenseCancelBtn')
+        let deleteExpenseCancelBtn = document.querySelector('#deleteExpenseCancelBtn')
+        let allHomeBtn = [logoutBtn, accountBtn, setExpenseLimitCancelBtn, editExpenseCancelBtn, deleteExpenseCancelBtn]
+        // Account
+        let updatePasswordBtn = document.querySelector('#changePassBtn')
+        let viewScheduleExpensesBtn = document.querySelector('#viewScheduleExpensesBtn')
+        let allEditUserInfoCancelBtn = document.querySelectorAll('.edit-user-info-cancel-btn')
+        let allAccountsBtn = [logoutBtn, updatePasswordBtn, viewScheduleExpensesBtn]
+
+        /* Tables */
+
+        // Home
+        let expenseTable = document.querySelector('#mainTable')
+        let expenseTableHead = document.querySelector('#expenseTableHead')
+        // Account
+        let scheduleExpenseTable = document.querySelector('#scheduleExpenseTable')
+        let scheduleExpenseTableHead = document.querySelector('#scheduleExpenseTableHead')
+
+        /* Text */
+        let deleteExpenseModalBodyText = document.querySelector('#deleteExpenseModalBodyText')
+        let allHomeText = [deleteExpenseModalBodyText]
+
+        /* Containers */
+
+        // Index
+        let loginFormContainer = document.querySelector('.authenticate-form-container')
+        let allIndexContainers = [loginFormContainer]
+        // Home
+        let addExpenseContainer = document.querySelector('.add-expense-container')
+        let expenseTrackerContainer = document.querySelector('.expense-tracker-container')
+        let expenseTableContainer = document.querySelector('.expense-table-container')
+        let setExpenseLimitModalContainer = document.querySelector('#setExpenseLimitModalContainer')
+        let setExpenseLimitModalFooter = document.querySelector('.set-expense-limit-modal-footer-container')
+        let editExpenseModalContainer = document.querySelector('#editExpenseModalContainer')
+        let editModalFooter = document.querySelector('.edit-expense-modal-footer-container')
+        let deleteExpenseModalContainer = document.querySelector('#deleteExpenseModalContainer')
+        let deleteExpenseModalFooter = document.querySelector('.delete-expense-modal-footer-container')
+        let allHomeContainers = [addExpenseContainer, expenseTableContainer, expenseTrackerContainer, setExpenseLimitModalContainer,
+                                setExpenseLimitModalFooter, editExpenseModalContainer, editModalFooter, deleteExpenseModalContainer,
+                                deleteExpenseModalFooter]
+        // Account
+        let accountContainer = document.querySelector('.acc-container')
+        let scheduleExpenseModalContainer = document.querySelector('#scheduleExpenseModalContainer')
+        let allEditUserInfoModals = document.querySelectorAll('.edit-user-info-modal')
+        let allAccountContainers = [accountContainer, scheduleExpenseModalContainer]
+
+        let currentURL = window.location.href
+        if (Theme === 'dark') {
+            // Body Style
+            body.style.backgroundImage = ''
+            body.style.backgroundColor = Colors['body']
+
+            /* Home Style */
+            if (currentURL.includes('home')) {
+                // Headings Style
+                allHomeHeadings.forEach(heading => {
+                    heading.style.color = Colors['font']
+                })
+                // Labels Style
+                allHomeLabels.forEach(label => {
+                    label.style.color = Colors['font']
+                })
+                // Selects Style
+                allHomeSelects.forEach(select => {
+                    select.style.backgroundColor = Colors['selectBG']
+                    select.style.color = Colors['selectFG']
+                    select.style.border = 'none'
+                })
+                // Inputs Style
+                allHomeInputs.forEach(input => {
+                    input.style.backgroundColor = Colors['inputBG']
+                    input.style.border = 'none'
+                    input.classList.add('placeholder-style')
+                })
+                // Buttons Style
+                allHomeBtn.forEach(btn => {
+                    btn.style.backgroundColor = Colors['btnBG']
+                    btn.style.color = Colors['font']
+                })
+                // Table Style
+                expenseTable.classList.add('table-dark')
+                expenseTableHead.style.border = `3px solid ${Colors['tableAccent']}`
+                // Text Style
+                allHomeText.forEach(text => {
+                    text.style.color = Colors['font']
+                })
+                // Containers Style
+                allHomeContainers.forEach(container => {
+                    container.style.backgroundColor = Colors['container']
+                })
+
+            }
+            /* Account Style */
+            else if (currentURL.includes('account')) {
+                // Headings Style
+                mainHeading.style.color = Colors['font']
+                allAccountHeadings.forEach(heading => {
+                    heading.style.color = Colors['font']
+                })
+                allEditUserInfoHeadings.forEach(heading => {
+                    heading.style.color = Colors['font']
+                })
+                // Labels Style
+                allAccountFieldItems.forEach(item => {
+                    item.style.color = Colors['font']
+                })
+                allAccountUserInfo.forEach(user_info => {
+                    user_info.style.color = 'white'
+                })
+                allInputLabels.forEach(label =>{
+                    label.style.color = Colors['font']
+                })
+                // Selects Style
+                allAccountSelects.forEach(select => {
+                    select.style.backgroundColor = Colors['selectBG']
+                    select.style.color = Colors['selectFG']
+                    select.style.border = 'none'
+                })
+                allEditUserInfoSelect.forEach(select => {
+                    select.style.backgroundColor = Colors['selectBG']
+                    select.style.color = Colors['selectFG']
+                    select.style.border = 'none'
+                })
+                // Inputs Style
+                allEditUserInfoInputs.forEach(input => {
+                    input.style.backgroundColor = Colors['inputBG']
+                    input.style.border = 'none'
+                    input.classList.add('placeholder-style')
+                })
+                // Button Style
+                allAccountsBtn.forEach(button => {
+                    button.style.backgroundColor = Colors['btnBG']
+                    button.style.color = Colors['font']
+                    button.style.border = 'none'
+                })
+                allEditUserInfoCancelBtn.forEach(button =>{
+                    button.style.backgroundColor = Colors['btnBG']
+                    button.style.color = Colors['font']
+                    button.style.border = 'none'
+                })
+                // Table Style
+                scheduleExpenseTable.classList.add('table-dark')
+                scheduleExpenseTableHead.style.border = `3px solid ${Colors['tableAccent']}`
+                // Container Style
+                allAccountContainers.forEach(container => {
+                    container.style.backgroundColor = Colors['container']
+                })
+                allEditUserInfoModals.forEach(modal => {
+                    modal.style.backgroundColor = Colors['container']
+                })
+
+            }
+            /* Index Style */
+            else {
+                // Heading Style
+                mainHeading.style.color = Colors['font']
+                // Labels Style
+                allIndexLabels.forEach(label => {
+                    label.style.color = Colors['font']
+                })
+                // Inputs Style
+                allIndexInputs.forEach(input => {
+                    input.style.backgroundColor = Colors['inputBG']
+                    input.style.border = 'none'
+                    input.classList.add('placeholder-style')
+                })
+                // Containers Style
+                allIndexContainers.forEach(container => {
+                    container.style.backgroundColor = Colors['container']
+                })
+
+            }
+        }
+        else {
+            // Body Style
+            body.style.backgroundImage = "url('/static/landingPage1.jpg')"
+
+            /* Home Style */
+            if (currentURL.includes('/home')) {
+                // Headings Style
+                mainHeading.style.color = 'white'
+                allHomeHeadings.forEach(heading => {
+                    heading.style.color = 'black'
+                })
+                // Containers Style
+                allHomeContainers.forEach(container => {
+                    container.style.backgroundColor = 'white'
+                })
+            }
+            /* Account Style */
+            if (currentURL.includes('/account')) {
+
+            }
+            /* Index Style */
+            else {
+                // Headings Style
+                mainHeading.style.color = 'white'
+                // Containers Style
+                allIndexContainers.forEach(container => {
+                    container.style.backgroundColor = 'white'
+                })
+
+            }
+
+
+        }
+
+
+    }
+
+</script>
 
 {% block script %}
 {% endblock %}

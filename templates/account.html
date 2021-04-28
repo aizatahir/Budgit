@@ -46,7 +46,7 @@
         height: 80px;
         width: 80px;
     }
-    #changePassBtn, #viewScheduleExpenses {
+    #changePassBtn, #viewScheduleExpensesBtn {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
     #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded {
@@ -67,6 +67,10 @@
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         font-size: 18px;
         font-weight: 500;
+    }
+    #autoSendEmail_ScheduleExpenseSelect , #autoSendEmail_ExpenseExceedLimitSelect{
+        margin-top: 5%;
+        margin-bottom: 5%;
     }
     .userInfo {
         font-family: 'Times New Roman', Times, serif;
@@ -279,7 +283,7 @@
             </a>
             <!-- VIEW SCHEDULE EXPENSES -->
             <a href="#scheduleExpenseModal" data-toggle="modal">
-                <button id="viewScheduleExpenses" class="btn btn-light">View Schedule Expenses</button>
+                <button id="viewScheduleExpensesBtn" class="btn btn-light">View Schedule Expenses</button>
             </a>
 
         </div>
@@ -289,24 +293,24 @@
 <!-- EDIT USERNAME MODAL -->
 <div id="editUserNameModal" class="modal fade">
 	<div class="modal-dialog">
-		<div class="modal-content">
+		<div class="modal-content edit-user-info-modal">
 			<form id="editUsernameForm">
                 <!-- EDIT USERNAME -->
 				<div class="modal-header">						
-					<h4 class="modal-title">Edit Username</h4>
+					<h4 class="modal-title edit-user-info-modal-heading">Edit Username</h4>
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <!-- NEW USERNAME -->
 				<div class="modal-body">					
 					<div class="form-group">
 						<label class="inputLabel" for="newUsername">New Username</label>
-						<input class="form-control" name="newUsername" autocomplete="off">
+						<input class="form-control edit-user-info-input" name="newUsername" autocomplete="off">
                     </div>
                         <p id="errorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE AND CANCEL BUTTON -->
 				<div class="modal-footer">
-					<input id="cancelUsernameBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<input id="cancelUsernameBtn" type="button" class="btn btn-default edit-user-info-cancel-btn" data-dismiss="modal" value="Cancel">
 					<button id="saveUsernameBtn" class="btn btn-primary" type="button" disabled>Save</button>
 				</div>
 			</form>
@@ -317,24 +321,24 @@
 <!-- EDIT EMAIL MODAL -->
 <div id="editEmailModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content edit-user-info-modal">
             <form id="editEmailForm">
               <!-- EDIT USERNAME -->
 				<div class="modal-header">						
-					<h4 class="modal-title">Edit Email</h4>
+					<h4 class="modal-title edit-user-info-modal-heading">Edit Email</h4>
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <!-- NEW EMAIL -->
 				<div class="modal-body">					
 					<div class="form-group">
 						<label class="inputLabel" for="newEmail">New Email</label>
-						<input class="form-control" name="newEmail" autocomplete="off">
+						<input class="form-control edit-user-info-input" name="newEmail" autocomplete="off">
                     </div>
                         <p id="editEmailErrorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE AND CANCEL BUTTON -->
 				<div class="modal-footer">
-					<input id="cancelEmailBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<input id="cancelEmailBtn" type="button" class="btn btn-default edit-user-info-cancel-btn" data-dismiss="modal" value="Cancel">
 					<button id="saveEmailBtn" class="btn btn-primary" type="button" disabled>Save</button>
 				</div>
             </form>
@@ -345,24 +349,24 @@
 <!-- EDIT PHONE NUMBER MODAL -->
 <div id="editPhoneNumberModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content edit-user-info-modal">
             <form id="editPhoneNumberForm">
               <!-- HEADER -->
 				<div class="modal-header">						
-					<h4 class="modal-title">Edit Phone Number</h4>
+					<h4 class="modal-title edit-user-info-modal-heading">Edit Phone Number</h4>
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <!-- BODY -->
 				<div class="modal-body">					
 					<div class="form-group">
 						<label class="inputLabel" for="newPhoneNumber">New Phone Number</label>
-						<input class="form-control" name="newPhoneNumber" autocomplete="off">
+						<input class="form-control edit-user-info-input" name="newPhoneNumber" autocomplete="off">
                     </div>
                         <p id="phoneNumberErrorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE AND CANCEL BUTTON -->
 				<div class="modal-footer">
-					<input id="cancelPhoneNumberBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+					<input id="cancelPhoneNumberBtn" type="button" class="btn btn-default edit-user-info-cancel-btn" data-dismiss="modal" value="Cancel">
 					<button id="savePhoneNumberBtn" class="btn btn-primary" type="button" disabled>Save</button>
 				</div>
             </form>
@@ -373,21 +377,21 @@
 <!-- AUTO SEND EMAILS MODAL -> Expense_Limit_Exceeded -->
 <div id="autoSendEmail_ExpenseExceedLimitModal" class="modal fade">
 	<div class="modal-dialog">
-		<div class="modal-content">
+		<div class="modal-content edit-user-info-modal">
             <!-- AUTO SEND EMAILS -->
             <div id="autoSendEmail_ExpenseExceedLimitModalHeader" class="modal-header">
-                <h4 class="modal-title">Auto Send Email After Expense Limit Exceeded</h4>
+                <h4 class="modal-title edit-user-info-modal-heading">Auto Send Email After Expense Limit Exceeded</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
             <!-- NEW OPTION -->
-            <select id="autoSendEmail_ExpenseExceedLimitSelect" class="form-control">
+            <select id="autoSendEmail_ExpenseExceedLimitSelect" class="form-control edit-user-info-select">
                 <option id="autoSendEmail_EL-enabled" value="enabled">Enabled</option>
                 <option id="autoSendEmail_EL-disabled" value="disabled">Disabled</option>
             </select>
            
             <!-- SAVE AND CANCEL BUTTON -->
             <div id="autoSendEmail_ExpenseExceedLimitModalFooter" class="modal-footer">
-                <input id="autoSendEmail_ExpenseExceedLimitCancelBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <input id="autoSendEmail_ExpenseExceedLimitCancelBtn" type="button" class="btn btn-default edit-user-info-cancel-btn" data-dismiss="modal" value="Cancel">
                 <button id="autoSendEmail_ExpenseExceedLimitSaveBtn" class="btn btn-primary" type="button" disabled>Save</button>
             </div>
 		
@@ -398,21 +402,21 @@
 <!-- AUTO SEND EMAILS MODAL -> ScheduleExpense_Added -->
 <div id="autoSendEmail_ScheduleExpenseModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content edit-user-info-modal">
             <!-- AUTO SEND EMAILS -->
             <div id="autoSendEmail_ScheduleExpenseAddedModalHeader" class="modal-header">
-                <h4 class="modal-title">Auto Send Email After Schedule Expense Added</h4>
+                <h4 class="modal-title edit-user-info-modal-heading">Auto Send Email After Schedule Expense Added</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
             <!-- NEW OPTION -->
-            <select id="autoSendEmail_ScheduleExpenseSelect" class="form-control">
+            <select id="autoSendEmail_ScheduleExpenseSelect" class="form-control edit-user-info-select">
                 <option id="autoSendEmail_SE-enabled" value="enabled">Enabled</option>
                 <option id="autoSendEmail_SE-disabled" value="disabled">Disabled</option>
             </select>
 
             <!-- SAVE AND CANCEL BUTTON -->
             <div id="autoSendEmail_ScheduleExpenseAddedModalFooter" class="modal-footer">
-                <input id="autoSendEmail_ScheduleExpenseCancelBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                <input id="autoSendEmail_ScheduleExpenseCancelBtn" type="button" class="btn btn-default edit-user-info-cancel-btn" data-dismiss="modal" value="Cancel">
                 <button id="autoSendEmail_ScheduleExpenseAddedSaveBtn" class="btn btn-primary" type="button" disabled>Save</button>
             </div>
 
@@ -423,31 +427,31 @@
 <!-- UPDATE PASSWORD MODAL -->
 <div id="updatePasswordModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div class="modal-content edit-user-info-modal">
             <div class="form-group">
                 <form id="updatePasswordForm">
                 <!-- HEADER -->
                     <div class="modal-header">						
-                        <h4 class="modal-title">Update Password</h4>
+                        <h4 class="modal-title edit-user-info-modal-heading">Update Password</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     </div>
                     <!-- BODY -->
                     <div class="modal-body">
                         <!-- CURRENT PASSWORD -->
                         <label class="inputLabel" for="currentPassword">Current Password</label>
-                        <input class="form-control" name="currentPassword" type="password" autocomplete="new-password">
+                        <input class="form-control edit-user-info-input" name="currentPassword" type="password" autocomplete="new-password">
                         <!-- NEW PASSWORD -->
                         <label class="inputLabel" for="newPassword">New Password</label>
-                        <input class="form-control" name="newPassword" type="password" autocomplete="new-password">
+                        <input class="form-control edit-user-info-input" name="newPassword" type="password" autocomplete="new-password">
                         <!-- CONFIRM PASSWORD -->
                         <label class="inputLabel" for="confirmPassword">Confirm Password</label>
-                        <input class="form-control" name="confirmPassword" type="password" autocomplete="new-password">
+                        <input class="form-control edit-user-info-input" name="confirmPassword" type="password" autocomplete="new-password">
                         <p id="passwordErrorMessage" class="text-warning"></p>
                     
                     </div>
                     <!-- SAVE AND CANCEL BUTTON -->
                     <div class="modal-footer">
-                        <input id="cancelPasswordBtn" type="button" class="btn btn-default" data-dismiss="modal" value="Cancel">
+                        <input id="cancelPasswordBtn" type="button" class="btn btn-default edit-user-info-cancel-btn" data-dismiss="modal" value="Cancel">
                         <button id="savePasswordBtn" class="btn btn-primary" type="button" disabled>Save</button>
                     </div>
                 </form>
@@ -456,14 +460,17 @@
     </div>
 </div>
 
+
+
+
+
 <!-- VIEW SCHEDULE EXPENSE MODAL -->
 <div id="scheduleExpenseModal" class="modal fade">
     <div class="modal-dialog modal-xl">
-        <div id="scheduleExpenseModalTable">
-            <div class="modal-content">
+        <div id="scheduleExpenseModalContainer" class="modal-content">
                 <!-- HEADER -->
                 <div class="modal-header">
-                    <h4 class="modal-title">Schedule Expenses</h4>
+                    <h4 id="scheduleExpenseModalHeading" class="modal-title">Schedule Expenses</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <!-- BODY -->
@@ -485,8 +492,8 @@
 
 
                     <div style="text-align: center;">
-                        <table id="scheduleExpenseTable" class="table table" style="width:100%; margin: auto">
-                            <thead class="thead-dark">
+                        <table id="scheduleExpenseTable" class="table" style="width:100%; margin: auto">
+                            <thead id="scheduleExpenseTableHead" class="thead-dark">
                             <tr>
                                 <th class="table_header">Name</th>
                                 <th class="table_header">Price</th>
@@ -533,9 +540,9 @@
                     <button id="saveScheduleExpenseBtn" class="btn btn-primary" type="button" disabled>Save</button>
                     <div id="scheduleExpenseModalErrorMessage" class="error-message"></div>
                 </div>
-            </div>
+</div>
 
-        </div>
+    </div>
     </div>
 </div>
 
@@ -724,7 +731,6 @@
             let amount = newExpenseFrequency[1]
             let timePeriod = newExpenseFrequency[2]
 
-            console.log(amount)
 
             if (frequency !== 'every' || (isNaN(amount) || parseInt(amount) <= 0 || amount === '') || !(['day','days', 'week','weeks', 'month','months', 'year','years'].includes(timePeriod))) {
                 this.showErrorMessage('Invalid Frequency')

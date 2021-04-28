@@ -124,9 +124,8 @@ def authenticate(userId, userName, userEmail, userPassword, confirmPassword):
     else:
         # LOGIN
         if not user.validateCredentials():
-            # return render_template("index.html", alert=True, alertType="danger", alertMessage="You Are Not Registered")
             dataRouteToReturn = {
-                'message': 'User Not Registered',
+                'message': 'Invalid Credentials',
                 'route': None
             }
             return jsonify(dataRouteToReturn)

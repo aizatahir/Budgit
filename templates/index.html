@@ -3,11 +3,11 @@
 {% block style %}
 
 <style>
-    .form-container {
+    .authenticate-form-container {
         margin: auto;
         margin-top: 80px;
         width: 50%;
-        background-color: white;
+        /*background-color: white;*/
         border-radius: 10px;
         height: 290px;
         padding: 15px;
@@ -60,7 +60,7 @@
         #alertMessage {
             width: 90%;
         }
-        .form-container {
+        .authenticate-form-container {
             width: 90%;
             margin-top: 40px;
         }
@@ -74,7 +74,7 @@
         #passwordErrorMsg, #emailErrorMsg {
             font-size: 15px;
         }
-        .form-container {
+        .authenticate-form-container {
             width: 95%;
         }
     }
@@ -91,36 +91,36 @@
 
 <div class="container-1">
 <!--    <div class="alert alert-danger" role="alert">Alert</div>-->
-        <center>
+        <div style="text-align: center;">
             <div id="mainHeading">BudgIt</div>
-        </center>
+        </div>
     <!-- </div> -->
 
 
     <div id="alertDiv">
 <!--        <div id="alertMessage" class="alert alert-warning" role="alert">You Are Not Registered</div>-->
     </div>
-    <div class="form-container">
+    <div class="authenticate-form-container">
         <form id="validateForm" name="Form" method="POST">
             <div class="form-group">
                 <!-- USERNAME -->
-                <label class="inputLabel" for="userName">Username</label>
-                <input class="form-control" name="userName" placeholder="Type your username here">
+                <label id="userNameLabel" class="inputLabel" for="userNameInput">Username</label>
+                <input id="userNameInput" class="form-control" name="userName" placeholder="Type your username here">
                 <br>
                 <!-- EMAIL -->
                 <div id="Email">
-                    <label class="inputLabel" for="userEmail">Email</label>
-                    <input class="form-control" name="userEmail" placeholder="Enter Your Email">
+                    <label id="userEmailLabel" class="inputLabel" for="userEmailInput">Email</label>
+                    <input id="userEmailInput" class="form-control" name="userEmail" placeholder="Enter Your Email">
                     <br>
                 </div>
                 <!-- PASSWORD -->
-                <label class="inputLabel" for="userPassword">Password</label>
-                <input class="form-control" name="userPassword" placeholder="Type your password here" type="password">
+                <label id="userPasswordLabel" class="inputLabel" for="userPassWordInput">Password</label>
+                <input id="userPassWordInput" class="form-control" name="userPassword" placeholder="Type your password here" type="password">
                 <br>
                 <!-- CONFIRM PASSWORD -->
                 <div id="confirmPass">
-                    <label class="inputLabel" for="confirmPassword">Confirm Password</label>
-                    <input id="cPass" class="form-control" name="confirmPassword" placeholder="Confirm your password" type="password">
+                    <label id="userConfirmPasswordLabel" class="inputLabel" for="userConfirmPasswordInput">Confirm Password</label>
+                    <input id="userConfirmPasswordInput" class="form-control" name="confirmPassword" placeholder="Confirm your password" type="password">
                 </div>
                 <br>
                 <!--  BUTTON CONTAINER -->
@@ -189,8 +189,8 @@
                 window.location.href = authenticateData['route']
             }
             // User Not Registered
-            if (authenticateData['message'] === 'User Not Registered') {
-                showAlert('You Are Not Registered', 'danger')
+            if (authenticateData['message'] === 'Invalid Credentials') {
+                showAlert('Invalid Credentials', 'danger')
             }
             // Register User
             if (authenticateData['message'] === 'Register User') {
@@ -241,7 +241,7 @@
         var byPassDisable = false
         if (confirmPass.style.display === "block") {
             // VALIDATE PASSWORDS
-            var confirmPassInput = document.getElementById('cPass')
+            var confirmPassInput = document.getElementById('userConfirmPasswordInput')
 
             // Passwords don't match
             if ((passwordField !== "" && confirmPassField !== "") && passwordField !== confirmPassField) {
@@ -314,14 +314,14 @@
         }
 
         // EXTEND THE HEIGHT
-        document.querySelector('.form-container').style.height = "460px"
+        document.querySelector('.authenticate-form-container').style.height = "460px"
 
     }
 
     // removeConfirmPassword and Email
     function removeConfirmPasswordAndEmail() {
         // console.log("remove Confirm")
-        document.querySelector('.form-container').style.height = "290px"
+        document.querySelector('.authenticate-form-container').style.height = "290px"
 
         let nameField = document.forms["Form"]["userName"].value
         let passwordField = document.forms["Form"]["userPassword"].value
@@ -364,12 +364,12 @@
     // adjustContainer
     function adjustContainerWidth(screenWidth) {
         if (screenWidth < 630) {
-            document.querySelector('.form-container').style.height = "480px"
+            document.querySelector('.authenticate-form-container').style.height = "480px"
         }
     }
     function revertContainerWidth(screenWidth) {
         if (screenWidth < 630) {
-            document.querySelector('.form-container').style.height = "460px"
+            document.querySelector('.authenticate-form-container').style.height = "460px"
         }
     }
 
@@ -400,7 +400,6 @@
 
         // Add alert to page
         document.querySelector('#alertDiv').appendChild(alertDiv)
-        // document.querySelector('.form-container').insertBefore(alertDiv, document.querySelector('#alertDiv'))
 
         // Remove alert
         setTimeout(()=>{alertDiv.remove()}, 2000)

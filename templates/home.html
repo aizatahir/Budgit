@@ -116,7 +116,7 @@
         color: red;
 
     }
-    #expenseLimitModalLabel {
+    #expenseLimitPeriodModalLabel {
         margin-left: 28px;
     }
     #expenseLimitSetText {
@@ -200,7 +200,8 @@
         margin: auto;
         margin-top: 70px;
         width: 60%;
-        background-color: white;
+        /*background-color: white;*/
+        /*background-color: #151A21;*/
         border-radius: 10px;
         height: 320px;
         padding: 15px;
@@ -209,7 +210,7 @@
         margin: auto;
         margin-top: 70px;
         width: 30%;
-        background-color: white;
+        /*background-color: white;*/
         border-radius: 10px;
         height: 320px;
         padding: 15px;
@@ -219,7 +220,7 @@
         margin-top: 40px;
         margin-bottom: 10px;
         width: 90%;
-        background-color: white;
+        /*background-color: white;*/
         border-radius: 10px;
         min-height: 280px;
         padding: 15px;
@@ -425,7 +426,7 @@
             <div class="form-group">
                 <form>
                     <!-- SPENDING LIMIT FOR TIME-->
-                    <label id="expenseLimitLabel" class="inputLabel" for="expensePerTime"></label>
+                    <label id="expenseLimitLabel" class="inputLabel" for="expenseLimitSelect"></label>
                     <select id="expenseLimitSelect" class="form-control" name="expensePerTime">
                         <option value="this-day">Today</option>
                         <option value="this-week">This Week</option>
@@ -434,7 +435,7 @@
                     </select>
                     <br>
                     <!-- TOTAL EXPENSE FOR TIME -->
-                    <label id="totalExpenseLabel" class="inputLabel" for="totalExpense">Total Expense: $0</label>
+                    <label id="totalExpenseLabel" class="inputLabel" for="totalExpenseSelect">Total Expense: $0</label>
                     <select id="totalExpenseSelect" class="form-control" name="totalExpense">
                         <option value="this-day">Today</option>
                         <option value="this-week">This Week</option>
@@ -459,12 +460,12 @@
             <form id="addExpenseForm">
                 <div class="form-group">
                     <!-- ITEM NAME -->
-                    <label class="inputLabel" for="expenseName">Expense Name</label>
-                    <input class="form-control" name="expenseName" placeholder="Enter The Name of The Expense" autocomplete="off">
+                    <label id="expenseNameLabel" class="inputLabel" for="expenseNameInput">Expense Name</label>
+                    <input id="expenseNameInput" class="form-control" name="expenseName" placeholder="Enter The Name of The Expense" autocomplete="off">
                     <br>
                     <!-- ITEM PRICE -->
-                    <label class="inputLabel" for="expensePrice">Expense Price</label>
-                    <input id="itemPrice" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense" autocomplete="off">
+                    <label id="expensePriceLabel" class="inputLabel" for="expensePriceInput">Expense Price</label>
+                    <input id="expensePriceInput" class="form-control" name="expensePrice" placeholder="Enter The Price of The Expense" autocomplete="off">
                     <br>
                     <div class="exceed-limit-container">
                     <!-- ADD EXPENSE BTN -->
@@ -509,12 +510,12 @@
             </select>
         </div>
         <!-- EXPENSE TABLE -->
-        <center>
+        <div style="text-align: center;">
             <div id="expenseTableHeading">Expenses For Today</div>
-        </center>
+        </div>
         <br>
-        <table id="mainTable" class="table table-striped" style="width: 90%; margin: auto;" >
-            <thead class="table-dark">
+        <table id="mainTable" class="table" style="width: 90%; margin: auto;" >
+            <thead id="expenseTableHead" class="table-dark">
             <tr>
                 <th class="table_header">Name</th>
                 <th class="table_header">Price</th>
@@ -544,7 +545,7 @@
                 <!-- BODY -->
                 <br>
                 <!-- TIME FRAME SELECT -->
-                <label id="expenseLimitModalLabel" class="inputLabel" for="expenseLimitPeriod">Time Frame</label>
+                <label id="expenseLimitPeriodModalLabel" class="inputLabel" for="expenseLimitPeriod">Time Frame</label>
                 <select id="expenseLimitModalSelect" class="form-control" name="expenseLimitPeriod">
                     <option value="this-day">Today</option>
                     <option value="this-week">This Week</option>
@@ -555,13 +556,13 @@
                 <!-- SET EXPENSE LIMIT FIELD -->
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="inputLabel" for="expenseLimit">Expense Limit</label>
-                        <input class="form-control" name="expenseLimit" autocomplete="off" placeholder="Amount">
+                        <label id="setExpenseLimitLabel" class="inputLabel" for="setExpenseLimitInput">Expense Limit</label>
+                        <input id="setExpenseLimitInput" class="form-control" name="expenseLimit" autocomplete="off" placeholder="Amount">
                     </div>
                 </div>
                 <div id="expenseLimitSetText"></div>
                 <!-- SAVE AND CANCEL BUTTON -->
-                <div class="modal-footer">
+                <div class="modal-footer set-expense-limit-modal-footer-container">
                     <input type="button" class="btn btn-default" id="setExpenseLimitCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="setLimitBtn" class="btn btn-primary" type="button" disabled>Set Limit</button>
                 </div>
@@ -574,29 +575,29 @@
 <!-- Edit EXPENSE MODAL -->
 <div id="editExpenseModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div id="editExpenseModalContainer" class="modal-content">
             <form id="editExpenseForm">
                 <!-- EDIT EXPENSE -->
                 <div class="modal-header">
-                    <h4 class="modal-title">Edit Expense</h4>
+                    <h4 id="editExpenseModalHeading" class="modal-title">Edit Expense</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <!-- NEW ITEM NAME -->
                 <div class="modal-body">
                     <div class="form-group">
-                        <label class="inputLabel" for="newName">New Name</label>
-                        <input class="form-control" name="newName" autocomplete="off">
+                        <label id="editExpenseNewNameLabel" class="inputLabel" for="editExpenseNewNameInput">New Name</label>
+                        <input id="editExpenseNewNameInput" class="form-control" name="newName" autocomplete="off">
                     </div>
                     <!-- NEW ITEM PRICE -->
                     <div class="form-group">
-                        <label class="inputLabel" for="newPrice">New Price</label>
-                        <input class="form-control" name="newPrice" autocomplete="off">
+                        <label id="editExpenseNewPriceLabel" class="inputLabel" for="editExpenseNewPriceInput">New Price</label>
+                        <input id="editExpenseNewPriceInput" class="form-control" name="newPrice" autocomplete="off">
                     </div>
                     <p id="errorMessage" class="text-warning"><small></small></p>
                 </div>
                 <!-- SAVE BUTTON -->
-                <div class="modal-footer">
-                    <input type="button" class="btn btn-default" id="editModalCancelBtn" data-dismiss="modal" value="Cancel">
+                <div class="modal-footer edit-expense-modal-footer-container">
+                    <input type="button" class="btn btn-default" id="editExpenseCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="saveEditBtn" class="btn btn-primary" type="button" disabled>Save</button>
                 </div>
             </form>
@@ -606,17 +607,17 @@
 <!-- Delete Modal HTML -->
 <div id="deleteExpenseModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div id="deleteExpenseModalContainer" class="modal-content">
             <form>
                 <div class="modal-header">
-                    <h4 class="modal-title">Delete Expense</h4>
+                    <h4 id="deleteExpenseModalHeading" class="modal-title">Delete Expense</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete this expense?</p>
+                    <p id="deleteExpenseModalBodyText">Are you sure you want to delete this expense?</p>
                     <p class="text-warning"><small>This action cannot be undone.</small></p>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer delete-expense-modal-footer-container">
                     <input type="button" class="btn btn-default" id="deleteExpenseCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="deleteExpenseBtn" class="btn btn-danger" type="button">Delete</button>
                 </div>
@@ -968,15 +969,15 @@
                         exceedLimitText.style.color = "orange"
                         exceedLimitText.textContent = "Enter the price without the use of '$'"
                     }
-                    document.querySelector('#itemPrice').style.borderColor = "red"
+                    document.querySelector('#expensePriceInput').style.borderColor = "red"
                     addExpenseBtn.disabled = true
                 }
                 else {
-                    document.querySelector('#itemPrice').style.borderColor = ""
+                    document.querySelector('#expensePriceInput').style.borderColor = ""
                 }
             }
             else {
-                document.querySelector('#itemPrice').style.borderColor = ""
+                document.querySelector('#expensePriceInput').style.borderColor = ""
             }
 
         }
@@ -1238,7 +1239,7 @@
         }
         //  REMOVE MODALS
         static removeEditExpenseModal() {
-            document.querySelector('#editModalCancelBtn').click()
+            document.querySelector('#editExpenseCancelBtn').click()
         }
         static removeDeleteExpenseModal() {
             document.querySelector('#deleteExpenseCancelBtn').click()
@@ -1744,7 +1745,7 @@
     // Validate Add Expense Form
     document.querySelector('#addExpenseForm').onkeyup = () => {Expense.validateAddExpenseForm()}
     // Check If Expense That Is About To Be Added Will Exceed a Limit
-    document.querySelector('#itemPrice').onkeyup = () => {Expense.expenseToBeAddedWillExceedLimit()}
+    document.querySelector('#expensePriceInput').onkeyup = () => {Expense.expenseToBeAddedWillExceedLimit()}
     // Validate Schedule Expense Form
     document.querySelector('#scheduleExpenseForm').onkeyup = () => {ScheduleExpense.validateAddScheduleExpenseForm()}
     // Validate Schedule Expense Custom Frequency
