@@ -47,6 +47,9 @@
     .placeholder-style::-webkit-input-placeholder {
         color: #5D7290
     }
+    select {
+        /*-webkit-appearance: none;*/
+    }
     body {
         /*background-image: url("{{ url_for('static', filename = 'landingPage1.jpg') }}");*/
         /*background-color: #0B0E11;*/
@@ -72,6 +75,7 @@
 
 
     function loadTheme() {
+        let userAccountSettings = JSON.parse(localStorage.getItem('Budgit-userSettings-account'))
         let body = document.querySelector('body')
         let Colors = {
             'body': '#0B0E11',
@@ -84,7 +88,13 @@
             'font': '#D3D8DF',
         }
 
-        let Theme = 'dark'
+        let Theme
+        if (userAccountSettings['darkMode'] === 'enabled') {
+            Theme = 'dark'
+        }
+        else {
+            Theme = 'light'
+        }
 
         /* Headings */
 
@@ -174,8 +184,9 @@
         // Account
         let updatePasswordBtn = document.querySelector('#changePassBtn')
         let viewScheduleExpensesBtn = document.querySelector('#viewScheduleExpensesBtn')
+        let scheduleExpenseModalCancelBtn = document.querySelector('#scheduleExpenseModalCancelBtn')
         let allEditUserInfoCancelBtn = document.querySelectorAll('.edit-user-info-cancel-btn')
-        let allAccountsBtn = [logoutBtn, updatePasswordBtn, viewScheduleExpensesBtn]
+        let allAccountsBtn = [logoutBtn, updatePasswordBtn, viewScheduleExpensesBtn, scheduleExpenseModalCancelBtn]
 
         /* Tables */
 
@@ -358,8 +369,8 @@
                 })
             }
             /* Account Style */
-            if (currentURL.includes('/account')) {
-
+            else if (currentURL.includes('/account')) {
+                mainHeading.style.color = 'white'
             }
             /* Index Style */
             else {

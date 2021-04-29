@@ -614,6 +614,7 @@ def initializeUserAccountSettings():
         'scheduleExpenseTable-DateToShow': defaultSettings.schedule_expense_table_date_to_show,
         'auto-send-email(exceed_spending_limit)': defaultSettings.auto_send_email__exceed_spending_limit,
         'auto-send-email(schedule_expense_added)': defaultSettings.auto_send_email__schedule_expense_added,
+        'darkMode': defaultSettings.dark_mode,
 
     }
     return jsonify(defaultSettingsJSON)

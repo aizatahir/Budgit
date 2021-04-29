@@ -172,6 +172,7 @@ class AccountSettings(db.Model):
     schedule_expense_table_date_to_show = db.Column(db.String, default='last_due')
     auto_send_email__exceed_spending_limit = db.Column(db.String, default='enabled')
     auto_send_email__schedule_expense_added = db.Column(db.String, default='enabled')
+    dark_mode = db.Column(db.String, default='disabled')
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
 
     def createDefaultAccountSettings(self):
@@ -204,6 +205,7 @@ class AccountSettings(db.Model):
         self.schedule_expense_table_date_to_show = newSettings['scheduleExpenseTable-DateToShow']
         self.auto_send_email__exceed_spending_limit = newSettings['auto-send-email(exceed_spending_limit)']
         self.auto_send_email__schedule_expense_added = newSettings['auto-send-email(schedule_expense_added)']
+        self.dark_mode = newSettings['darkMode']
         db.session.commit()
 
 

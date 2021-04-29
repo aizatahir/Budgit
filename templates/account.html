@@ -49,13 +49,15 @@
     #changePassBtn, #viewScheduleExpensesBtn {
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
-    #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded {
+    #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded, #editDarkModeBtn {
         position: absolute;
         left: 73%;
     }
-    #autoSendEmail_ExpenseExceedLimitSelect, #autoSendEmail_ScheduleExpenseSelect {
+    #autoSendEmail_ExpenseExceedLimitSelect, #autoSendEmail_ScheduleExpenseSelect, #darkModeSelect {
         margin: auto;
         width: 70%;
+        margin-top: 5%;
+        margin-bottom: 5%;
     }
     #autoSendEmail_ExpenseExceedLimitModalHeader, #autoSendEmail_ScheduleExpenseAddedModalHeader, #autoSendEmail_ExpenseExceedLimitModalFooter, #autoSendEmail_ScheduleExpenseAddedModalFooter {
         border-color: white;
@@ -68,10 +70,10 @@
         font-size: 18px;
         font-weight: 500;
     }
-    #autoSendEmail_ScheduleExpenseSelect , #autoSendEmail_ExpenseExceedLimitSelect{
-        margin-top: 5%;
-        margin-bottom: 5%;
-    }
+    /*#autoSendEmail_ScheduleExpenseSelect , #autoSendEmail_ExpenseExceedLimitSelect, #darkModeSelect{*/
+    /*    margin-top: 5%;*/
+    /*    margin-bottom: 5%;*/
+    /*}*/
     .userInfo {
         font-family: 'Times New Roman', Times, serif;
         /* margin-right: 60%; */
@@ -118,7 +120,6 @@
         font-size: 14px;
     }
     .error-message {
-        /*font-family: "Times New Roman",serif;*/
         font-weight: 600;
         color: #E20E0E;
         position: absolute;
@@ -131,8 +132,6 @@
         border: none;
         width: 88%;
         height: 30px;
-        /*margin: 0;*/
-        /*padding: 0;*/
     }
     .schedule-expense-table-selects-container {
         display: flex;
@@ -187,7 +186,7 @@
         }
     }
     @media only screen and (max-width: 420px) {
-        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded, #editDarkModeBtn {
             left: 80%;
         }
     }
@@ -206,7 +205,7 @@
         }
     }
     @media only screen and (max-width: 360px) {
-        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded, #editDarkModeBtn {
             left: 83%;
         }
     }
@@ -276,6 +275,13 @@
                 </a>
             </div>
             <hr>
+            <div class="field-item">Dark Mode: <span id="darkModeField" class="userInfo"></span>
+                <a href="#darkModeModal" id="editDarkModeBtn" class="edit" data-toggle="modal">
+                    <i class="material-icons" data-toggle="tooltip" title="Edit"></i>
+                </a>
+            </div>
+            <hr>
+
 
             <!-- UPDATE PASSWORD -->
             <a href="#updatePasswordModal" class="edit" data-toggle="modal">
@@ -285,6 +291,7 @@
             <a href="#scheduleExpenseModal" data-toggle="modal">
                 <button id="viewScheduleExpensesBtn" class="btn btn-light">View Schedule Expenses</button>
             </a>
+
 
         </div>
     </div>
@@ -423,6 +430,33 @@
         </div>
     </div>
 </div>
+
+
+<div id="darkModeModal" class="modal fade">
+    <div class="modal-dialog">
+        <div class="modal-content edit-user-info-modal">
+            <!-- AUTO SEND EMAILS -->
+            <div id="darkModeModalHeader" class="modal-header">
+                <h4 class="modal-title edit-user-info-modal-heading">Dark Mode</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <!-- NEW OPTION -->
+            <select id="darkModeSelect" class="form-control edit-user-info-select">
+                <option id="DM-enabled" value="enabled">Enabled</option>
+                <option id="DM-disabled" value="disabled">Disabled</option>
+            </select>
+
+            <!-- SAVE AND CANCEL BUTTON -->
+            <div id="darkModeModalFooter" class="modal-footer">
+                <input id="darkModeModalCancelBtn" type="button" class="btn btn-default edit-user-info-cancel-btn" data-dismiss="modal" value="Cancel">
+                <button id="darkModeModalSaveBtn" class="btn btn-primary" type="button" disabled>Save</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
 
 <!-- UPDATE PASSWORD MODAL -->
 <div id="updatePasswordModal" class="modal fade">
@@ -795,7 +829,7 @@
                     return false
                 }
             }
-            else if (settingToUpdate === 'auto-send-email(schedule_expense_added)' || 'auto-send-email(exceed_spending_limit)') {
+            else if (settingToUpdate === 'auto-send-email(schedule_expense_added)' || 'auto-send-email(exceed_spending_limit)' || 'darkMode') {
                 let allValidOptions = ['enabled', 'disabled']
                 if (!(allValidOptions.includes(newValue))) {
                     return false
@@ -817,18 +851,6 @@
                 UI.updateScheduleExpenseTableSelect(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'])
             }
             request.send()
-
-            //
-            // if (!(localStorage.getItem('Budgit-userSettings-account'))) {
-            //     localStorage.setItem('Budgit-userSettings-account', JSON.stringify({
-            //         'scheduleExpenseTable-Next-DueTime-Period': 'this-day',
-            //         'scheduleExpenseTable-SortBy': 'expense_name',
-            //         'scheduleExpenseTable-Order': 'asc',
-            //         'scheduleExpenseTable-DateToShow': 'last_due',
-            //         'auto-send-email(exceed_spending_limit)': 'enabled',
-            //         'auto-send-email(schedule_expense_added)': 'enabled',
-            //     }))
-            // }
         }
         // GET USER SETTINGS
         static getUserSettings() {
@@ -890,6 +912,7 @@
             'dateToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow'],
             'autoSendExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(exceed_spending_limit)'],
             'autoSendScheduleExpenseAddedEmail': Settings.getUserSettings()['auto-send-email(schedule_expense_added)'],
+            'darkMode': Settings.getUserSettings()['darkMode']
         }
 
         const request = new XMLHttpRequest()
@@ -926,7 +949,7 @@
             if (userSettings.autoSendExpenseAddedEmail === 'enabled') {
                 document.querySelector('#autoSendEmail_EL-enabled').selected = true
             }
-            if (userSettings.autoSendExpenseAddedEmail === 'disabled') {
+            else if (userSettings.autoSendExpenseAddedEmail === 'disabled') {
                 document.querySelector('#autoSendEmail_EL-disabled').selected = true
             }
 
@@ -936,8 +959,18 @@
             if (userSettings.autoSendScheduleExpenseAddedEmail === 'enabled') {
                 document.querySelector('#autoSendEmail_SE-enabled').selected = true
             }
-            if (userSettings.autoSendScheduleExpenseAddedEmail === 'disabled') {
+            else if (userSettings.autoSendScheduleExpenseAddedEmail === 'disabled') {
                 document.querySelector('#autoSendEmail_SE-disabled').selected = true
+            }
+
+            // POPULATE DARK MODE FIELD
+            document.querySelector('#darkModeField').textContent = capitalize(userSettings.darkMode)
+            // Set the default select option in the modal box
+            if (userSettings.darkMode === 'enabled') {
+                document.querySelector('#DM-enabled').selected = true
+            }
+            else if (userSettings.darkMode === 'disabled') {
+                document.querySelector('#DM-disabled').selected = true
             }
 
         }
@@ -1061,6 +1094,19 @@
         else {
             saveBtn.disabled = true
         }
+    }
+    // DARK MODE SELECT
+    document.querySelector('#darkModeSelect').onchange = function() {
+        let currentSetting = Settings.getUserSettings()['darkMode']
+        let saveBtn = document.querySelector('#darkModeModalSaveBtn')
+
+        if (this.value !== currentSetting) {
+            saveBtn.disabled = false
+        }
+        else {
+            saveBtn.disabled = true
+        }
+
     }
 
 
@@ -1229,6 +1275,14 @@
         document.querySelector('#autoSendEmail_ScheduleExpenseCancelBtn').click()
         scrollToTop()
         showAlert(`Schedule Expense Added Emails ${capitalize(newSettingValue)}`)
+    }
+    // UPDATE DARK MODE
+    document.querySelector('#darkModeModalSaveBtn').onclick = () => {
+        let newSettingValue = document.querySelector('#darkModeSelect').value
+        Settings.updateUserSettings('darkMode', newSettingValue)
+        document.querySelector('#darkModeField').textContent = capitalize(newSettingValue)
+        document.querySelector('#darkModeModalCancelBtn').click()
+        location.reload()
     }
 
 
