@@ -3,7 +3,7 @@ from calendar import monthrange
 from datetime import date, timedelta, tzinfo, datetime
 from math import inf
 
-from Classes import Date
+from Classes import Date, EST
 
 def getThisWeekForQuery(now):
     """ THIS FUNCTION RETURNS AN ARRAY OF ALL THE DATES IN THE CURRENT WEEK """
@@ -241,9 +241,76 @@ def getMostRecentDate(listOfDates: list):
 
 
 
+def validateDate(due_date):
+    tmp_date = due_date
+    all_months = {"January", "February", "March", "April", "May", "June", "July", "August",
+                  "September", "October", "November", "December"}
+
+    try:
+        due_date = due_date.split()
+        due_date_month = due_date[0]
+        due_date_day = int(due_date[1].replace(',', ''))
+        due_date_year = int(due_date[2])
+    except:
+        return 0
+
+    # INVALID MONTH
+    if due_date_month not in all_months:
+        return -1
+    # INVALID DAY
+    if due_date_day < 1 or due_date_day > 31 if due_date_month != "February" else 28:
+        return -2
+    # DATE HAS PASSED
+    if dateHasPassed(tmp_date):
+        return -3
+
+    return 1
+
+
+def dateHasPassed(due_date):
+    now = Date()
+    due_date = Date(due_date)
+
+    all_months = {"January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6, "July": 7, "August": 8,
+                  "September": 9, "October": 10, "November": 11, "December": 12}
+
+    try:
+        today_date_day   = now.day
+        today_date_month = now.month
+        today_date_year  = now.year
+
+        due_date_day   = due_date.day
+        due_date_month = due_date.month
+        due_date_year  = due_date.year
+
+        Today    = [all_months[today_date_month], today_date_day, today_date_year]
+        Due_Date = [all_months[due_date_month], due_date_day, due_date_year]
+
+        # THE YEAR HAS PASSED
+        if Due_Date[2] < Today[2]:
+            return True
+        if Due_Date[2] > Today[2]:
+            return False
+        # MONTH HAS PASSED
+        if Due_Date[0] < Today[0]:
+            return True
+        if Due_Date[0] > Today[0]:
+            return False
+        # DAY HAS PASSED
+        if Due_Date[0] == Today[0]:
+            if Due_Date[1] < Today[1]:
+                return True
+        return False
+    except:
+        return False
+
+
+
+
 def main():
-    Dates = ['January 20, 2021', 'March 02, 2021', 'June 20, 2021']
-    print(getMostRecentDate(Dates))
+    now = 'May 1, 2021'
+    print(Date.validateDate(now))
+
 
 
 main()

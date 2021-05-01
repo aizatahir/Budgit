@@ -142,7 +142,7 @@
         font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         border-radius: 10px;
     }
-    #scheduleExpenseNameInput, #scheduleExpensePriceInput, #customFrequencyInput, #scheduleExpenseStartDateInput {
+    #scheduleExpenseNameInput, #scheduleExpensePriceInput, #addScheduleExpenseCustomFrequencyInput, #scheduleExpenseStartDateInput {
         margin-bottom: 2%;
         border-radius: 5px;
     }
@@ -153,14 +153,14 @@
         cursor: pointer;
         margin-left: 85%;
     }
-    #frequencySelect {
+    #addScheduleExpenseFrequencySelect {
         margin-bottom: 2%;
     }
-    #timePeriodHeading, #frequencyHeading, #customFrequencyHeading {
+    #addScheduleExpenseTimePeriodHeading, #addScheduleExpenseFrequencyHeading, #addScheduleExpenseCustomFrequencyHeading {
         font-weight: 600;
         /*text-decoration: overline;*/
     }
-    #customFrequencyHeading, #customFrequencyInput {
+    #addScheduleExpenseCustomFrequencyHeading, #addScheduleExpenseCustomFrequencyInput {
         display: none;
     }
     #scheduleExpenseDateSelect {
@@ -187,7 +187,7 @@
         font-size: 14px;
     }
     #expenseLimitSelect, #totalExpenseSelect, #expenseTableSelectTimePeriod, #expenseTableSort {
-        -webkit-appearance: none;
+        /*-webkit-appearance: none;*/
     }
     .container-1 {
         display: flex;
@@ -640,11 +640,11 @@
 <!--SCHEDULE EXPENSE MODAL -->
 <div id="scheduleExpenseModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div id="addScheduleExpenseModalContainer" class="modal-content">
 
             <!-- HEADER -->
             <div class="modal-header">
-                <h4 class="modal-title">Schedule Expense (Beta)</h4>
+                <h4 id="addScheduleExpenseModalHeading" class="modal-title">Schedule Expense</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
             </div>
             <!-- BODY -->
@@ -652,13 +652,13 @@
                 <div class="form-group">
                     <form id="scheduleExpenseForm">
                         <!-- EXPENSE NAME -->
-                        <label class="inputLabel" for="scheduleExpenseNameInput">Expense Name</label>
+                        <label id="addScheduleExpenseNameLabel" class="inputLabel" for="scheduleExpenseNameInput">Expense Name</label>
                         <input id="scheduleExpenseNameInput" class="form-control" name="expenseName" autocomplete="off">
                         <!-- EXPENSE PRICE -->
-                        <label class="inputLabel" for="scheduleExpensePriceInput">Expense Price</label>
+                        <label id="addScheduleExpensePriceLabel" class="inputLabel" for="scheduleExpensePriceInput">Expense Price</label>
                         <input id="scheduleExpensePriceInput" class="form-control" name="expensePrice" autocomplete="off">
                         <!-- START DATE -->
-                        <label class="inputLabel" for="scheduleExpenseStartDateInput">Start Date</label>
+                        <label id="addScheduleExpenseStartDateLabel" class="inputLabel" for="scheduleExpenseStartDateInput">Start Date</label>
                         <select class="form-control" id="scheduleExpenseDateSelect">
                             <option value="#">Today</option>
                             <option value="other">Other</option>
@@ -674,40 +674,40 @@
                     <!-- SCHEDULE INFO -->
                     <div class="schedule-info-container">
                         <div class="time-period-container">
-                            <div id="timePeriodHeading">Time Period</div>
+                            <div id="addScheduleExpenseTimePeriodHeading">Time Period</div>
                             <!-- DAY RADIO BTN -->
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="inlineRadioOptions" id="dayRadioBtn" value="day" checked>
-                                <label class="form-check-label" for="inlineRadio1">Day</label>
+                                <label id="addScheduleExpenseDayRadioBtnLabel" class="form-check-label" for="inlineRadio1">Day</label>
                             </div>
                             <!-- WEEK RADIO BTN -->
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="inlineRadioOptions" id="weekRadioBtn" value="week">
-                                <label class="form-check-label" for="inlineRadio1">Week</label>
+                                <label id="addScheduleExpenseWeekRadioBtnLabel" class="form-check-label" for="inlineRadio1">Week</label>
                             </div>
                             <!-- MONTH RADIO BTN -->
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="inlineRadioOptions" id="monthRadioBtn" value="month">
-                                <label class="form-check-label" for="inlineRadio2">Month</label>
+                                <label id="addScheduleExpenseMonthRadioBtnLabel" class="form-check-label" for="inlineRadio2">Month</label>
                             </div>
                             <!-- YEAR RADIO BTN -->
                             <div class="form-check form-check-inline">
                                 <input class="form-check-input" type="radio" name="inlineRadioOptions" id="yearRadioBtn" value="year">
-                                <label class="form-check-label" for="inlineRadio3">Year</label>
+                                <label id="addScheduleExpenseYearRadioBtnLabel" class="form-check-label" for="inlineRadio3">Year</label>
                             </div>
                         </div>
                         <hr>
                         <!-- FREQUENCY -->
-                        <label id="frequencyHeading" for="frequencySelect">Frequency</label>
-                        <select id="frequencySelect" class="form-control">
+                        <label id="addScheduleExpenseFrequencyHeading" for="addScheduleExpenseFrequencySelect">Frequency</label>
+                        <select id="addScheduleExpenseFrequencySelect" class="form-control">
                             <option value="every-1-day">Every Day</option>
                             <option value="every-2-days">Every 2 Days</option>
                             <option value="every-3-days">Every 3 Days</option>
                             <option value="custom-day">Custom</option>
                         </select>
                         <!-- CUSTOM FREQUENCY INPUT -->
-                        <label id="customFrequencyHeading" for="customFrequencyInput"></label>
-                        <input id="customFrequencyInput" class="form-control" type="number" min="1" max="1000">
+                        <label id="addScheduleExpenseCustomFrequencyHeading" for="addScheduleExpenseCustomFrequencyInput"></label>
+                        <input id="addScheduleExpenseCustomFrequencyInput" class="form-control" type="number" min="1" max="1000">
                         <!-- ERROR MESSAGE -->
                         <p class="text-danger error-message"><small id="customFrequencyErrorMessage"></small></p>
                     </div>
@@ -716,7 +716,7 @@
 
                 </div>
                 <!-- SAVE AND CANCEL BUTTON -->
-                <div class="modal-footer">
+                <div id="addScheduleExpenseModalFooter" class="modal-footer">
                     <input type="button" class="btn btn-default" id="scheduleExpenseCancelBtn" data-dismiss="modal" value="Cancel">
                     <button id="scheduleExpenseSaveBtn" class="btn btn-primary" type="button" disabled>Schedule</button>
                 </div>
@@ -1260,7 +1260,7 @@
     class ScheduleExpense {
         // UPDATE FREQUENCY
         static updateFrequencySelect(period) {
-            let frequencySelect = document.querySelector('#frequencySelect')
+            let frequencySelect = document.querySelector('#addScheduleExpenseFrequencySelect')
             switch (period) {
                 case 'day':
                     frequencySelect.innerHTML = `
@@ -1299,14 +1299,14 @@
         }
         // SHOW CUSTOM FREQUENCY
         static showCustomFrequency() {
-            document.querySelector('#customFrequencyHeading').style.display = 'block'
-            document.querySelector('#customFrequencyInput').style.display = 'block'
+            document.querySelector('#addScheduleExpenseCustomFrequencyHeading').style.display = 'block'
+            document.querySelector('#addScheduleExpenseCustomFrequencyInput').style.display = 'block'
 
         }
         // REMOVE CUSTOM FREQUENCY
         static removeCustomFrequency() {
-            document.querySelector('#customFrequencyHeading').style.display = 'none'
-            document.querySelector('#customFrequencyInput').style.display = 'none'
+            document.querySelector('#addScheduleExpenseCustomFrequencyHeading').style.display = 'none'
+            document.querySelector('#addScheduleExpenseCustomFrequencyInput').style.display = 'none'
 
         }
         // VALIDATE FORM
@@ -1317,6 +1317,7 @@
             let scheduleExpenseDateSelect = document.querySelector('#scheduleExpenseDateSelect')
             let errorMessage = document.querySelector('#scheduleExpenseErrorMessage')
             let scheduleBtn = document.querySelector('#scheduleExpenseSaveBtn')
+            scheduleBtn.disabled = true
 
 
             // let allFields = [expenseNameField, expensePriceField, expenseStartDateField]
@@ -1351,35 +1352,62 @@
             }
 
             // Validate expenseStartDateField
-            if (scheduleExpenseDateSelect.selectedIndex !== 0) {   // 'Today' was selected
+            // if (scheduleExpenseDateSelect.selectedIndex !== 0) {   // 'Other' was selected
+            //     if (expenseStartDateField.value !== '') {
+            //         if (!(isValidDate(expenseStartDateField.value))) {
+            //             validDate = false
+            //             errorMessage.textContent = 'Invalid Start Date'
+            //             expenseStartDateField.style.borderColor = 'red'
+            //         }
+            //         else {
+            //             validDate = true
+            //             errorMessage.textContent = ''
+            //             expenseStartDateField.style.borderColor = ''
+            //         }
+            //     }
+            // }
+            if (scheduleExpenseDateSelect.selectedIndex !== 0) {   // 'Other' was selected
                 if (expenseStartDateField.value !== '') {
-                    if (!(isValidDate(expenseStartDateField.value))) {
-                        validDate = false
-                        errorMessage.textContent = 'Invalid Start Date'
-                        expenseStartDateField.style.borderColor = 'red'
+                    let startDate = expenseStartDateField.value.replace('/', '-').replace('/', '-')
+
+                    const request = new XMLHttpRequest()
+                    request.open('GET', `/validateDate/${startDate}`)
+                    request.onload = () => {
+                        let dataValidity = request.responseText
+                        if (dataValidity === 'Validated') {
+                            validDate = true
+                            errorMessage.textContent = ''
+                            expenseStartDateField.style.borderColor = ''
+                        }
+                        else {
+                            validDate = false
+                            errorMessage.textContent = dataValidity
+                            expenseStartDateField.style.borderColor = 'red'
+                        }
+                        // Check If All Fields Are Valid
+                        if (validName && validPrice && validDate)
+                            scheduleBtn.disabled = false
+                        else
+                            scheduleBtn.disabled = true
                     }
-                    else {
-                        validDate = true
-                        errorMessage.textContent = ''
-                        expenseStartDateField.style.borderColor = ''
-                    }
+                    request.send()
                 }
             }
             else {
                 validDate = true
+                // Check If All Fields Are Valid
+                if (validName && validPrice && validDate)
+                    scheduleBtn.disabled = false
+                else
+                    scheduleBtn.disabled = true
             }
 
 
-            // Check If All Fields Are Valid
-            if (validName && validPrice && validDate)
-                scheduleBtn.disabled = false
-            else
-                scheduleBtn.disabled = true
 
         }
         // VALIDATE CUSTOM FREQUENCY INPUT
         static validateCustomFrequencyInput() {
-            let customFrequencyField = document.querySelector('#customFrequencyInput')
+            let customFrequencyField = document.querySelector('#addScheduleExpenseCustomFrequencyInput')
             let errorMessage = document.querySelector('#customFrequencyErrorMessage')
             let scheduleBtn = document.querySelector('#scheduleExpenseSaveBtn')
 
@@ -1404,7 +1432,7 @@
         }
         // ADD SCHEDULE EXPENSE
         static addScheduleExpense() {
-            let frequencySelect = document.querySelector('#frequencySelect')
+            let frequencySelect = document.querySelector('#addScheduleExpenseFrequencySelect')
             let expenseNameField = document.querySelector('#scheduleExpenseNameInput')
             let expensePriceField = document.querySelector('#scheduleExpensePriceInput')
             let scheduleExpenseDateSelect = document.querySelector('#scheduleExpenseDateSelect')
@@ -1419,7 +1447,7 @@
             let frequency
             // Check if a custom frequency was selected
             if (['custom-day','custom-week','custom-month','custom-year'].includes(frequencySelect.value)) {
-                frequency = document.querySelector('#customFrequencyInput').dataset.value
+                frequency = document.querySelector('#addScheduleExpenseCustomFrequencyInput').dataset.value
             }
             else {
                 frequency = frequencySelect.value
@@ -1588,8 +1616,8 @@
 
     // DOM CONTENT LOADED
     document.addEventListener('DOMContentLoaded', () => {
+        testDate()
         Settings.initializeUserSettings()
-
         Expense.loadTotalUserExpenses()
         Expense.loadUserExpenseLimits()
 
@@ -1627,7 +1655,7 @@
     // Change Frequency Select Depending On The Time Period
     document.querySelector('.time-period-container').onclick = (e) => {
         if (e.target.className === 'form-check-input') {
-            document.querySelector('#customFrequencyInput').value = ''
+            document.querySelector('#addScheduleExpenseCustomFrequencyInput').value = ''
             ScheduleExpense.updateFrequencySelect(e.target.value)
             ScheduleExpense.removeCustomFrequency()
         }
@@ -1641,7 +1669,7 @@
     })
     // Add Schedule Expense
     document.querySelector('#scheduleExpenseSaveBtn').onclick = () => {
-        let frequencySelect = document.querySelector('#frequencySelect')
+        let frequencySelect = document.querySelector('#addScheduleExpenseFrequencySelect')
         let dateSelect = document.querySelector('#scheduleExpenseDateSelect')
         let scheduleExpenseStartDateInput = document.querySelector('#scheduleExpenseStartDateInput')
         let scheduleBtn = document.querySelector('#scheduleExpenseSaveBtn')
@@ -1702,9 +1730,9 @@
     // Expense Limit Select
     document.querySelector('#expenseLimitSelect').onchange = function() {Expense.displayExpenseLimit(this.value)}
     // Schedule Expense Frequency Select -> 'custom' Has Been Selected
-    document.querySelector('#frequencySelect').onchange = function() {
-        let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
-        let customFrequencyInput = document.querySelector('#customFrequencyInput')
+    document.querySelector('#addScheduleExpenseFrequencySelect').onchange = function() {
+        let customFrequencyHeading = document.querySelector('#addScheduleExpenseCustomFrequencyHeading')
+        let customFrequencyInput = document.querySelector('#addScheduleExpenseCustomFrequencyInput')
         switch (this.value) {
             case 'custom-day':
                 customFrequencyHeading.textContent = 'Custom Day'
@@ -1759,16 +1787,16 @@
     // Validate Schedule Expense Form
     document.querySelector('#scheduleExpenseForm').onkeyup = () => {ScheduleExpense.validateAddScheduleExpenseForm()}
     // Validate Schedule Expense Custom Frequency
-    document.querySelector('#customFrequencyInput').onkeyup = () => {ScheduleExpense.validateCustomFrequencyInput()}
+    document.querySelector('#addScheduleExpenseCustomFrequencyInput').onkeyup = () => {ScheduleExpense.validateCustomFrequencyInput()}
 
 
     /** ON-BLUR EVENTS **/
 
     // Custom Frequency Input
-    document.querySelector('#customFrequencyInput').onblur = function() {
+    document.querySelector('#addScheduleExpenseCustomFrequencyInput').onblur = function() {
         ScheduleExpense.validateCustomFrequencyInput()
-        let customFrequencyHeading = document.querySelector('#customFrequencyHeading')
-        let customFrequencyInput = document.querySelector('#customFrequencyInput')
+        let customFrequencyHeading = document.querySelector('#addScheduleExpenseCustomFrequencyHeading')
+        let customFrequencyInput = document.querySelector('#addScheduleExpenseCustomFrequencyInput')
         let scheduleExpenseSaveBtn = document.querySelector('#scheduleExpenseSaveBtn')
         let headingToUse = ''
 
@@ -1844,14 +1872,16 @@
             return true
     }
 
-    function testSettings() {
-        // const request = new XMLHttpRequest()
-        // request.open('GET', '/initializeUserHomeSettings')
-        // request.onload = () => {
-        //     const homeSettings = JSON.parse(request.responseText)
-        //
-        // }
-        // request.send()
+    function testDate() {
+        const request = new XMLHttpRequest()
+        let date = '13-5-2021'
+        request.open('GET', `/validateDate/${date}`)
+        request.onload = () => {
+            console.log(request.responseText)
+
+        }
+        request.send()
+
     }
 </script>
 

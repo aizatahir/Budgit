@@ -277,7 +277,7 @@ def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
     now = now.strftime("%B %d, %Y")
 
     # CONVERT DATE FROM mm-dd-yyyy TO 'now' FORMAT
-    startDate = convertStartDate(startDate, 'mm-dd-yyyy', 'now-format')
+    startDate = convertDateFormats(startDate, 'mm-dd-yyyy', 'now-format')
     now = getIntegerDayForNow(now)
     # EXPENSE IS TO BE ADDED TODAY
     if startDate == now:
@@ -638,6 +638,30 @@ def updateUserAccountSettings(newSettings):
     return 'Done'
 
 
+@app.route('/validateDate/<string:date>', methods=['GET'])
+def validateDate(date):
+    """ :param date MUST BE IN MM/DD/YYYY FORMAT """
+    try:
+        date = convertDateFormats(date, 'mm-dd-yyyy', 'now-format')
+    except:
+        return 'Invalid Format'
+
+    print(f"Date: {date}")
+    dateValidity = Date.validateDate(date)
+
+    if dateValidity == 0:
+        return 'Validated'
+    elif dateValidity == -1:
+        return 'Invalid Format'
+    elif dateValidity == -2:
+        return 'Invalid Month'
+    elif dateValidity == -3:
+        return 'Invalid Day'
+    elif dateValidity == -4:
+        return 'Date Has Already Passed'
+
+
+
 
 # SEND EMAIL
 def sendEmail(To, Subject, Message):
@@ -673,7 +697,7 @@ def test():
 
 
 
-def convertStartDate(startDate, currentFormat, newFormat):
+def convertDateFormats(Date, currentFormat, newFormat):
     SupportedFormats = ['mm-dd-yyyy', 'dd-mm-yyyy', 'mm/dd/yyyy', 'dd/mm/yyyy', 'now-format']
     if currentFormat not in SupportedFormats:
         raise ValueError(f'{currentFormat} is not supported as currentFormat')
@@ -685,7 +709,7 @@ def convertStartDate(startDate, currentFormat, newFormat):
     if currentFormat == 'mm-dd-yyyy':
         if newFormat == 'now-format':
             try:
-                day, month, year = int(startDate.split('-')[1]), monthLookup[int(startDate.split('-')[0])], int(startDate.split('-')[2])
+                day, month, year = int(Date.split('-')[1]), monthLookup[int(Date.split('-')[0])], int(Date.split('-')[2])
             except ValueError:
                 raise ValueError('startDate was not formatted correctly')
 

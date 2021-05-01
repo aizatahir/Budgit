@@ -26,7 +26,75 @@ class Date:
             self.year = int(date.split()[2])
         else:
             now = datetime.now(EST()).date()
-            self.now = now.strftime("%B %d, %Y")
+            self.today = now.strftime("%B %d, %Y")
+            self.day = int(self.today.split()[1].replace(',', ''))
+            self.month = self.today.split()[0]
+            self.year = int(self.today.split()[2])
+
+    @staticmethod
+    def validateDate(due_date):
+        tmp_date = due_date
+        all_months = {"January", "February", "March", "April", "May", "June", "July", "August",
+                      "September", "October", "November", "December"}
+
+        try:
+            due_date = due_date.split()
+            due_date_month = due_date[0]
+            due_date_day = int(due_date[1].replace(',', ''))
+            due_date_year = int(due_date[2])
+        except:
+            return -1
+
+        # INVALID MONTH
+        if due_date_month not in all_months:
+            return -2
+        # INVALID DAY
+        if due_date_day < 1 or due_date_day > 31 if due_date_month != "February" else 28:
+            return -3
+        # DATE HAS PASSED
+        if Date.dateHasPassed(tmp_date):
+            return -4
+
+        return 0
+
+    @staticmethod
+    def dateHasPassed(due_date):
+        now = Date()
+        due_date = Date(due_date)
+
+        all_months = {"January": 1, "February": 2, "March": 3, "April": 4, "May": 5, "June": 6, "July": 7, "August": 8,
+                      "September": 9, "October": 10, "November": 11, "December": 12}
+
+        try:
+            today_date_day = now.day
+            today_date_month = now.month
+            today_date_year = now.year
+
+            due_date_day = due_date.day
+            due_date_month = due_date.month
+            due_date_year = due_date.year
+
+            Today = [all_months[today_date_month], today_date_day, today_date_year]
+            Due_Date = [all_months[due_date_month], due_date_day, due_date_year]
+
+            # THE YEAR HAS PASSED
+            if Due_Date[2] < Today[2]:
+                return True
+            if Due_Date[2] > Today[2]:
+                return False
+            # MONTH HAS PASSED
+            if Due_Date[0] < Today[0]:
+                return True
+            if Due_Date[0] > Today[0]:
+                return False
+            # DAY HAS PASSED
+            if Due_Date[0] == Today[0]:
+                if Due_Date[1] < Today[1]:
+                    return True
+            return False
+        except:
+            return False
+
 
     # TODO - FIX
     def isValidDate(self, date):
