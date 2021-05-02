@@ -48,8 +48,17 @@ db.init_app(app)
 # ENABLE SESSION
 Session(app)
 
-from Classes import EST
 from Methods import getIntegerDayForNow, getMostRecentDate
+
+class EST(tzinfo):
+    def utcoffset(self, dt):
+        return timedelta(hours = -5)
+
+    def tzname(self, dt):
+        return "EST"
+
+    def dst(self, dt):
+        return timedelta(0)
 
 
 
