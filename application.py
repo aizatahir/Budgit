@@ -14,6 +14,7 @@ from models import *
 
 import datetime
 from datetime import date, timedelta, tzinfo, datetime
+from pytz import timezone
 from math import inf
 
 
@@ -655,7 +656,6 @@ def validateDate(date):
     except:
         return 'Invalid Format'
 
-    print(f"Date: {date}")
     dateValidity = Date.validateDate(date)
 
     if dateValidity == 0:
@@ -844,15 +844,19 @@ def getWeek(year, monthIndex, startDay):
 def getCurrentTime():
     """ RETURNS THE CURRENT TIME IN 12 HOUR FORMAT """
 
-    time = datetime.today().strftime("%H:%M %p")
+    fmt = "%H:%M"
+    # Current time in EST
+    now_utc = datetime.now(timezone('US/Eastern'))
+    time = now_utc.strftime(fmt)
+
     time = time.split(':')
     hour = int(time[0])
     minute = time[1]
     if hour <= 12:
-        pass
+        time = f"{hour}:{minute} AM"
     else:
         hour -= 12
-    time = f"{hour}:{minute}"
+        time = f"{hour}:{minute} PM"
     return time
 
 def getCurrentDay(now):

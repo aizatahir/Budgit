@@ -308,8 +308,9 @@ def dateHasPassed(due_date):
 
 
 def main():
-    now = 'May 1, 2021'
-    print(Date.validateDate(now))
+    pass
+    # now = 'May 1, 2021'
+    # print(Date.validateDate(now))
 
 
 
