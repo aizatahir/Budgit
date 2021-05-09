@@ -167,6 +167,7 @@
             let addScheduleExpenseYearRadioBtnLabel = document.querySelector('#addScheduleExpenseYearRadioBtnLabel')
             let allHomeRadioBtnLabels = [addScheduleExpenseDayRadioBtn, addScheduleExpenseWeekRadioBtnLabel, addScheduleExpenseMonthRadioBtnLabel,
                 addScheduleExpenseYearRadioBtnLabel]
+            let allSearchExpenseTableRadioBtn = document.querySelectorAll('.radio-btn-label')
             let allHomeLabels = [expenseLimitLabel, totalExpenseLabel, expenseNameLabel, expensePriceLabel, mainHeading,
                                 expenseLimitPeriodModalLabel, setExpenseLimitModalLabel, editExpenseNewNameLabel, editExpenseNewPriceLabel,
                                 addScheduleExpenseNameLabel, addScheduleExpensePriceLabel, addScheduleExpenseStartDateLabel]
@@ -181,13 +182,15 @@
             let expenseLimitSelect = document.querySelector('#expenseLimitSelect')
             let totalExpenseSelect = document.querySelector('#totalExpenseSelect')
             let expenseLimitModalSelect = document.querySelector('#expenseLimitModalSelect')
+            let expenseTableSearchSelect = document.querySelector('#expenseTableSearchSelect')
             let expenseTableSelectTimePeriodSelect = document.querySelector('#expenseTableSelectTimePeriod')
             let expenseTableSortSelect = document.querySelector('#expenseTableSort')
             let allEditUserInfoSelect = document.querySelectorAll('.edit-user-info-select')
             let addScheduleExpenseStartDateSelect = document.querySelector('#scheduleExpenseDateSelect')
             let addScheduleExpenseFrequencySelect = document.querySelector('#addScheduleExpenseFrequencySelect')
             let allHomeSelects = [expenseLimitSelect, totalExpenseSelect, expenseTableSelectTimePeriodSelect, expenseTableSortSelect,
-                                 expenseLimitModalSelect, addScheduleExpenseStartDateSelect, addScheduleExpenseFrequencySelect]
+                                 expenseLimitModalSelect, addScheduleExpenseStartDateSelect, addScheduleExpenseFrequencySelect,
+                                 expenseTableSearchSelect]
             // Account
             let scheduleExpenseTableSort = document.querySelector('#scheduleExpenseTableSort')
             let allAccountSelects = [scheduleExpenseTableSort]
@@ -211,9 +214,10 @@
             let addScheduleExpensePriceInput = document.querySelector('#scheduleExpensePriceInput')
             let addScheduleExpenseStartDateInput = document.querySelector('#scheduleExpenseStartDateInput')
             let addScheduleExpenseCustomFrequencyInput = document.querySelector('#addScheduleExpenseCustomFrequencyInput')
+            let expenseTableSearchBar = document.querySelector('#expenseTableSearchBar')
             let allHomeInputs = [expenseNameInput, expensePriceInput, setExpenseLimitInput, editExpenseNewNameInput,
                                  editExpenseNewPriceInput, addScheduleExpenseNameInput, addScheduleExpensePriceInput,
-                                 addScheduleExpenseStartDateInput, addScheduleExpenseCustomFrequencyInput]
+                                 addScheduleExpenseStartDateInput, addScheduleExpenseCustomFrequencyInput, expenseTableSearchBar]
             // Account
             let allEditUserInfoInputs = document.querySelectorAll('.edit-user-info-input')
 
@@ -291,6 +295,9 @@
                         label.style.color = Colors['font']
                     })
                     allHomeRadioBtnLabels.forEach(label => {
+                        label.style.color = Colors['selectFG']
+                    })
+                    allSearchExpenseTableRadioBtn.forEach(label => {
                         label.style.color = Colors['selectFG']
                     })
                     // Selects Style

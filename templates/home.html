@@ -7,6 +7,23 @@
 
 {% block style %}
 <style>
+    @keyframes showExpenseTableSearchBar {
+        from {
+            width: 0;
+        }
+        to {
+            width: 170px;
+        }
+    }
+    @keyframes hideExpenseTableSearchBar {
+        from {
+            width: 170px;
+        }
+        to {
+            width: 0;
+        }
+
+    }
     #mainHeading {
         font-size: 60px;
     }
@@ -189,6 +206,26 @@
     #expenseLimitSelect, #totalExpenseSelect, #expenseTableSelectTimePeriod, #expenseTableSort {
         /*-webkit-appearance: none;*/
     }
+    #searchExpenseTableBtnContainer {
+        /*position: absolute;*/
+        /*left: 89.5%;*/
+        /*top: 94%;*/
+        margin-left: 1%;
+        cursor: pointer;
+        /*float: right;*/
+    }
+    #expenseTableSearchBar {
+        animation-name: showExpenseTableSearchBar;
+        animation-fill-mode: forwards;
+        /*animation-delay: 2s;*/
+        animation-duration: 1s;
+        display: none;
+        position: absolute;
+        left: 11%;
+        /*margin-bottom: 30%;*/
+        border-radius: 20px;
+        width: 0;
+    }
     .container-1 {
         display: flex;
         flex-wrap: wrap;
@@ -228,15 +265,33 @@
         min-height: 280px;
         padding: 15px;
     }
-    .expense-table-select {
+    .expense-table-options-container {
         display: flex;
-        margin-bottom: 3%;
+        margin-bottom: 2%;
+        /*width: 300px;*/
     }
+
     .exceed-limit-container {
         display: flex;
     }
     .time-period-container {
         margin-bottom: 3%;
+    }
+    .search-expense-table-radio-btn-container {
+        display: none;
+        position: relative;
+        top: 55px;
+        left: 6.5%;
+    }
+    #expenseTableSearchSelect {
+        display: none;
+        position: absolute;
+        left: 330px;
+        border-radius: 5px;
+        width: 70px;
+    }
+    .radio-btn-label {
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
 
     /* MAKE HEADERS FIXED  */
@@ -256,7 +311,7 @@
         font-size: 22px;
     }
 
-    
+
     @media only screen and (max-width: 1100px) {
         .add-expense-container {
             height: 330px;
@@ -271,31 +326,14 @@
             left: 3%;
         }
     }
-    @media only screen and (max-width: 700px) {
-        #mainTable {
-            /* MAKE TABLE SCROLLABLE */
-            display: block;
-            /*max-width: -moz-fit-content;*/
-            max-width: fit-content;
-            max-height: 500px;
-            margin: 0 auto;
-            overflow-x: auto;
-            white-space: nowrap;
+    @media only screen and (max-width: 900px) {
+        #expenseTableSearchBar {
+            left: 13%;
         }
-    }
-    @media only screen and (max-width: 570px) {
-        #setExpenseLimitModalContainer {
-            margin: auto;
-            margin-left: 2%;
-            width: 90%;
-        }
-        #exceedLimitText {
-            font-size: 17px;
-        }
-        /*.table_header {*/
-        /*    font-size: 13px;*/
-        /*}*/
+        #expenseTableSearchSelect {
+            left: 300px;
 
+        }
     }
     @media only screen and (max-width: 768px) {
         .container-1 {
@@ -307,6 +345,7 @@
         #alertMessage {
             width: 90%;
         }
+
         body {
             background-color: white;
         }
@@ -321,44 +360,45 @@
         }
 
     }
-    @media only screen and (max-width: 375px) {
+    @media only screen and (max-width: 700px) {
+        #mainTable {
+            /* MAKE TABLE SCROLLABLE */
+            display: block;
+            /*max-width: -moz-fit-content;*/
+            max-width: fit-content;
+            max-height: 500px;
+            margin: 0 auto;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        #expenseLimitText {
+            font-size: 20px;
+        }
+        #expenseTableSearchBar {
+            left: 16.5%;
+        }
 
-        body {
-            background-size: 100% 90%;
-        }
     }
-    @media only screen and (max-width: 360px) {
-        body {
-            background-size: 100%  90%;
+    @media only screen and (max-width: 570px) {
+        #setExpenseLimitModalContainer {
+            margin: auto;
+            margin-left: 2%;
+            width: 90%;
         }
-        #addExpenseHeading, #expenseInfo, #expenseTableHeading {
-            font-size: 28px;
+        #exceedLimitText {
+            font-size: 17px;
         }
-        .table_data {
-            font-size: 11px;
+        #expenseTableSearchSelect {
+            left: 270px;
         }
+
     }
-    @media only screen and (max-width: 360px) {
-        body {
-            background-size: 100% 100%;
+    @media only screen and (min-width: 500px) {
+        #accountBtn {
+            margin-right: 3%;
         }
-        /*.add-expense-container {*/
-        /*    height: 1950px;*/
-        /*    !*border: 10px solid red;*!*/
-        /*}*/
-    }
-    @media only screen and (max-width: 400px) {
-        #expenseTableHeading {
-            font-size: 25px;
-        }
-        .expense-table-select {
-            margin-bottom: 10%;
-        }
-        .add-expense-container {
-            height: 355px;
-        }
-        .exceed-limit-container {
-            height: 45px;
+        #logoutBtn {
+            margin-left: 3%;
         }
 
     }
@@ -377,20 +417,65 @@
         }
 
     }
-    @media only screen and (max-width: 700px) {
-        #expenseLimitText {
-            font-size: 20px;
+    @media only screen and (max-width: 400px) {
+        #expenseTableHeading {
+            font-size: 25px;
         }
-    }
-    @media only screen and (min-width: 500px) {
-        #accountBtn {
-            margin-right: 3%;
+        #expenseTableSearchBar {
+            left: 19%;
         }
-        #logoutBtn {
-            margin-left: 3%;
+        .expense-table-options-container {
+            margin-bottom: 10%;
+        }
+        .add-expense-container {
+            height: 355px;
+        }
+        .exceed-limit-container {
+            height: 45px;
         }
 
     }
+    @media only screen and (max-width: 375px) {
+        #expenseTableSearchSelect {
+            left: 250px;
+        }
+
+    }
+    @media only screen and (max-width: 370px) {
+        #expenseTableSearchBar {
+            left: 19%;
+            width: 170px;
+        }
+        #expenseTableSearchSelect {
+            left: 240px;
+        }
+
+
+    }
+    @media only screen and (max-width: 360px) {
+        body {
+            background-size: 100% 100%;
+        }
+        #addExpenseHeading, #expenseInfo, #expenseTableHeading {
+            font-size: 28px;
+        }
+        .table_data {
+            font-size: 11px;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 </style>
 {% endblock %}
@@ -502,7 +587,7 @@
     <!-- EXPENSE TABLE CONTAINER -->
     <div class="expense-table-container">
         <!-- EXPENSE TABLE SELECT -->
-        <div class="expense-table-select">
+        <div class="expense-table-options-container">
             <!-- Expense table select: period -->
             <select id="expenseTableSelectTimePeriod" class="form-control">
                 <option value="this-day">Today</option>
@@ -518,7 +603,32 @@
                 <option value="item_price" data-order="asc">By Price(Asc)</option>
                 <option value="item_price" data-order="desc">By Price(Desc)</option>
             </select>
+
         </div>
+
+        <!-- EXPENSE SEARCH CONTAINER -->
+        <div class="expense-search-container">
+            <!-- Search Bar -->
+            <input id="expenseTableSearchBar" class="form-control" placeholder="Search Expense" autocomplete="off">
+<!--            <input placeholder="ello">-->
+            <!-- Search Radio Btn -->
+            <select class="form-control" id="expenseTableSearchSelect">
+                <option value="item_name">Name</option>
+                <option value="item_price">Price</option>
+                <option value="date">Date</option>
+                <option value="time">Time</option>
+            </select>
+
+
+            <!-- Search Btn -->
+            <div id="searchExpenseTableBtnContainer">
+                <img id="searchExpenseTableBtn" src="/static/search.svg" height="50" width="50">
+            </div>
+        </div>
+
+
+
+
         <!-- EXPENSE TABLE -->
         <div style="text-align: center;">
             <div id="expenseTableHeading">Expenses For Today</div>
@@ -773,7 +883,7 @@
 
         }
         // populateTable
-        static populateTable(timePeriod, sortBy, order) {
+        static populateTable(timePeriod, sortBy, order, searchFilter, filterField, filterExpenses) {
             // console.log('called')
             // console.log(timePeriod)
             // console.log(sortBy)
@@ -781,9 +891,15 @@
             // Clear the table
             this.removeAllChildNodes(document.getElementById('tableBody'))
 
-            // Initialize new request
+            // console.log(filterExpenses)
+
             const request = new XMLHttpRequest();
-            request.open('GET', `/getExpenses/${timePeriod}/${sortBy}/${order}`);
+            if (searchFilter === undefined || filterField === undefined || (filterExpenses === undefined || filterExpenses === false)) {
+                request.open('GET', `/getExpenses/${timePeriod}/${sortBy}/${order}/null/null/false`)
+            }
+            else {
+                request.open('GET', `/getExpenses/${timePeriod}/${sortBy}/${order}/${searchFilter}/${filterField}/${filterExpenses}`)
+            }
 
             // Callback function for when request completes
             request.onload = () => {
@@ -901,6 +1017,30 @@
         }
 
     }
+    // Animation Class
+    class Animation {
+        static showExpenseTableSearchBar() {
+            let expenseTableSearchBar = document.querySelector('#expenseTableSearchBar')
+            expenseTableSearchBar.style.display = 'block'
+            expenseTableSearchBar.style.animationName = 'showExpenseTableSearchBar'
+            expenseTableSearchBar.style.animationFillMode = 'forwards'
+            expenseTableSearchBar.style.animationDuration = '0.5s'
+            expenseTableSearchBar.onanimationend = () => {
+                expenseTableSearchBar.style.display = 'block'
+            }
+
+        }
+        static removeExpenseTableSearchBar() {
+            let expenseTableSearchBar = document.querySelector('#expenseTableSearchBar')
+            expenseTableSearchBar.style.animationName = 'hideExpenseTableSearchBar'
+            expenseTableSearchBar.style.animationFillMode = 'forwards'
+            expenseTableSearchBar.style.animationDuration = '0.5s'
+            expenseTableSearchBar.onanimationend = () => {
+                expenseTableSearchBar.style.display = 'none'
+            }
+
+        }
+    }
     // Expense Class
     class Expense {
         // ADD EXPENSE
@@ -915,8 +1055,11 @@
                 'expensePrice': expensePrice.value,
             }
 
+            let timePeriod = document.querySelector('#expenseTableSelectTimePeriod').value
             let sortBy = document.querySelector('#expenseTableSort').value
             let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
+
+            let searchExpenseInfo = this.getSearchExpenseInfo()
 
 
             const request = new XMLHttpRequest()
@@ -924,7 +1067,7 @@
             request.onload = () => {
                 addExpenseBtn.disabled = true
                 UI.scrollToTop()
-                UI.populateTable(document.querySelector('#expenseTableSelectTimePeriod').value, sortBy, order)
+                UI.populateTable(timePeriod, sortBy, order, searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
                 UI.showAlert(`${expenseName.value} Has Been Added`, 'success', 'top')
                 expenseName.value = ""
                 expensePrice.value = ""
@@ -1115,6 +1258,9 @@
             let timePeriod = document.querySelector('#expenseTableSelectTimePeriod').value
             let sortBy = document.querySelector('#expenseTableSort').value
             let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
+
+            let searchExpenseInfo = this.getSearchExpenseInfo()
+
             if (timePeriod === 'all-time') {
                 tableHeading = 'All Time Expenses'
             }
@@ -1137,7 +1283,7 @@
             // REMOVE PREVIOUS DATA FROM TABLE TO POPULATE IT WITH NEW ONE DATA
             UI.removeAllChildNodes(tableBody)
             Settings.updateUserSettings('expenseTable-Time-Period', timePeriod)
-            UI.populateTable(timePeriod, sortBy, order)
+            UI.populateTable(timePeriod, sortBy, order, searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
         }
         // SORT EXPENSE TABLE
         static sortExpenseTable() {
@@ -1147,12 +1293,32 @@
             let sortBy = expenseTableSelectSort.value
             let order = expenseTableSelectSort.selectedOptions[0].dataset.order
 
+            let searchExpenseInfo = this.getSearchExpenseInfo()
 
             Settings.updateUserSettings('expenseTable-SortBy', sortBy)
             Settings.updateUserSettings('expenseTable-Order', order)
-            UI.populateTable(timePeriod, sortBy, order)
+            UI.populateTable(timePeriod, sortBy, order, searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
 
 
+        }
+        // GET SEARCH EXPENSE INFO
+        static getSearchExpenseInfo() {
+            let expenseTableSearchBar = document.querySelector('#expenseTableSearchBar')
+            let expenseTableSearchBarSelect = document.querySelector('#expenseTableSearchSelect')
+            if (expenseTableSearchBar.style.display === 'none' || expenseTableSearchBar.style.display === '') {
+                return {
+                    'searchFilter': undefined,
+                    'filterField': undefined,
+                    'filterExpenses': false,
+                }
+            }
+            else {
+                return {
+                    'searchFilter': expenseTableSearchBar.value,
+                    'filterField': expenseTableSearchBarSelect.value,
+                    'filterExpenses': true
+                }
+            }
         }
         // EDIT EXPENSE MODAL
         static showEditExpenseModal(itemID, sortBy, order) {
@@ -1207,6 +1373,7 @@
                 request.onload = () => {
                     let tableBody = document.getElementById('tableBody')
                     let timePeriod = document.querySelector('#expenseTableSelectTimePeriod').value
+                    let searchExpenseInfo = Expense.getSearchExpenseInfo()
                     // UPDATE UI
                     document.forms["editExpenseForm"]["newName"].value = ""
                     document.forms["editExpenseForm"]["newPrice"].value = ""
@@ -1214,7 +1381,7 @@
                     UI.showAlert("Expense Changed", 'primary', 'aboveTable')
                     UI.removeAllChildNodes(tableBody)
                     Expense.displayTotalExpense(timePeriod)
-                    UI.populateTable(timePeriod, sortBy, order)
+                    UI.populateTable(timePeriod, sortBy, order, searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
                 }
                 request.send()
             }
@@ -1228,11 +1395,12 @@
                 request.onload = () => {
                     let tableBody = document.getElementById('tableBody')
                     let timePeriod = document.querySelector('#expenseTableSelectTimePeriod').value
+                    let searchExpenseInfo = Expense.getSearchExpenseInfo()
                     Expense.removeDeleteExpenseModal()
                     UI.showAlert("Expense Deleted", 'danger', 'aboveTable')
                     UI.removeAllChildNodes(tableBody)
                     Expense.displayTotalExpense(timePeriod)
-                    UI.populateTable(timePeriod, sortBy, order)
+                    UI.populateTable(timePeriod, sortBy, order, searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
                 }
                 request.send()
             }
@@ -1470,7 +1638,8 @@
                         'sortBy': Settings.getUserSettings()['expenseTable-SortBy'],
                         'order': Settings.getUserSettings()['expenseTable-Order'],
                     }
-                    UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'])
+                    let searchExpenseInfo = Expense.getSearchExpenseInfo()
+                    UI.populateTable(userSettings['timePeriod'], userSettings['sortBy'] , userSettings['order'], searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
                 }, 2000)
 
             }
@@ -1567,8 +1736,9 @@
             request.open('GET', '/initializeUserHomeSettings')
             request.onload = () => {
                 const homeSettings = JSON.parse(request.responseText)
-
-                UI.populateTable(homeSettings['expenseTable-Time-Period'], homeSettings['expenseTable-SortBy'] , homeSettings['expenseTable-Order'])
+                let searchExpenseInfo = Expense.getSearchExpenseInfo()
+                UI.populateTable(homeSettings['expenseTable-Time-Period'], homeSettings['expenseTable-SortBy'] , homeSettings['expenseTable-Order'],
+                                 searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
                 UI.updateExpenseTableHeadings(homeSettings['expenseTable-Time-Period'], homeSettings['expenseTable-SortBy'] , homeSettings['expenseTable-Order'])
 
                 localStorage.setItem('Budgit-userSettings-home', JSON.stringify(homeSettings))
@@ -1616,7 +1786,6 @@
 
     // DOM CONTENT LOADED
     document.addEventListener('DOMContentLoaded', () => {
-        testDate()
         Settings.initializeUserSettings()
         Expense.loadTotalUserExpenses()
         Expense.loadUserExpenseLimits()
@@ -1701,6 +1870,18 @@
 
 
     }
+    // Show Expense Search Bar
+    document.querySelector('#searchExpenseTableBtn').addEventListener('click', () => {
+        let expenseTableSearchSelect = document.querySelector('#expenseTableSearchSelect')
+        if (expenseTableSearchBar.style.display === '' || expenseTableSearchBar.style.display === 'none') {
+            Animation.showExpenseTableSearchBar()
+            expenseTableSearchSelect.style.display = 'block'
+        }
+        else {
+            Animation.removeExpenseTableSearchBar()
+            expenseTableSearchSelect.style.display = 'none'
+        }
+    })
 
 
     /** ON-CHANGE EVENTS **/
@@ -1788,6 +1969,29 @@
     document.querySelector('#scheduleExpenseForm').onkeyup = () => {ScheduleExpense.validateAddScheduleExpenseForm()}
     // Validate Schedule Expense Custom Frequency
     document.querySelector('#addScheduleExpenseCustomFrequencyInput').onkeyup = () => {ScheduleExpense.validateCustomFrequencyInput()}
+    // Expense Table Search Bar
+    document.querySelector('#expenseTableSearchBar').addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            let timePeriod = document.querySelector('#expenseTableSelectTimePeriod').value
+            let sortBy = document.querySelector('#expenseTableSort').value
+            let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
+            let searchFilter = this.value
+            let expenseTableSearchSelect = document.querySelector('#expenseTableSearchSelect')
+            let filterField = expenseTableSearchSelect.value
+
+            // console.log('filterField: ' + filterField)
+            // console.log('searchFilter: ' + searchFilter)
+            //
+            // console.log('timePeriod: ' + timePeriod)
+            // console.log('sortBy: ' + sortBy)
+            // console.log('order: ' + order)
+            if (searchFilter !== '')
+                UI.populateTable(timePeriod, sortBy, order, searchFilter, filterField, true)
+            else
+                UI.populateTable(timePeriod, sortBy, order, searchFilter, filterField, false)
+
+        }
+    })
 
 
     /** ON-BLUR EVENTS **/
@@ -1872,13 +2076,18 @@
             return true
     }
 
-    function testDate() {
+    function testExpense() {
         const request = new XMLHttpRequest()
-        let date = '13-5-2021'
-        request.open('GET', `/validateDate/${date}`)
+
+        let period = 'this-day'
+        let sortBy = 'item_name'
+        let order = 'asc'
+        let searchFilter = 'burger'
+        let filterField = 'item_name'
+
+        request.open('GET', `/getExpensesTest/${period}/${sortBy}/${order}/${searchFilter}/${filterField}/${true}`)
         request.onload = () => {
             console.log(request.responseText)
-
         }
         request.send()
 
