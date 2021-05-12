@@ -433,7 +433,7 @@
     </div>
 </div>
 
-
+<!-- DARK MODE MODAL -->
 <div id="darkModeModal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content edit-user-info-modal">
@@ -457,8 +457,6 @@
         </div>
     </div>
 </div>
-
-
 
 <!-- UPDATE PASSWORD MODAL -->
 <div id="updatePasswordModal" class="modal fade">
@@ -495,10 +493,6 @@
         </div>
     </div>
 </div>
-
-
-
-
 
 <!-- VIEW SCHEDULE EXPENSE MODAL -->
 <div id="scheduleExpenseModal" class="modal fade">
@@ -580,19 +574,17 @@
     </div>
 </div>
 
-
-
 <!-- Delete Schedule Expense MODAL -->
 <div id="deleteScheduleExpenseModal" class="modal fade">
     <div class="modal-dialog">
-        <div class="modal-content">
+        <div id="deleteScheduleExpenseModalContainer" class="modal-content">
             <form>
                 <div class="modal-header">
-                    <h4 class="modal-title">Delete Schedule Expense</h4>
+                    <h4 id="deleteScheduleExpenseHeading" class="modal-title">Delete Schedule Expense</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>Are you sure you want to delete this expense?</p>
+                    <p id="scheduleExpenseModalText">Are you sure you want to delete this expense?</p>
                     <p class="text-warning"><small>This action cannot be undone.</small></p>
                 </div>
                 <div class="modal-footer">

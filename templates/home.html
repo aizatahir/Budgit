@@ -1246,7 +1246,15 @@
             const request = new XMLHttpRequest()
             request.open('GET', '/getExpenseLimit/all-limits-json')
             request.onload = () => {
-                const data = JSON.stringify(JSON.parse(request.responseText))
+                let data
+                try {
+                    data = JSON.stringify(JSON.parse(request.responseText))
+                }
+                catch (e) {
+                    if (e.name === 'SyntaxError')
+                        window.location.href = '/'
+                }
+
                 document.querySelector('#userExpenseLimits').dataset.user_expense_limits = data
             }
             request.send()
@@ -1545,7 +1553,7 @@
             // }
             if (scheduleExpenseDateSelect.selectedIndex !== 0) {   // 'Other' was selected
                 if (expenseStartDateField.value !== '') {
-                    let startDate = expenseStartDateField.value.replace('/', '-').replace('/', '-')
+                    let startDate = expenseStartDateField.value
 
                     const request = new XMLHttpRequest()
                     request.open('GET', `/validateDate/${startDate}`)
@@ -1631,7 +1639,7 @@
             }
 
             const request = new XMLHttpRequest()
-            request.open('POST', `/scheduleExpense/${expenseNameField.value}/${expensePriceField.value}/${startDate}/${frequency}`)
+            request.open('POST', `/addScheduleExpense/${expenseNameField.value}/${expensePriceField.value}/${startDate}/${frequency}`)
             request.send()
 
 
@@ -1955,6 +1963,27 @@
             scheduleExpenseStartDateInput.style.display = 'none'
         }
         ScheduleExpense.validateAddScheduleExpenseForm()
+    }
+    // Expense Table Search Select
+    document.querySelector('#expenseTableSearchSelect').onchange = function () {
+        let timePeriod = document.querySelector('#expenseTableSelectTimePeriod').value
+        let sortBy = document.querySelector('#expenseTableSort').value
+        let order = document.querySelector('#expenseTableSort').selectedOptions[0].dataset.order
+        let searchFilter = document.querySelector('#expenseTableSearchBar').value
+        let filterField = this.value
+
+
+        // timePeriod, sortBy, order, searchFilter, filterField, filterExpenses
+
+        UI.populateTable(timePeriod, sortBy, order, searchFilter, filterField, true)
+
+        // console.log('timePeriod: ' + timePeriod)
+        // console.log('sortBy: ' + sortBy)
+        // console.log('order": ' + order)
+        // console.log('searchFilter: ' + searchFilter)
+        // console.log('filterField: ' + filterField)
+
+
     }
 
 

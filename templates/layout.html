@@ -138,8 +138,9 @@
             // Account
             let welcomeHeading = document.querySelector('#welcomeHeading')
             let scheduleExpenseModalHeading = document.querySelector('#scheduleExpenseModalHeading')
+            let deleteScheduleExpenseHeading = document.querySelector('#deleteScheduleExpenseHeading')
             let allEditUserInfoHeadings = document.querySelectorAll('.edit-user-info-modal-heading')
-            let allAccountHeadings = [welcomeHeading, scheduleExpenseModalHeading]
+            let allAccountHeadings = [welcomeHeading, scheduleExpenseModalHeading, deleteScheduleExpenseHeading]
 
             /* Labels */
 
@@ -236,8 +237,9 @@
             let updatePasswordBtn = document.querySelector('#changePassBtn')
             let viewScheduleExpensesBtn = document.querySelector('#viewScheduleExpensesBtn')
             let scheduleExpenseModalCancelBtn = document.querySelector('#scheduleExpenseModalCancelBtn')
+            let deleteScheduleExpenseCancelBtn = document.querySelector('#deleteScheduleExpenseCancelBtn')
             let allEditUserInfoCancelBtn = document.querySelectorAll('.edit-user-info-cancel-btn')
-            let allAccountsBtn = [logoutBtn, updatePasswordBtn, viewScheduleExpensesBtn, scheduleExpenseModalCancelBtn]
+            let allAccountsBtn = [logoutBtn, updatePasswordBtn, viewScheduleExpensesBtn, scheduleExpenseModalCancelBtn, deleteScheduleExpenseCancelBtn]
 
             /* Tables */
 
@@ -249,8 +251,13 @@
             let scheduleExpenseTableHead = document.querySelector('#scheduleExpenseTableHead')
 
             /* Text */
+
+            // Home
             let deleteExpenseModalBodyText = document.querySelector('#deleteExpenseModalBodyText')
             let allHomeText = [deleteExpenseModalBodyText]
+            // Account
+            let scheduleExpenseModalText = document.querySelector('#scheduleExpenseModalText')
+            allAccountsText = [scheduleExpenseModalText]
 
             /* Containers */
 
@@ -275,8 +282,9 @@
             // Account
             let accountContainer = document.querySelector('.acc-container')
             let scheduleExpenseModalContainer = document.querySelector('#scheduleExpenseModalContainer')
+            let deleteScheduleExpenseModalContainer = document.querySelector('#deleteScheduleExpenseModalContainer')
             let allEditUserInfoModals = document.querySelectorAll('.edit-user-info-modal')
-            let allAccountContainers = [accountContainer, scheduleExpenseModalContainer]
+            let allAccountContainers = [accountContainer, scheduleExpenseModalContainer, deleteScheduleExpenseModalContainer]
 
 
             if (Theme === 'dark') {
@@ -383,6 +391,10 @@
                     // Table Style
                     scheduleExpenseTable.classList.add('table-dark')
                     scheduleExpenseTableHead.style.border = `3px solid ${Colors['tableAccent']}`
+                    // Text Style
+                    allAccountsText.forEach(text => {
+                        text.style.color = Colors['font']
+                    })
                     // Container Style
                     allAccountContainers.forEach(container => {
                         container.style.backgroundColor = Colors['container']

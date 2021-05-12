@@ -280,7 +280,7 @@ def addExpense(expenseData):
             # return redirect(f"/home/{session['user_id']}")
 
 # ADD SCHEDULE EXPENSE
-@app.route("/scheduleExpense/<string:expenseName>/<string:expensePrice>/<string:startDate>/<string:frequency>", methods=["POST", "GET"])
+@app.route("/addScheduleExpense/<string:expenseName>/<string:expensePrice>/<string:startDate>/<string:frequency>", methods=["POST", "GET"])
 @login_required
 def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
     now = datetime.now(EST()).date()
@@ -890,12 +890,16 @@ def updateUserAccountSettings(newSettings):
     return 'Done'
 
 
-@app.route('/validateDate/<string:date>', methods=['GET'])
+@app.route('/validateDate/<path:date>', methods=['GET'])
 def validateDate(date):
     """ :param date MUST BE IN MM/DD/YYYY FORMAT """
     try:
-        date = convertDateFormats(date, 'mm-dd-yyyy', 'now-format')
-    except:
+        date = convertDateFormats(date, 'mm/dd/yyyy', 'now-format')
+    except ValueError:
+        return 'Invalid Format'
+    except KeyError:
+        return 'Invalid Month'
+    except IndexError:
         return 'Invalid Format'
 
     dateValidity = Date.validateDate(date)
@@ -963,9 +967,24 @@ def convertDateFormats(Date, currentFormat, newFormat):
                 day, month, year = int(Date.split('-')[1]), monthLookup[int(Date.split('-')[0])], int(Date.split('-')[2])
             except ValueError:
                 raise ValueError('startDate was not formatted correctly')
+            except KeyError:
+                raise KeyError('invalid month')
 
             newFormat = f'{month} {day}, {year}'
             return newFormat
+
+    elif currentFormat == 'mm/dd/yyyy':
+        if newFormat == 'now-format':
+            try:
+                day, month, year = int(Date.split('/')[1]), monthLookup[int(Date.split('/')[0])], int(Date.split('/')[2])
+            except ValueError:
+                raise ValueError('startDate was not formatted correctly')
+            except KeyError:
+                raise KeyError('invalid month')
+
+            newFormat = f'{month} {day}, {year}'
+            return newFormat
+
 
 
 def getThisWeekForQuery(now):
