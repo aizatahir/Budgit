@@ -702,16 +702,62 @@ def getExpenses(period, sortBy, order, searchFilter, filterField, filterExpenses
 #     return jsonify(userExpenses)
 
 # GET SCHEDULE EXPENSES
-@app.route("/getUserScheduleExpenses/<string:sortBy>/<string:order>", methods=['GET'])
+@app.route("/getUserScheduleExpenses/<string:sortBy>/<string:order>/<string:timePeriod>", methods=['GET'])
 @login_required
-def getUserScheduleExpenses(sortBy, order):
-    if order == 'asc':
-        # expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter_by(user_id=session['user_id']).all()
+def getUserScheduleExpenses(sortBy, order, timePeriod):
+    now = datetime.now(EST()).date()
+    now = now.strftime("%B %d, %Y")
 
-        userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy)).filter_by(user_id=session['user_id']).all()
-        # userScheduleExpenses = ScheduledExpense.query.filter_by(user_id=session['user_id']).all()
-    else:
-        userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy).desc()).filter_by(user_id=session['user_id']).all()
+    if timePeriod == 'all-time':
+        if order == 'asc':
+            # expenseQuery = Expense.query.order_by(getattr(Expense, sortBy)).filter_by(user_id=session['user_id']).all()
+
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy)).filter_by(user_id=session['user_id']).all()
+            # userScheduleExpenses = ScheduledExpense.query.filter_by(user_id=session['user_id']).all()
+        else:
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy).desc()).filter_by(user_id=session['user_id']).all()
+
+    elif timePeriod == 'this-day':
+        if order == 'asc':
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy)).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due == now
+            )).all()
+        else:
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy).desc()).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due == now
+            )).all()
+    elif timePeriod == 'this-week':
+        thisWeek = getThisWeekForQuery(now)
+        if order == 'asc':
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy)).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due.in_(thisWeek)
+            )).all()
+        else:
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy).desc()).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due.in_(thisWeek)
+            )).all()
+    elif timePeriod == 'this-month':
+        thisMonth, thisYear = now.split()[0], now.split()[2]
+        if order == 'asc':
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy)).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due.like(f"%{thisMonth}%"),
+                ScheduledExpense.next_due.like(f"%{thisYear}%")
+            )).all()
+        else:
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy).desc()).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due.like(f"%{thisMonth}%"),
+                ScheduledExpense.next_due.like(f"%{thisYear}%")
+            )).all()
+    elif timePeriod == 'this-year':
+        thisYear = now.split()[2]
+        if order == 'asc':
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy)).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due.like(f"%{thisYear}%")
+            ))
+        else:
+            userScheduleExpenses = ScheduledExpense.query.order_by(getattr(ScheduledExpense, sortBy).desc()).filter(and_(
+                ScheduledExpense.user_id == session['user_id'], ScheduledExpense.next_due.like(f"%{thisYear}%")
+            ))
 
     allUserScheduleExpenses = []
 

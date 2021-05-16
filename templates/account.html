@@ -91,12 +91,19 @@
         background-color: #212529;
         color: #fff;
     }
-    #scheduleExpenseTableSort {
-        /*-webkit-appearance: none;*/
-        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-        font-weight: 600;
-        width: 160px;
-        margin-bottom: 10px;
+    #scheduleExpenseTableSortLabel {
+        margin-right: 25px;
+    }
+    #scheduleExpenseTableSort{
+        width: 150px;
+        margin-right: 10px;
+    }
+    #nextDueSortLabel {
+        margin-top: 7px;
+        margin-right: 10px;
+    }
+    #nextDueSortSelect {
+        width: 120px;
     }
     .table_header {
         z-index: 1;
@@ -152,17 +159,6 @@
         }
 
     }
-    @media only screen and (max-width: 950px) {
-        #logoutBtn {
-            left: 3%;
-        }
-
-    }
-    @media only screen and (max-width: 770px) {
-        .acc-container {
-            width: 85%;
-        }
-    }
     @media only screen and (max-width: 1000px) {
         #scheduleExpenseTable {
             /* MAKE TABLE SCROLLABLE */
@@ -181,15 +177,26 @@
             width: 130px;
         }
     }
+    @media only screen and (max-width: 950px) {
+        #logoutBtn {
+            left: 3%;
+        }
+
+    }
+    @media only screen and (max-width: 770px) {
+        .acc-container {
+            width: 85%;
+        }
+    }
     @media only screen and (max-width: 660px) {
         #welcomeHeading {
             font-size: 30px;
         }
     }
-    @media only screen and (max-width: 420px) {
-        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded, #editDarkModeBtn {
-            left: 80%;
-        }
+    @media only screen and (min-width: 500px) {
+        /*#logoutBtn {*/
+        /*    margin-left: 3%;*/
+        /*}*/
     }
     @media only screen and (max-width: 490px) {
         img {
@@ -205,16 +212,23 @@
             font-size: 17px;
         }
     }
+    @media only screen and (max-width: 450px) {
+        #nextDueSortSelect {
+            /*position: absolute;*/
+        }
+
+    }
+    @media only screen and (max-width: 420px) {
+        #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded, #editDarkModeBtn {
+            left: 80%;
+        }
+    }
     @media only screen and (max-width: 360px) {
         #editUserNameBtn, #editEmailBtn, #editPhoneNumberBtn, #changeAutoSendEmailBtn_ExpenseExceedLimit, #changeAutoSendEmailBtn_ScheduleExpenseAdded, #editDarkModeBtn {
             left: 83%;
         }
     }
-    @media only screen and (min-width: 500px) {
-        /*#logoutBtn {*/
-        /*    margin-left: 3%;*/
-        /*}*/
-    }
+
    
 </style>
 {% endblock %}
@@ -507,18 +521,29 @@
                 <div class="modal-body">
                     <div class="schedule-expense-table-selects-container">
                         <!-- SCHEDULE EXPENSE TABLE SORT -->
-                        <select id="scheduleExpenseTableSort" class="form-control">
+                        <label id="scheduleExpenseTableSortLabel" class="inputLabel" for="scheduleExpenseTableSort">Sort By:</label>
+                        <select id="scheduleExpenseTableSort" class="form-control selectClass">
                             <option value="expense_name" data-order="asc">By Name(Asc)</option>
                             <option value="expense_name" data-order="desc">By Name(Desc)</option>
                             <option value="expense_price" data-order="asc">By Price(Asc)</option>
                             <option value="expense_price" data-order="desc">By Price(Desc)</option>
                         </select>
 
-<!--                        <select id="nextDueSortSelect" class="form-control selectClass">-->
-<!--                            <option>Today</option>-->
-<!--                        </select>-->
 
                     </div>
+
+                    <div style="display: flex">
+                        <label id="nextDueSortLabel" class="inputLabel" for="nextDueSortSelect">Next Due:</label>
+                        <select id="nextDueSortSelect" class="form-control selectClass">
+                            <option value="this-day">Today</option>
+                            <option value="this-week">This Week</option>
+                            <option value="this-month">This Month</option>
+                            <option value="this-year">This Year</option>
+                            <option value="all-time">All Time</option>
+                        </select>
+
+                    </div>
+
 
 
                     <div style="text-align: center;">
@@ -539,6 +564,7 @@
                             </tr>
                             </thead>
                             <tbody id="scheduleExpenseTableBody">
+
 <!--                                <tr>-->
 <!--                                    <td class="table_data" height="65px">Car Payment</td>-->
 <!--                                    <td class="table_data">$1400</td>-->
@@ -604,15 +630,21 @@
     // UI CLASS
     class UI {
         // POPULATE TABLE
-        static populateScheduleExpenseTable(sortBy, order, dateHeaderToShow) {
+        static populateScheduleExpenseTable(sortBy, order, timePeriod, dateHeaderToShow) {
             let tableBody = document.querySelector('#scheduleExpenseTableBody')
 
             this.removeAllChildNodes(tableBody)
 
             const request = new XMLHttpRequest()
-            request.open('GET', `/getUserScheduleExpenses/${sortBy}/${order}`)
+            request.open('GET', `/getUserScheduleExpenses/${sortBy}/${order}/${timePeriod}`)
             request.onload = () => {
                 const data = JSON.parse(request.responseText)
+
+                if (data.length === 0)
+                    document.querySelector('#scheduleExpenseTable').style.display = 'none'
+                else
+                    document.querySelector('#scheduleExpenseTable').style.display = ''
+
                 let dateTableHeaderSelect = document.querySelector('.schedule-expense-table-header-date_to_show-select')
 
                 for (let expense of data) {
@@ -663,7 +695,7 @@
 
         }
 
-        static updateScheduleExpenseTableSelect(sortBy, order) {
+        static updateScheduleExpenseTableSortSelect(sortBy, order) {
             let scheduleExpenseTableSort = document.querySelector('#scheduleExpenseTableSort')
 
             switch (sortBy) {
@@ -679,7 +711,27 @@
                     else
                         scheduleExpenseTableSort.options[3].selected = true
                     break
+            }
+        }
 
+        static updateScheduleExpenseTableNextDueTimePeriodSelect(timePeriod) {
+            let timePeriodSelect = document.querySelector('#nextDueSortSelect')
+
+            switch (timePeriod) {
+                case 'this-day':
+                    timePeriodSelect.options[0].selected = true
+                    break
+                case 'this-week':
+                    timePeriodSelect.options[1].selected = true
+                    break
+                case 'this-month':
+                    timePeriodSelect.options[2].selected = true
+                    break
+                case 'this-year':
+                    timePeriodSelect.options[3].selected = true
+                    break
+                case 'all-time':
+                    timePeriodSelect.options[4].selected = true
             }
         }
 
@@ -841,8 +893,12 @@
                 localStorage.setItem('Budgit-userSettings-account', JSON.stringify(accountSettings))
 
                 populateFields()
-                UI.populateScheduleExpenseTable(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'], accountSettings['scheduleExpenseTable-DateToShow'])
-                UI.updateScheduleExpenseTableSelect(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'])
+                UI.populateScheduleExpenseTable(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'],
+                                                accountSettings['scheduleExpenseTable-Next-DueTime-Period'],
+                                                accountSettings['scheduleExpenseTable-DateToShow'])
+
+                UI.updateScheduleExpenseTableSortSelect(accountSettings['scheduleExpenseTable-SortBy'], accountSettings['scheduleExpenseTable-Order'])
+                UI.updateScheduleExpenseTableNextDueTimePeriodSelect(accountSettings['scheduleExpenseTable-Next-DueTime-Period'])
             }
             request.send()
         }
@@ -1334,6 +1390,7 @@
         let userSettings = {
             'sortBy': Settings.getUserSettings()['scheduleExpenseTable-SortBy'],
             'order': Settings.getUserSettings()['scheduleExpenseTable-Order'],
+            'timePeriod': Settings.getUserSettings()['scheduleExpenseTable-Next-DueTime-Period'],
             'dateHeaderToShow': Settings.getUserSettings()['scheduleExpenseTable-DateToShow']
         }
 
@@ -1342,7 +1399,7 @@
         request.open('POST', `/deleteScheduleExpense/${expense_id}`)
         request.onload = () => {
             cancelBtn.click()
-            UI.populateScheduleExpenseTable(userSettings['sortBy'], userSettings['order'], userSettings['dateHeaderToShow'])
+            UI.populateScheduleExpenseTable(userSettings['sortBy'], userSettings['order'], userSettings['timePeriod'], userSettings['dateHeaderToShow'])
         }
         request.send()
 
@@ -1354,21 +1411,33 @@
     document.querySelector('.schedule-expense-table-header-date_to_show-select').addEventListener('change', function () {
         let sortBy = document.querySelector('#scheduleExpenseTableSort').value
         let order = document.querySelector('#scheduleExpenseTableSort').selectedOptions[0].dataset.order
+        let timePeriod = document.querySelector('#nextDueSortSelect').value
 
-        UI.populateScheduleExpenseTable(sortBy, order, this.value)
+        UI.populateScheduleExpenseTable(sortBy, order, timePeriod, this.value)
         Settings.updateUserSettings('scheduleExpenseTable-DateToShow', this.value)
         this.blur()
     })
-    // Schedule Expense Table - Sort
+    // Schedule Expense Table - Sort Select
     document.querySelector('#scheduleExpenseTableSort').addEventListener('change', function() {
         let sortBy = this.value
         let order = this.options[this.selectedIndex].dataset.order
+        let timePeriod = document.querySelector('#nextDueSortSelect').value
         let dateToShow = document.querySelector('.schedule-expense-table-header-date_to_show-select').value
 
-        UI.populateScheduleExpenseTable(sortBy, order, dateToShow)
+
+        UI.populateScheduleExpenseTable(sortBy, order, timePeriod, dateToShow)
         Settings.updateUserSettings('scheduleExpenseTable-SortBy', sortBy)
         Settings.updateUserSettings('scheduleExpenseTable-Order', order)
+    })
+    // Schedule Expense Table - Next Due Select
+    document.querySelector('#nextDueSortSelect').addEventListener('change', function() {
+        let sortBy = document.querySelector('#scheduleExpenseTableSort').value
+        let order = document.querySelector('#scheduleExpenseTableSort').selectedOptions[0].dataset.order
+        let timePeriod = this.value
+        let dateToShow = document.querySelector('.schedule-expense-table-header-date_to_show-select').value
 
+        UI.populateScheduleExpenseTable(sortBy, order, timePeriod, dateToShow)
+        Settings.updateUserSettings('scheduleExpenseTable-Next-DueTime-Period', timePeriod)
     })
 
 

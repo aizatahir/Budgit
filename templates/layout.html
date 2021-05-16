@@ -194,7 +194,8 @@
                                  expenseTableSearchSelect]
             // Account
             let scheduleExpenseTableSort = document.querySelector('#scheduleExpenseTableSort')
-            let allAccountSelects = [scheduleExpenseTableSort]
+            let scheduleExpenseNextDueSortSelect = document.querySelector('#nextDueSortSelect')
+            let allAccountSelects = [scheduleExpenseTableSort, scheduleExpenseNextDueSortSelect]
 
             /* Inputs */
 
@@ -366,6 +367,7 @@
                         select.style.border = 'none'
                     })
                     scheduleExpenseTableSort.style.webkitAppearance = 'none'
+                    scheduleExpenseNextDueSortSelect.style.webkitAppearance = 'none'
                     allEditUserInfoSelect.forEach(select => {
                         select.style.backgroundColor = Colors['selectBG']
                         select.style.color = Colors['selectFG']
