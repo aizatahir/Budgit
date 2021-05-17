@@ -682,7 +682,6 @@
             request.send()
 
         }
-
         // CONVERT INPUT FIELDS TO TEXT
         static convertInputFieldsToText(allChangedExpenseRows) {
             for (let row of allChangedExpenseRows) {
@@ -694,7 +693,7 @@
             }
 
         }
-
+        // UPDATE SCHEDULE EXPENSE TABLE SORT SELECT
         static updateScheduleExpenseTableSortSelect(sortBy, order) {
             let scheduleExpenseTableSort = document.querySelector('#scheduleExpenseTableSort')
 
@@ -713,7 +712,7 @@
                     break
             }
         }
-
+        // UPDATE SCHEDULE EXPENSE TABLE NEXT DUE NEXT DUE SELECT
         static updateScheduleExpenseTableNextDueTimePeriodSelect(timePeriod) {
             let timePeriodSelect = document.querySelector('#nextDueSortSelect')
 
@@ -734,7 +733,10 @@
                     timePeriodSelect.options[4].selected = true
             }
         }
-
+        // Item Is Input
+        static itemIsInput(itemInnerHTML) {
+            return itemInnerHTML.includes('<input class="form-control')
+        }
         // REMOVE ALL CHILD NODES
         static removeAllChildNodes(parent) {
             while (parent.firstChild) {
@@ -761,14 +763,42 @@
                         break
 
                 }
+
                 if (item.dataset.info === 'expense_name' || item.dataset.info === 'expense_price' || item.dataset.info === 'frequency') {
-                    // console.log(item)
-                    if (item.dataset.info === 'expense_name')
-                        item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpenseName(this.value, this)">`
-                    else if (item.dataset.info === 'expense_price')
-                        item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpensePrice(this.value, this)">`
-                    else if (item.dataset.info === 'frequency')
-                        item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpenseFrequency(this.value, this)">`
+                    let changeFieldToInput = true
+                    if (UI.itemIsInput(item.innerHTML))
+                        changeFieldToInput = false
+
+                    let tableDataText
+                    if (item.dataset.info === 'expense_name') {
+                        if (!changeFieldToInput) {
+                            tableDataText = item.firstElementChild.value
+                            item.innerHTML = tableDataText
+                        }
+                        else {
+                            item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpenseName(this.value, this)">`
+                        }
+
+                    }
+                    else if (item.dataset.info === 'expense_price') {
+                        if (!changeFieldToInput) {
+                            tableDataText = item.firstElementChild.value
+                            item.innerHTML = tableDataText
+                        }
+                        else {
+                            item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpensePrice(this.value, this)">`
+                        }
+
+                    }
+                    else if (item.dataset.info === 'frequency') {
+                        if (!changeFieldToInput) {
+                            tableDataText = item.firstElementChild.value
+                            item.innerHTML = tableDataText
+                        }
+                        else {
+                            item.innerHTML = `<input class="form-control edit-input ${className}" value="${item.textContent}" onkeyup="ScheduleExpense.validateNewExpenseFrequency(this.value, this)">`
+                        }
+                    }
                 }
             }
 
@@ -1344,14 +1374,15 @@
     let updateScheduleExpenses = []
     document.querySelector('#scheduleExpenseTableBody').addEventListener('click', (e) => {
         let expenseRow
-        switch (e.target.parentElement.className) {
+        editBtn = e.target
+        switch (editBtn.parentElement.className) {
             case 'edit':
-                expenseRow =  e.target.parentElement.parentElement.parentElement
+                expenseRow =  editBtn.parentElement.parentElement.parentElement
                 ScheduleExpense.editScheduleExpense(expenseRow)
                 allChangedExpenseRows.push(expenseRow)
                 break
             case 'delete':
-                document.querySelector('#deleteScheduleExpenseBtn').dataset.expense_id = e.target.dataset.expense_id
+                document.querySelector('#deleteScheduleExpenseBtn').dataset.expense_id = editBtn.dataset.expense_id
                 break
         }
     })
