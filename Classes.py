@@ -15,6 +15,54 @@ class EST(tzinfo):
     def dst(self, dt):
         return timedelta(0)
 
+class HashTable():
+    def __init__(self, dict=None):
+        if dict == None:
+            self.keys = []
+            self.values = []
+        else:
+            if len(dict) == 1:
+                self.key = list(dict)[0]
+                self.keys = [self.key]
+                self.value = list(dict.values())[0]
+                self.values = [self.value]
+            else:
+                self.keys = list(dict.keys())
+                self.values = list(dict.values())
+
+    def update(self, key, value):
+        if key not in self.keys:
+            self.keys.append(key)
+            self.values.append(value)
+        else:
+            indexOfKey = self.indexOf(self.keys, key)
+            Value = self.values[indexOfKey]
+            if type(Value) != set:
+                new_vals = {Value, value}
+                self.values[indexOfKey] = new_vals
+            else:
+                Value.add(value)
+                self.values[indexOfKey] = Value
+    def get(self, key):
+        indexOfKey = self.indexOf(self.keys, key)
+        try:
+            return self.values[indexOfKey]
+        except TypeError:
+            return None
+    @staticmethod
+    def indexOf(array, item):
+        for i in range(len(array)):
+            if array[i] == item:
+                return i
+        return None
+
+    def getTable(self):
+        Table = {self.keys[i]:self.values[i] for i in range(len(self.keys))}
+        return Table
+
+    def __str__(self):
+        return f"{self.getTable()}"
+
 class Date:
     monthLookup = {1: 'January', 2: 'February', 3: 'March', 4: 'April', 5: 'May', 6: 'June', 7: 'July', 8: 'August',9: 'September',
                    10: 'October', 11: 'November', 12: 'December'}

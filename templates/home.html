@@ -888,7 +888,7 @@
             // console.log(filterExpenses)
 
             const request = new XMLHttpRequest();
-            if (searchFilter === undefined || filterField === undefined || (filterExpenses === undefined || filterExpenses === false)) {
+            if ((searchFilter === undefined || searchFilter === '') || filterField === undefined || (filterExpenses === undefined || filterExpenses === false)) {
                 request.open('GET', `/getExpenses/${timePeriod}/${sortBy}/${order}/null/null/false`)
             }
             else {
@@ -1479,7 +1479,7 @@
             document.querySelector('#addScheduleExpenseCustomFrequencyInput').style.display = 'none'
 
         }
-        // VALIDATE FORM
+        // VALIDATE ADD SCHEDULE EXPENSE FORM
         static validateAddScheduleExpenseForm() {
             let expenseNameField = document.querySelector('#scheduleExpenseNameInput')
             let expensePriceField = document.querySelector('#scheduleExpensePriceInput')
@@ -1624,7 +1624,7 @@
             }
 
             const request = new XMLHttpRequest()
-            request.open('POST', `/addScheduleExpense/${expenseNameField.value}/${expensePriceField.value}/${startDate}/${frequency}`)
+            request.open('POST', `/addScheduleExpense/${expenseNameField.value}/${expensePriceField.value}/${startDate}/${frequency}/null`)
             request.send()
 
 
@@ -1960,6 +1960,7 @@
 
         // timePeriod, sortBy, order, searchFilter, filterField, filterExpenses
 
+        // if (searchFilter !== '')
         UI.populateTable(timePeriod, sortBy, order, searchFilter, filterField, true)
 
         // console.log('timePeriod: ' + timePeriod)

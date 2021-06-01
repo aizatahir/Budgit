@@ -280,9 +280,9 @@ def addExpense(expenseData):
             # return redirect(f"/home/{session['user_id']}")
 
 # ADD SCHEDULE EXPENSE
-@app.route("/addScheduleExpense/<string:expenseName>/<string:expensePrice>/<string:startDate>/<string:frequency>", methods=["POST", "GET"])
+@app.route("/addScheduleExpense/<string:expenseName>/<string:expensePrice>/<string:startDate>/<string:frequency>/<string:next_due>", methods=["POST", "GET"])
 @login_required
-def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
+def addScheduleExpense(expenseName, expensePrice, startDate, frequency, next_due):
     now = datetime.now(EST()).date()
     now = now.strftime("%B %d, %Y")
 
@@ -299,12 +299,20 @@ def addScheduleExpense(expenseName, expensePrice, startDate, frequency):
         }
         addExpense(json.dumps(expenseData))
 
-        nextDue = str(now.addTime('day', 1))
+
+        frequencyAmount, timePeriod = int(frequency.split('-')[1]), frequency.split('-')[2].replace('s', '')
+        nextDue = str(now.addTime(timePeriod, frequencyAmount))
         SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate, next_due=nextDue, frequency=frequency, user_id=session['user_id'])
         SE.addScheduledExpense()
 
     else:
-        SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate, next_due=startDate, frequency=frequency, user_id=session['user_id'])
+        if next_due == 'null':
+            SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate,
+                                  next_due=startDate, frequency=frequency, user_id=session['user_id'])
+        else:
+            SE = ScheduledExpense(expense_name=expenseName, expense_price=expensePrice, start_date=startDate,
+                                  next_due=next_due, frequency=frequency, user_id=session['user_id'])
+
         SE.addScheduledExpense()
 
     return 'Expense Successfully Scheduled'
