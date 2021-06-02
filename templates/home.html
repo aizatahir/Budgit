@@ -311,6 +311,10 @@
         font-size: 22px;
     }
 
+    /*#totalExpenseValue {*/
+    /*    color: red;*/
+    /*}*/
+
 
     @media only screen and (max-width: 1100px) {
         .add-expense-container {
@@ -524,7 +528,7 @@
                     </select>
                     <br>
                     <!-- TOTAL EXPENSE FOR TIME -->
-                    <label id="totalExpenseLabel" class="inputLabel" for="totalExpenseSelect">Total Expense: $0</label>
+                    <label id="totalExpenseLabel" class="inputLabel" for="totalExpenseSelect">Total Expense: <span id="totalExpenseValue"></span></label>
                     <select id="totalExpenseSelect" class="form-control" name="totalExpense">
                         <option value="this-day">Today</option>
                         <option value="this-week">This Week</option>
@@ -984,6 +988,21 @@
 
             }
         }
+        // GET TOTAL EXPENSE COLOR
+        static getTotalExpenseColor(totalExpense, userExpenseLimit) {
+            let percentOfTotal = (totalExpense / userExpenseLimit)*100
+            let color
+            if (totalExpense === 0)
+                color = ''
+            else if (percentOfTotal <= 50)
+                color = ''
+            else if (percentOfTotal > 50 && percentOfTotal < 75)
+                color = '#ff5900'
+            else if (percentOfTotal >= 75)
+                color = 'red'
+            return color
+
+        }
         // removeAllChildNodes
         static removeAllChildNodes(parent) {
             while (parent.firstChild) {
@@ -1063,6 +1082,7 @@
                 UI.scrollToTop()
                 UI.populateTable(timePeriod, sortBy, order, searchExpenseInfo['searchFilter'], searchExpenseInfo['filterField'], searchExpenseInfo['filterExpenses'])
                 UI.showAlert(`${expenseName.value} Has Been Added`, 'success', 'top')
+                this.displayTotalExpense(timePeriod)
                 expenseName.value = ""
                 expensePrice.value = ""
                 exceedLimitText.textContent = ""
@@ -1176,7 +1196,7 @@
         }
         // DISPLAY TOTAL EXPENSE
         static displayTotalExpense(period) {
-            let totalExpenseLabel = document.getElementById('totalExpenseLabel')
+            let totalExpenseValue = document.querySelector('#totalExpenseValue')
             let totalExpenseSelect = document.querySelector('#totalExpenseSelect')
 
             totalExpenseSelect = generateSelectOptionsDict(totalExpenseSelect)
@@ -1188,8 +1208,24 @@
 
             // Callback function for when request completes
             request.onload = () => {
-                var totalExpense = parseFloat(request.responseText)
-                totalExpenseLabel.textContent = "Total Expense: $" + totalExpense.toFixed(2)
+                let totalExpense = parseFloat(request.responseText)
+                totalExpenseValue.textContent = `$${totalExpense.toFixed(2)}`
+
+                const expenseLimitRequest = new XMLHttpRequest()
+                expenseLimitRequest.open('GET', `/getExpenseLimit/${period}`)
+                expenseLimitRequest.onload = () => {
+                    let userExpenseLimit = expenseLimitRequest.responseText
+                    if (isDigit(userExpenseLimit)) {
+                        userExpenseLimit = parseFloat(userExpenseLimit)
+                        totalExpenseValue.style.color = UI.getTotalExpenseColor(totalExpense.toFixed(2), userExpenseLimit)
+                    }
+                    else {
+                        totalExpenseValue.style.color = ''
+                    }
+
+                }
+                expenseLimitRequest.send()
+
             }
             request.send()
             Settings.updateUserSettings('totalExpense-TimePeriod', period)
@@ -1208,7 +1244,10 @@
                     document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: Not Set`
                 }
                 else {
-                    document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: $${data.toFixed(2)}`
+                    let userExpenseLimit = data.toFixed(2)
+                    document.querySelector('#expenseLimitLabel').textContent = `Spending Limit: $${userExpenseLimit}`
+
+
                 }
             }
             request.send()
@@ -2080,6 +2119,10 @@
                 break
         }
         return dateString
+    }
+
+    function isDigit(n) {
+        return !(isNaN(n))
     }
 
     function isValidDate(date) {
