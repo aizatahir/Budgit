@@ -155,3 +155,7 @@ class TestApplication(unittest.TestCase):
             userToRemove = User.query.get(session['user_id'])
             db.session.delete(userToRemove)
             db.session.commit()
+
+
+if __name__ == '__main__':
+    unittest.main()
