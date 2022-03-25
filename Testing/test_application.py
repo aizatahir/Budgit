@@ -536,10 +536,6 @@ class TestApplication(unittest.TestCase):
                         i, j = i+1, j-1
 
 
-
-
-
-
                     self.deleteAllTestExpenses()
                     """ ADD EXPENSES TO TEST FOR PERIOD: this-week """
 
