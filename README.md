@@ -3,6 +3,8 @@
 Budgit is a flask application that allows users to create and manage expenses. This project was created as part of the
 CUNY 2021 Hackathon.
 
+![image](https://user-images.githubusercontent.com/64718777/160216067-446397a1-c24f-4685-a368-fa50945cf7fe.png)
+
 ## Requirements
 
 All requirements are listed in requirements.txt.
