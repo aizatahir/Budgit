@@ -19,6 +19,15 @@ All requirements are listed in requirements.txt.
 * Get notified by email when you have exceeded your expense limit or a schedule expanse has been added.
 * Dark mode can be toggled on/off in the accounts page.
 
+## Usage
+
+Visit http://budgitproject.herokuapp.com/ or execute
+
+````
+set FLASK_APP=application.py 
+flask run
+````
+
 ## Technologies
 
 * Python Flask
